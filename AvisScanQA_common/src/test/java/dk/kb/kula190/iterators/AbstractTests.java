@@ -11,6 +11,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -121,43 +122,39 @@ public abstract class AbstractTests {
         while (avisIterator.hasNext()) {
             ParsingEvent next = avisIterator.next();
             switch (next.getType()) {
-                case NodeBegin: {
+                case NodeBegin -> {
                     String s;
                     s = getIndent(indent);
                     if (print != null) {
                         print.println(s + printEvent(next));
                     }
                     indent += 2;
-                    break;
                 }
-                case NodeEnd: {
+                case NodeEnd -> {
                     String s;
                     indent -= 2;
                     s = getIndent(indent);
                     if (print != null) {
                         print.println(s + printEvent(next));
                     }
-                    break;
                 }
-                case Attribute: {
+                case Attribute -> {
                     String s = getIndent(indent);
                     AttributeParsingEvent attributeEvent = (AttributeParsingEvent) next;
                     if (print != null) {
                         print.println(s + printEvent(next));
                     }
                     s = getIndent(indent + 2);
-                    if (printContent!= null) {
-                        List<String> content = IOUtils.readLines(attributeEvent.getData());
+                    if (printContent != null) {
+                        List<String> content = IOUtils.readLines(attributeEvent.getData(), StandardCharsets.UTF_8);
                         printContent.println(s + "[" + content.size() + " lines of content]");
                     }
                     files++;
-                    break;
-
                 }
             }
 
         }
         assertEquals(indent, 0, "Indent is not reset after iteration");
-        //assertTrue(files > 1, "We have not encountered very much, only " + files + ", is the test data broken?");
+        assertTrue(files > 1, "We have not encountered very much, only " + files + ", is the test data broken?");
     }
 }

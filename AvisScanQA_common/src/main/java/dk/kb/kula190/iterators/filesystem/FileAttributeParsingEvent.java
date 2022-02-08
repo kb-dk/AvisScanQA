@@ -31,7 +31,7 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
     public FileAttributeParsingEvent(String name, File file, String checksumPostfix) {
         super(name, file.getAbsolutePath());
         this.file = file;
-        this.checksumFile = new File(file.getAbsolutePath().replaceFirst("\\.[^.]+$",checksumPostfix));
+        this.checksumFile = new File(file.getAbsolutePath().replaceFirst("\\.[^_]+$",checksumPostfix));
     }
 
 

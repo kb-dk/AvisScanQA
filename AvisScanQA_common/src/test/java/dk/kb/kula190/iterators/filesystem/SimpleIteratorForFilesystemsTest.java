@@ -27,7 +27,7 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
                                                             file.getParentFile(),
                                                             List.of("MIX", "TIFF", "PDF", "ALTO"),
                                                             "_[^_]+$",
-                                                            "\\.[^.]+$");
+                                                            "\\.[^_]+$");
         }
         return iterator;
         
