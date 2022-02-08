@@ -1,22 +1,19 @@
-package dk.kb.kula190.iterators.filesystem;
+package dk.kb.kula190.iterators.eventhandlers;
 
-
-import dk.kb.kula190.iterators.AbstractTests;
+import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
-
-public class SimpleIteratorForFilesystemsTest extends AbstractTests {
+class EventRunnerTest {
     
     private TreeIterator iterator;
     
-    @Override
+    
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
@@ -33,19 +30,15 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
         
     }
     
-    
-    //TODO fjern transparent dirs from name
     @Test
-    public void testIterator() throws Exception {
-        try (PrintStream out = new PrintStream("batch.xml")) {
-            super.testIterator(out, null);
-        }
-    }
+    void run() throws URISyntaxException {
+        ResultCollector resultCollector = new ResultCollector("Testing tool","Testing version", 100);
+        List<TreeEventHandler> eventHandlers = List.of(new ChecksumEventHandler(resultCollector));
     
-    @Test
-    public void testIteratorWithSkipping() throws Exception {
-        try (PrintStream out = new PrintStream("batch.xml")) {
-            super.testIteratorWithSkipping(out, null);
-        }
+        EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);
+        runner.run();
+    
+        System.out.println(resultCollector.toReport());
+        //new
     }
 }
