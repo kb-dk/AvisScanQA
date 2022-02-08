@@ -7,8 +7,6 @@ import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIt
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.List;
