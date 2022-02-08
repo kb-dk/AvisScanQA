@@ -1,7 +1,9 @@
-package dk.kb.kula190.iterators.eventhandlers;
+package dk.kb.kula190.checkers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.EventRunner;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.IOException;
@@ -9,10 +11,10 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class ChecksumEventHandler extends DefaultTreeEventHandler {
+public class ChecksumChecker extends DefaultTreeEventHandler {
     private final ResultCollector resultCollector;
     
-    public ChecksumEventHandler(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
+    public ChecksumChecker(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
     
     @Override
     public void handleAttribute(AttributeParsingEvent event) {

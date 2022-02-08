@@ -1,6 +1,8 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.checkers.ChecksumChecker;
+import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
@@ -33,9 +35,10 @@ class EventRunnerTest {
     @Test
     void run() throws URISyntaxException {
         ResultCollector resultCollector = new ResultCollector("Testing tool","Testing version", 100);
-        List<TreeEventHandler> eventHandlers = List.of(new ChecksumEventHandler(resultCollector));
+        List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector), new NoMissingMiddlePagesChecker(resultCollector));
     
         EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);
+        
         runner.run();
     
         System.out.println(resultCollector.toReport());
