@@ -78,6 +78,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
               .stream()
               .sorted()
               .map(key -> new TransparintingFileIterator(new File(id, key),
+                                                         key,
                                                          groups.get(key),
                                                          batchFolder,
                                                          transparentDirNames,
@@ -122,7 +123,12 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     
     
     public String toPathID(File id) {
-        return id.getAbsolutePath().replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
+        String pathId = id.getAbsolutePath()
+                                     .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
+        for (String transparentDirName : transparentDirNames) {
+            pathId = pathId.replaceAll("/"+transparentDirName+"/", "/");
+        }
+        return pathId;
     }
     
     @Override

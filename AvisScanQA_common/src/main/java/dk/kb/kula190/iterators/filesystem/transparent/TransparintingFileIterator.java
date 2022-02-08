@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TransparintingFileIterator extends TransparintingFileSystemIterator {
@@ -18,12 +19,13 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
     
     
     public TransparintingFileIterator(File id,
+                                      String prefix,
                                       List<File> group,
                                       File batchFolder,
                                       List<String> transparentDirNames,
                                       String groupingChar) {
         super(id, batchFolder, transparentDirNames, groupingChar, null);
-        this.prefix              = id.getName();
+        this.prefix              = prefix;
         this.group               = group;
         this.batchFolder         = batchFolder;
         this.transparentDirNames = transparentDirNames;
@@ -42,6 +44,7 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                          .stream()
                          .filter(group -> group.getValue().size() > 1)
                          .map(group -> new TransparintingFileIterator(new File(id, group.getKey()),
+                                                                      prefix+"/"+group.getKey(),
                                                                       group.getValue(),
                                                                       batchFolder,
                                                                       transparentDirNames,
@@ -69,5 +72,21 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                     .sorted()
                     .collect(Collectors.groupingBy(this::getPrefix));
     }
-
+    
+    
+    public String toPathID(File file) {
+        if (file.isFile()) {
+            File folder = file.getParentFile().getAbsoluteFile();
+            String pathId = folder.getPath()
+                                  .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
+            for (String transparentDirName : transparentDirNames) {
+                pathId = pathId.replaceAll(Pattern.quote("/" + transparentDirName )+"(/|\\z)", "/");
+            }
+            pathId = new File(new File(pathId, prefix), file.getName()).toString();
+            return pathId;
+        } else {
+            return super.toPathID(file);
+        }
+        //return pathId;
+    }
 }
