@@ -142,4 +142,10 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
         return toPathID(id);
     }
     
+    @Override
+    public String toString() {
+        return "TransparintingFileSystemIterator{" +
+               "id=" + getIdOfNode() +
+               '}';
+    }
 }

@@ -5,6 +5,7 @@ import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -42,6 +43,7 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
         } else {
             return groups.entrySet()
                          .stream()
+                    .sorted(Map.Entry.comparingByKey())
                          .filter(group -> group.getValue().size() > 1)
                          .map(group -> new TransparintingFileIterator(new File(id, group.getKey()),
                                                                       prefix+"/"+group.getKey(),
@@ -88,5 +90,12 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
             return super.toPathID(file);
         }
         //return pathId;
+    }
+    
+    @Override
+    public String toString() {
+        return "TransparintingFileIterator{" +
+               "prefix='" + getIdOfNode() + '\'' +
+               '}';
     }
 }
