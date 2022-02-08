@@ -34,7 +34,6 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
     }
     
     
-    //TODO fjern transparent dirs from name
     @Test
     public void testIterator() throws Exception {
         try (PrintStream out = new PrintStream("batch.xml")) {
