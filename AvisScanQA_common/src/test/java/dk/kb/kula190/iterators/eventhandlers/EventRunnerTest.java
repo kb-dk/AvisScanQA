@@ -25,8 +25,9 @@ class EventRunnerTest {
             File specificBatch = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
             
             System.out.println(specificBatch);
-            //Files named as modersmaalet_19060703_udg01_1.sektion_0004.mix.xml
+            
             File batchesFolder = specificBatch.getParentFile();
+            
             iterator = new TransparintingFileSystemIterator(
                     //Folder for the specific batch to run on
                     specificBatch,
@@ -37,15 +38,21 @@ class EventRunnerTest {
                     //These folders will NOT be nodes, but regarded as transparent
                     List.of("MIX", "TIFF", "PDF", "ALTO"),
                     
-                    //Part to remove to generate the edition name
-                    //will output modersmaalet_19060703_udg01_1.sektion
-                    "_[^_]+$",
-                    //filename.split(editionRegexp)[0];
+                    //actual files named as modersmaalet_19060703_udg01_1.sektion_0004.mix.xml
+                    List.of(
+                            //Part to remove to generate the edition name
+                            //will output modersmaalet_19060703_udg01
+                            "_[^_]+_\\d{4}\\.\\w+(\\.xml)?$"
                     
-                    //Part to remove to generate the page name
-                    //will output modersmaalet_19060703_udg01_1.sektion_0004
-                    "\\.[^_]+$",
-                    //filename.split(pageRegexp)[0];
+                            //Part to remove to generate the section name
+                            //will output modersmaalet_19060703_udg01_1.sektion
+                            , "_[^_]+$", //filename.split(editionRegexp)[0];
+                            
+                            //Part to remove to generate the page name
+                            //will output modersmaalet_19060703_udg01_1.sektion_0004
+                            "\\.[^_]+$" //filename.split(pageRegexp)[0];
+                           ),
+                    
                     
                     //How to adapt the filename for the checksum extension below
                     "\\.[^_]+$",
@@ -62,8 +69,8 @@ class EventRunnerTest {
         
         try (PrintStream out = new PrintStream("decoratedBatch.xml")) {
             
-            List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector),
-                                                           new NoMissingMiddlePagesChecker(resultCollector),
+            List<TreeEventHandler> eventHandlers = List.of(//new ChecksumChecker(resultCollector),
+                                                           //new NoMissingMiddlePagesChecker(resultCollector),
                                                            new DecoratedConsoleLogger(out, resultCollector));
             
             EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);

@@ -3,8 +3,10 @@ package dk.kb.kula190.checkers;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
+import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,18 +24,22 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     private ThreadLocal<List<Integer>> pages = new ThreadLocal<>();
     
     @Override
-    public void editionBegins(NodeBeginsParsingEvent event, String editionName) {
+    public void editionBegins(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         pages.set(new ArrayList<>());
     }
     
     @Override
-    public void pageBegins(NodeBeginsParsingEvent event, String editionName, Integer pageNumber) {
+    public void pageBegins(ParsingEvent event,
+                           String editionName,
+                           LocalDate editionDate,
+                           String udgave,
+                           String sectionName,
+                           Integer pageNumber) {
         pages.get().add(pageNumber);
     }
     
-    
     @Override
-    public void editionEnds(NodeEndParsingEvent event, String editionName) {
+    public void editionEnds(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {

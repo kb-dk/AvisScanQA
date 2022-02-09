@@ -29,8 +29,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     private final File batchFolder;
     
     private final List<String> transparentDirNames;
-    protected final String editionRegexp;
-    protected final String pageRegexp;
+    protected final List<String> virtualLevelsRegexp;
+
     protected final String checksumRegexp;
     protected final String checksumExtension;
     
@@ -45,15 +45,13 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     public TransparintingFileSystemIterator(File specificBatch,
                                             File folderForBatches,
                                             List<String> transparentDirNames,
-                                            String editionRegexp,
-                                            String pageRegexp,
+                                            List<String> virtualLevelsRegexp,
                                             String checksumRegexp,
                                             String checksumExtension) {
         super(specificBatch);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
-        this.editionRegexp       = editionRegexp;
-        this.pageRegexp          = pageRegexp;
+        this.virtualLevelsRegexp = virtualLevelsRegexp;
         this.checksumRegexp      = checksumRegexp;
         this.checksumExtension   = checksumExtension;
     }
@@ -71,8 +69,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
               .map(subdir -> new TransparintingFileSystemIterator(subdir,
                                                                   batchFolder,
                                                                   transparentDirNames,
-                                                                  editionRegexp,
-                                                                  pageRegexp,
+                                                                  virtualLevelsRegexp,
                                                                   checksumRegexp,
                                                                   checksumExtension))
               .forEach(result::add);
@@ -94,11 +91,10 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                          groups.get(key),
                                                          batchFolder,
                                                          transparentDirNames,
-                                                         editionRegexp,
-                                                         pageRegexp,
+                                                         virtualLevelsRegexp.subList(1,
+                                                                                     virtualLevelsRegexp.size()),
                                                          checksumRegexp,
                                                          checksumExtension
-                                                         
               ))
               .forEach(result::add);
         return result.iterator();
@@ -133,8 +129,12 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     }
     
     protected String getPrefix(File file) {
-        String prefix = file.getName().split(editionRegexp)[0];
-        return prefix;
+        if (virtualLevelsRegexp.isEmpty()){
+            return file.getName();
+        }
+        String regex = virtualLevelsRegexp.get(0);
+        String[] split = file.getName().split(regex);
+        return split[0];
     }
     
     

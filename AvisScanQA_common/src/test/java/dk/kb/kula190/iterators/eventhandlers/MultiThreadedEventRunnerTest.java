@@ -29,8 +29,8 @@ class MultiThreadedEventRunnerTest {
             iterator = new TransparintingFileSystemIterator(file,
                                                             file.getParentFile(),
                                                             List.of("MIX", "TIFF", "PDF", "ALTO"),
-                                                            "_[^_]+$",
-                                                            "\\.[^_]+$",
+                                                            List.of("_[^_]+$",
+                                                            "\\.[^_]+$"),
                                                             "\\.[^_]+$",
                                                             ".md5");
         }

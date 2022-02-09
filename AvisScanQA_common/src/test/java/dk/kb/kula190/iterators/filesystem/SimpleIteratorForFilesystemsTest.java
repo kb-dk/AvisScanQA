@@ -4,6 +4,7 @@ package dk.kb.kula190.iterators.filesystem;
 import dk.kb.kula190.iterators.AbstractTests;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -26,8 +27,21 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
             iterator = new TransparintingFileSystemIterator(file,
                                                             file.getParentFile(),
                                                             List.of("MIX", "TIFF", "PDF", "ALTO"),
-                                                            "_[^_]+$",
-                                                            "\\.[^_]+$",
+                                                            //actual files named as modersmaalet_19060703_udg01_1.sektion_0004.mix.xml
+                                                            List.of(
+                                                                    //Part to remove to generate the edition name
+                                                                    //will output modersmaalet_19060703_udg01
+                                                                    "_[^_]+_\\d{4}\\.\\w+(\\.xml)?$"
+        
+                                                                    //Part to remove to generate the section name
+                                                                    //will output modersmaalet_19060703_udg01_1.sektion
+                                                                    , "_[^_]+$", //filename.split(editionRegexp)[0];
+        
+                                                                    //Part to remove to generate the page name
+                                                                    //will output modersmaalet_19060703_udg01_1.sektion_0004
+                                                                    "\\.[^_]+$" //filename.split(pageRegexp)[0];
+                                                                   ),
+                    
                                                             "\\.[^_]+$",
                                                             ".md5");
         }
@@ -44,6 +58,7 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
     }
     
     @Test
+    @Disabled
     public void testIteratorWithSkipping() throws Exception {
         try (PrintStream out = new PrintStream("batch.xml")) {
             super.testIteratorWithSkipping(out, null);

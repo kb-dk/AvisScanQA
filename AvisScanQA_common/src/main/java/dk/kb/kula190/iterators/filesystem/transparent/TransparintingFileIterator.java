@@ -23,54 +23,60 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                       List<File> group,
                                       File batchFolder,
                                       List<String> transparentDirNames,
-                                      String editionRegexp,
-                                      String pageRegexp,
+                                      List<String> virtualLevelsRegexp,
                                       String checksumRegexp,
                                       String checksumExtension) {
-        super(id, batchFolder, transparentDirNames, editionRegexp, pageRegexp,checksumRegexp, checksumExtension);
+        super(id, batchFolder, transparentDirNames, virtualLevelsRegexp, checksumRegexp, checksumExtension);
         this.prefix              = prefix;
         this.group               = group;
         this.batchFolder         = batchFolder;
         this.transparentDirNames = transparentDirNames;
-        
     }
     
     
     @Override
     protected Iterator<? extends DelegatingTreeIterator> initializeChildrenIterator() {
-        Map<String, List<File>> groups = getGroups(group);
-        
-        if (groups.size() == 1) { //if only a single group, we do not group
+        if (virtualLevelsRegexp.isEmpty()) {
             return Collections.emptyIterator();
         } else {
+            Map<String, List<File>> groups = getGroups(group);
+            
+            //if (groups.size() == 1) { //if only a single group, we do not group
+            //    return Collections.emptyIterator();
+            //} else {
+            List<String> virtualLevelsRegexp = this.virtualLevelsRegexp.subList(1,
+                                                                                this.virtualLevelsRegexp.size());
             return groups.entrySet()
                          .stream()
-                    .sorted(Map.Entry.comparingByKey())
+                         .sorted(Map.Entry.comparingByKey())
                          .filter(group -> group.getValue().size() > 1)
                          .map(group -> new TransparintingFileIterator(new File(id, group.getKey()),
-                                                                      prefix+"/"+group.getKey(),
+                                                                      prefix + "/" + group.getKey(),
                                                                       group.getValue(),
                                                                       batchFolder,
                                                                       transparentDirNames,
-                                                                      editionRegexp,
-                                                                      pageRegexp,
+                                                                      virtualLevelsRegexp,
                                                                       checksumRegexp,
                                                                       checksumExtension))
                          .iterator();
+            //}
         }
         
     }
     
     @Override
     protected Iterator<File> initilizeAttributeIterator() {
-        Map<String, List<File>> grouped = getGroups(group);
-        
-        if (grouped.size() == 1) { //if all the files are in the same group, do not make this virtual group
-            return grouped.values().stream().flatMap(Collection::stream).toList().iterator();
+        if (virtualLevelsRegexp.isEmpty()) {
+            return group.iterator();
+        } else {
+            Map<String, List<File>> grouped = getGroups(group);
+            
+            //if (grouped.size() == 1) { //if all the files are in the same group, do not make this virtual group
+            //    return grouped.values().stream().flatMap(Collection::stream).toList().iterator();
+            //}
+            
+            return grouped.values().stream().filter(group -> group.size() == 1).flatMap(Collection::stream).iterator();
         }
-        
-        return grouped.values().stream().filter(group -> group.size() == 1).flatMap(Collection::stream).iterator();
-        
     }
     
     
@@ -87,7 +93,7 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
             String pathId = folder.getPath()
                                   .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
             for (String transparentDirName : transparentDirNames) {
-                pathId = pathId.replaceAll(Pattern.quote("/" + transparentDirName )+"(/|\\z)", "/");
+                pathId = pathId.replaceAll(Pattern.quote("/" + transparentDirName) + "(/|\\z)", "/");
             }
             pathId = new File(new File(pathId, prefix), file.getName()).toString();
             return pathId;
@@ -96,12 +102,12 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
         }
         //return pathId;
     }
-    
-    
-    protected String getPrefix(File file) {
-        String prefix = file.getName().split(pageRegexp)[0];
-        return prefix;
-    }
+    //
+    //
+    //protected String getPrefix(File file) {
+    //    String prefix = file.getName().split(virtualLevelsRegexp.get(0))[0];
+    //    return prefix;
+    //}
     
     
     @Override

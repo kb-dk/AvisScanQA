@@ -5,7 +5,7 @@ package dk.kb.kula190.iterators.common;
  * attributes
  * and subtrees from the current node, just before leaving it.
  */
-public class NodeEndParsingEvent extends ParsingEvent {
+public class NodeEndParsingEvent extends NodeParsingEvent {
 
 
     public NodeEndParsingEvent(String name) {
