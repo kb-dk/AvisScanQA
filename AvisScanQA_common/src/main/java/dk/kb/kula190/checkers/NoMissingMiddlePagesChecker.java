@@ -1,10 +1,9 @@
 package dk.kb.kula190.checkers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
+import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
-import dk.kb.kula190.iterators.eventhandlers.decorating.EditionBegins;
-import dk.kb.kula190.iterators.eventhandlers.decorating.EditionEnds;
-import dk.kb.kula190.iterators.eventhandlers.decorating.PageBegins;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,25 +13,28 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     private final ResultCollector resultCollector;
     
     public NoMissingMiddlePagesChecker(ResultCollector resultCollector) {
-                                                                            super(resultCollector);
-                                                                            this.resultCollector = resultCollector;}
+        super(resultCollector);
+        this.resultCollector = resultCollector;
+    }
     
-    private List<Integer> pages;
+    //Note that all fields in these checkers should be threadlocal. Otherwise they will not work on multithreaded runs
+    //There is only one checker instance shared between all the threads
+    private ThreadLocal<List<Integer>> pages = new ThreadLocal<>();
     
     @Override
-    public void editionBegins(EditionBegins event, String editionName) {
-        pages = new ArrayList<>();
+    public void editionBegins(NodeBeginsParsingEvent event, String editionName) {
+        pages.set(new ArrayList<>());
     }
     
     @Override
-    public void pageBegins(PageBegins event, String editionName, Integer pageNumber) {
-        pages.add(pageNumber);
+    public void pageBegins(NodeBeginsParsingEvent event, String editionName, Integer pageNumber) {
+        pages.get().add(pageNumber);
     }
     
     
     @Override
-    public void editionEnds(EditionEnds event, String editionName) {
-        List<Integer> sortedPages = pages.stream().sorted().toList();
+    public void editionEnds(NodeEndParsingEvent event, String editionName) {
+        List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {
                 resultCollector.addFailure(event.getName(),

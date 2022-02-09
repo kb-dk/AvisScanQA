@@ -16,32 +16,30 @@ import java.util.stream.Collectors;
 
 public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     
-    private int level = 0;
-    private String batch;
-    private String edition;
-    private Integer page;
+    private InheritableThreadLocal<String> batch = new InheritableThreadLocal<>();
+    private InheritableThreadLocal<String> edition = new InheritableThreadLocal<>();
+    private InheritableThreadLocal<Integer> page = new InheritableThreadLocal<>();
     
     private final ResultCollector resultCollector;
     
     protected DecoratedEventHandler(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
     
     @Override
-    public void handleNodeBegin(NodeBeginsParsingEvent event) {
-        if (batch == null) {
-            batch = lastName(event.getName());
-            batchBegins(event, batch);
+    public final void handleNodeBegin(NodeBeginsParsingEvent event) {
+        if (batch.get() == null) {
+            batch.set(lastName(event.getName()));
+            batchBegins(event, batch.get());
         } else if (isMETS(event)) {
             metsBegins(event);
         } else if (isMODS(event)) {
             modsBegins(event);
         } else if (isEdition(event)) {
-            edition = lastName(event.getName());
-            editionBegins(new EditionBegins(event.getName(), event.getLocation()), edition);
+            edition.set(lastName(event.getName()));
+            editionBegins(event, edition.get());
         } else if (isPage(event)) {
-            page = pageNumber(event.getName());
-            pageBegins(new PageBegins(event.getName(), event.getLocation()), edition, page);
+            page.set(pageNumber(event.getName()));
+            pageBegins(event, edition.get(), page.get());
         }
-        level += 1;
     }
     
     private Integer pageNumber(String name) {
@@ -50,34 +48,33 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     
     
     @Override
-    public void handleNodeEnd(NodeEndParsingEvent event) {
-        level -= 1;
-        if (batch.equals(lastName(event.getName()))) {
-            batchEnds(event, batch);
+    public final void handleNodeEnd(NodeEndParsingEvent event) {
+        if (batch.get().equals(lastName(event.getName()))) {
+            batchEnds(event, batch.get());
         } else if (isMETS(event)) {
             metsEnds(event);
         } else if (isMODS(event)) {
             modsEnds(event);
         } else if (isEdition(event)) {
-            editionEnds(new EditionEnds(event.getName(), event.getLocation()), edition);
-            edition = null;
+            editionEnds(event, edition.get());
+            edition.set(null);
         } else if (isPage(event)) {
-            pageEnds(new PageEnds(event.getName(), event.getLocation()), edition, page);
-            page = null;
+            pageEnds(event, edition.get(), page.get());
+            page.set(null);
         }
     }
     
     @Override
-    public void handleAttribute(AttributeParsingEvent event) {
+    public final void handleAttribute(AttributeParsingEvent event) {
         try {
             if (event.getName().endsWith(".alto.xml")) {
-                altoFile(event, edition, page);
+                altoFile(event, edition.get(), page.get());
             } else if (event.getName().endsWith(".mix.xml")) {
-                mixFile(event, edition, page);
+                mixFile(event, edition.get(), page.get());
             } else if (event.getName().endsWith(".tif")) {
-                tiffFile(event, edition, page);
+                tiffFile(event, edition.get(), page.get());
             } else if (event.getName().endsWith(".pdf")) {
-                pdfFile(event, edition, page);
+                pdfFile(event, edition.get(), page.get());
             } else if (event.getName().endsWith(".mets.xml")) {
                 metsFile(event);
             } else if (event.getName().endsWith(".mods.xml")) {
@@ -101,15 +98,15 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     
     
     private boolean isEdition(ParsingEvent event) {
-        return level == 1 && !Set.of("METS", "MODS").contains(lastName(event.getName()));
+        return getLevel(event) == 2 && !Set.of("METS", "MODS").contains(lastName(event.getName()));
     }
     
     private boolean isMETS(ParsingEvent event) {
-        return level == 1 && Objects.equals("METS", lastName(event.getName()));
+        return getLevel(event) == 2 && Objects.equals("METS", lastName(event.getName()));
     }
     
     private boolean isMODS(ParsingEvent event) {
-        return level == 1 && Objects.equals("MODS", lastName(event.getName()));
+        return getLevel(event) == 2 && Objects.equals("MODS", lastName(event.getName()));
     }
     
     private String lastName(String name) {
@@ -117,79 +114,61 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     }
     
     private boolean isPage(ParsingEvent event) {
-        return level == 2;
+        return getLevel(event) == 3;
     }
     
-    public String getBatch() {
-        return batch;
+    public final String getBatch() {
+        return batch.get();
     }
     
-    public String getEdition() {
-        return edition;
+    public final String getEdition() {
+        return edition.get();
     }
     
-    public Integer getPage() {
-        return page;
+    public final Integer getPage() {
+        return page.get();
     }
     
-    public int getLevel() {
-        return level;
-    }
-    
-    public void batchBegins(NodeBeginsParsingEvent event, String batch) {
-    
-    }
-    
-    public void batchEnds(NodeEndParsingEvent event, String batch) {
-    
-    }
-    
-    public void modsBegins(NodeBeginsParsingEvent event) {
-    
-    }
-    
-    public void modsEnds(NodeEndParsingEvent event) {
-    
-    }
-    
-    public void metsBegins(NodeBeginsParsingEvent event) {
-    
-    }
-    
-    public void metsEnds(NodeEndParsingEvent event) {
-    
+    public final int getLevel(ParsingEvent event) {
+        return event.getName().split("/").length;
     }
     
     
-    public void editionBegins(EditionBegins event, String editionName) {
-    }
+    public void batchBegins(NodeBeginsParsingEvent event, String batch) {}
     
-    public void editionEnds(EditionEnds event, String editionName) {
-    }
+    public void batchEnds(NodeEndParsingEvent event, String batch) {}
     
-    public void pageBegins(PageBegins event, String editionName, Integer pageNumber) {
-    }
+    public void modsBegins(NodeBeginsParsingEvent event) {}
     
-    public void pageEnds(PageEnds event, String editionName, Integer pageNumber) {
-    }
+    public void modsFile(AttributeParsingEvent event) throws IOException {}
     
-    public void mixFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {
-    }
+    public void modsEnds(NodeEndParsingEvent event) {}
     
-    public void tiffFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {
-    }
+    public void metsBegins(NodeBeginsParsingEvent event) {}
     
-    public void altoFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {
-    }
+    public void metsFile(AttributeParsingEvent event) throws IOException {}
     
-    public void pdfFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {
-    }
+    public void metsEnds(NodeEndParsingEvent event) {}
     
-    public void metsFile(AttributeParsingEvent event) throws IOException {
-    }
+    public void editionBegins(NodeBeginsParsingEvent event, String editionName) {}
     
-    public void modsFile(AttributeParsingEvent event) throws IOException {
-    }
+    public void editionEnds(NodeEndParsingEvent event, String editionName) {}
+    
+    public void pageBegins(NodeBeginsParsingEvent event, String editionName, Integer pageNumber) {}
+    
+    public void pageEnds(NodeEndParsingEvent event, String editionName, Integer pageNumber) {}
+    
+    public void mixFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {}
+    
+    public void tiffFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {}
+    
+    public void altoFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {}
+    
+    public void pdfFile(AttributeParsingEvent event, String editionName, Integer pageNumber) throws IOException {}
+    
+    
+    
+    
     
     public ResultCollector getResultCollector() {
         return resultCollector;
