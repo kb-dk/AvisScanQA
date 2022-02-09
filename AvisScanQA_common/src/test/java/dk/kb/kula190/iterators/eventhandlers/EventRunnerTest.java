@@ -27,7 +27,9 @@ class EventRunnerTest {
                                                             file.getParentFile(),
                                                             List.of("MIX", "TIFF", "PDF", "ALTO"),
                                                             "_[^_]+$",
-                                                            "\\.[^_]+$");
+                                                            "\\.[^_]+$",
+                                                            "\\.[^_]+$",
+                                                            ".md5");
         }
         return iterator;
         

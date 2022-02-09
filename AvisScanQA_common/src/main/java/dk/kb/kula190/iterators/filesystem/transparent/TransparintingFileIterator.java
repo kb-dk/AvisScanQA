@@ -5,7 +5,6 @@ import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
 import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +23,11 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                       List<File> group,
                                       File batchFolder,
                                       List<String> transparentDirNames,
-                                      String groupingChar) {
-        super(id, batchFolder, transparentDirNames, groupingChar, null);
+                                      String editionRegexp,
+                                      String pageRegexp,
+                                      String checksumRegexp,
+                                      String checksumExtension) {
+        super(id, batchFolder, transparentDirNames, editionRegexp, pageRegexp,checksumRegexp, checksumExtension);
         this.prefix              = prefix;
         this.group               = group;
         this.batchFolder         = batchFolder;
@@ -50,7 +52,10 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                                                       group.getValue(),
                                                                       batchFolder,
                                                                       transparentDirNames,
-                                                                      groupingChar))
+                                                                      editionRegexp,
+                                                                      pageRegexp,
+                                                                      checksumRegexp,
+                                                                      checksumExtension))
                          .iterator();
         }
         
@@ -91,6 +96,13 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
         }
         //return pathId;
     }
+    
+    
+    protected String getPrefix(File attribute) {
+        String prefix = attribute.getName().split(pageRegexp)[0];
+        return prefix;
+    }
+    
     
     @Override
     public String toString() {

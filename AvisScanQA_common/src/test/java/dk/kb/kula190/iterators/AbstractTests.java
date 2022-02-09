@@ -2,8 +2,6 @@ package dk.kb.kula190.iterators;
 
 
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.DataFileNodeBeginsParsingEvent;
-import dk.kb.kula190.iterators.common.DataFileNodeEndsParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import org.apache.commons.io.IOUtils;
@@ -19,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public abstract class AbstractTests {
-
-
+    
+    
     private static final String indentString = "                                                   ";
-
+    
     private static String getIndent(int indent) {
         String s;
         if (indent > 0) {
@@ -32,13 +30,13 @@ public abstract class AbstractTests {
         }
         return s;
     }
-
+    
     public abstract TreeIterator getIterator() throws URISyntaxException, IOException;
-
-    public void testIterator( PrintStream print, final PrintStream printContent) throws Exception {
+    
+    public void testIterator(PrintStream print, final PrintStream printContent) throws Exception {
         printStructure(getIterator(), print, printContent);
     }
-
+    
     private String printEvent(ParsingEvent next) throws IOException {
         switch (next.getType()) {
             case NodeBegin:
@@ -48,31 +46,33 @@ public abstract class AbstractTests {
             case Attribute:
                 if (next instanceof AttributeParsingEvent) {
                     AttributeParsingEvent attributeParsingEvent = (AttributeParsingEvent) next;
-                    return "<attribute name=\"" + next.getName() + "\" checksum=\"" + attributeParsingEvent.getChecksum() + "\" location=\"" + next.getLocation() + "\"/>";
+                    return "<attribute name=\""
+                           + next.getName()
+                           + "\" checksum=\""
+                           + attributeParsingEvent.getChecksum()
+                           + "\" location=\""
+                           + next.getLocation()
+                           + "\"/>";
                 }
-
+            
             default:
                 return next.toString();
         }
     }
-
-    public void testIteratorWithSkipping( PrintStream print, final PrintStream printContent) throws Exception {
-
+    
+    public void testIteratorWithSkipping(PrintStream print, final PrintStream printContent) throws Exception {
+        
         List<TreeIterator> avisIterators = new ArrayList<>();
-
-
+        
+        
         System.out.println("Print the batch and film, and store the iterators for the aviser");
         int indent = 0;
         while (getIterator().hasNext()) {
             ParsingEvent next = getIterator().next();
-
+            
             String s;
             switch (next.getType()) {
                 case NodeBegin:
-                    if (next.getName().endsWith(".tiff")) {
-                        assertTrue(next instanceof DataFileNodeBeginsParsingEvent);
-                    }
-
                     s = getIndent(indent);
                     if (print != null) {
                         print.println(s + printEvent(next));
@@ -85,10 +85,6 @@ public abstract class AbstractTests {
                     }
                     break;
                 case NodeEnd:
-                    if (next.getName().endsWith(".tiff")) {
-                        assertTrue(next instanceof DataFileNodeEndsParsingEvent);
-                    }
-
                     indent -= 2;
                     s = getIndent(indent);
                     if (print != null) {
@@ -112,11 +108,11 @@ public abstract class AbstractTests {
             }
             printStructure(avisIterator, print, printContent);
         }
-
+        
     }
-
+    
     private void printStructure(TreeIterator avisIterator, PrintStream print, final PrintStream printContent) throws
-                                                                                                            IOException {
+                                                                                                              IOException {
         int indent = 0;
         int files = 0;
         while (avisIterator.hasNext()) {
@@ -152,7 +148,7 @@ public abstract class AbstractTests {
                     files++;
                 }
             }
-
+            
         }
         assertEquals(indent, 0, "Indent is not reset after iteration");
         assertTrue(files > 1, "We have not encountered very much, only " + files + ", is the test data broken?");

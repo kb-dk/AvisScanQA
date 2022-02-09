@@ -29,23 +29,33 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     private final File batchFolder;
     
     private final List<String> transparentDirNames;
-    protected final String groupingChar;
-    private final String groupingChar2;
+    protected final String editionRegexp;
+    protected final String pageRegexp;
+    protected final String checksumRegexp;
+    protected final String checksumExtension;
     
     
     /**
      * Construct an iterator rooted at a given directory
      *
-     * @param dir         the directory at which to root the iterator.
-     * @param batchFolder
+     * @param specififBatch         the directory at which to root the iterator.
+     * @param folderForBatches      The directory containing the batch folders
+     *
      */
-    public TransparintingFileSystemIterator(File dir, File batchFolder, List<String> transparentDirNames,
-                                            String groupingChar, String groupingChar2) {
-        super(dir);
-        this.batchFolder         = batchFolder;
+    public TransparintingFileSystemIterator(File specififBatch,
+                                            File folderForBatches,
+                                            List<String> transparentDirNames,
+                                            String editionRegexp,
+                                            String pageRegexp,
+                                            String checksumRegexp,
+                                            String checksumExtension) {
+        super(specififBatch);
+        this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
-        this.groupingChar        = groupingChar;
-        this.groupingChar2       = groupingChar2;
+        this.editionRegexp       = editionRegexp;
+        this.pageRegexp          = pageRegexp;
+        this.checksumRegexp      = checksumRegexp;
+        this.checksumExtension   = checksumExtension;
     }
     
     @Override
@@ -61,8 +71,10 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
               .map(subdir -> new TransparintingFileSystemIterator(subdir,
                                                                   batchFolder,
                                                                   transparentDirNames,
-                                                                  groupingChar,
-                                                                  groupingChar2))
+                                                                  editionRegexp,
+                                                                  pageRegexp,
+                                                                  checksumRegexp,
+                                                                  checksumExtension))
               .forEach(result::add);
         
         
@@ -82,7 +94,11 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                          groups.get(key),
                                                          batchFolder,
                                                          transparentDirNames,
-                                                         groupingChar2
+                                                         editionRegexp,
+                                                         pageRegexp,
+                                                         checksumRegexp,
+                                                         checksumExtension
+                                                         
               ))
               .forEach(result::add);
         return result.iterator();
@@ -109,7 +125,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                    .flatMap(dir -> FileUtils.listFiles(dir,
                                                        new AndFileFilter(FileFileFilter.INSTANCE,
                                                                          new NotFileFilter(new WildcardFileFilter(
-                                                                                 "*.md5"))),
+                                                                                 "*" + checksumExtension))),
                                                        new NameFileFilter(transparentDirNames))
                                             .stream())
                    .sorted()
@@ -117,16 +133,16 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     }
     
     protected String getPrefix(File attribute) {
-        String prefix = attribute.getName().split(groupingChar)[0];
+        String prefix = attribute.getName().split(editionRegexp)[0];
         return prefix;
     }
     
     
     public String toPathID(File id) {
         String pathId = id.getAbsolutePath()
-                                     .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
+                          .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + File.separator), "");
         for (String transparentDirName : transparentDirNames) {
-            pathId = pathId.replaceAll("/"+transparentDirName+"/", "/");
+            pathId = pathId.replaceAll(File.separator + transparentDirName + File.separator, File.separator);
         }
         return pathId;
     }
@@ -134,7 +150,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     @Override
     protected AttributeParsingEvent makeAttributeEvent(File nodeID, File attributeID) {
         String name = toPathID(attributeID);
-        return new FileAttributeParsingEvent(name, attributeID, ".md5");
+        return new FileAttributeParsingEvent(name, attributeID, checksumRegexp, checksumExtension);
     }
     
     @Override

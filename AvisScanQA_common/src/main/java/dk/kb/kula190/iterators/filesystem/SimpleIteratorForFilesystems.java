@@ -2,7 +2,7 @@ package dk.kb.kula190.iterators.filesystem;
 
 
 
-import dk.kb.kula190.iterators.AbstractIterator;
+import dk.kb.kula190.iterators.common.AbstractIterator;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
 import org.apache.commons.io.FileUtils;
@@ -30,7 +30,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
      * @param dir the directory at which to root the iterator.
      */
     public SimpleIteratorForFilesystems(File dir) {
-        super(dir, "");
+        super(dir);
     }
 
     @Override

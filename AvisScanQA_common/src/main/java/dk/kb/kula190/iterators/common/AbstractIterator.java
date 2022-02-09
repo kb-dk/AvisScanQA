@@ -1,11 +1,7 @@
-package dk.kb.kula190.iterators;
-
-
+package dk.kb.kula190.iterators.common;
 
 
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.DataFileNodeBeginsParsingEvent;
-import dk.kb.kula190.iterators.common.DataFileNodeEndsParsingEvent;
 import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
@@ -15,7 +11,6 @@ import dk.kb.kula190.iterators.common.TreeIterator;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.regex.Pattern;
 
 /**
  * The abstract iterator, meant as a common superclass for implementations for different backends.
@@ -35,15 +30,13 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
     private Iterator<? extends DelegatingTreeIterator> childrenIterator;
     private Iterator<T> attributeIterator;
     protected final T id;
-    private String dataFilePattern;
-
+    
     private DelegatingTreeIterator delegate = null;
     private boolean done = false;
     private boolean begun = false;
 
-    protected AbstractIterator(T id, String dataFilePattern) {
+    protected AbstractIterator(T id) {
         this.id = id;
-        this.dataFilePattern = dataFilePattern;
     }
 
     @Override
@@ -125,16 +118,9 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
      * @return a node ends event
      */
     protected NodeEndParsingEvent createNodeEndsParsingEvent() {
-        if (isDataFile(getIdOfNode())) {
-            return new DataFileNodeEndsParsingEvent(getIdOfNode(), id.toString());
-        }
         return new NodeEndParsingEvent(getIdOfNode(), id.toString());
     }
-
-    private boolean isDataFile(String idOfNode) {
-        return Pattern.matches(dataFilePattern, idOfNode);
-    }
-
+    
     /**
      * Utility method to create the nodeBegins event. A methods so that subclasses can override it to return their own
      * specialisations of this event. In this implementation the location is set to the String representation of
@@ -143,9 +129,6 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
      * @return a node begins event
      */
     protected NodeBeginsParsingEvent createNodeBeginsParsingEvent() {
-        if (isDataFile(getIdOfNode())) {
-            return new DataFileNodeBeginsParsingEvent(getIdOfNode(), id.toString());
-        }
         return new NodeBeginsParsingEvent(getIdOfNode(), id.toString());
     }
 
@@ -268,9 +251,5 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
     @Override
     public final TreeIterator getDelegate() {
         return delegate;
-    }
-
-    public String getDataFilePattern() {
-        return dataFilePattern;
     }
 }
