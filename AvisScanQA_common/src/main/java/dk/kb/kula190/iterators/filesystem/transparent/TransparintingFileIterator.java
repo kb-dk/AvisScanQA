@@ -98,8 +98,8 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
     }
     
     
-    protected String getPrefix(File attribute) {
-        String prefix = attribute.getName().split(pageRegexp)[0];
+    protected String getPrefix(File file) {
+        String prefix = file.getName().split(pageRegexp)[0];
         return prefix;
     }
     

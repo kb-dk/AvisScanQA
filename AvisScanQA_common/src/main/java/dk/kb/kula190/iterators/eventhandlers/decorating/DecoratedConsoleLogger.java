@@ -8,6 +8,11 @@ import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 
 import java.io.IOException;
 import java.io.PrintStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
+import java.time.temporal.TemporalAccessor;
 
 /**
  * Prints the tree to the console. Used for testing purposes.
@@ -15,6 +20,14 @@ import java.io.PrintStream;
 public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     private PrintStream out;
+    
+    private static final DateTimeFormatter dateFormatter = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR,
+                                                                                                      4)
+                                                                                         .appendValue(ChronoField.MONTH_OF_YEAR,
+                                                                                                      2)
+                                                                                         .appendValue(ChronoField.DAY_OF_MONTH,
+                                                                                                      2)
+                                                                                         .toFormatter();
     
     public DecoratedConsoleLogger(PrintStream out, ResultCollector resultCollector) {
         super(resultCollector);
@@ -24,7 +37,20 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void batchBegins(NodeBeginsParsingEvent event, String batch) {
-        out.println(" ".repeat(getLevel(event) * 2) + "<batch name=\"" + batch + "\">");
+        //modersmaalet_19060701_19061231_RT1
+        String[] batchSplits = batch.split("_", 4);
+        TemporalAccessor startDate = LocalDate.parse(batchSplits[1], dateFormatter);
+        TemporalAccessor endDate = LocalDate.parse(batchSplits[2], dateFormatter);
+        String avis = batchSplits[0];
+        String roundTrip = batchSplits[3].replaceFirst("^RT", "");
+        
+        out.println(" ".repeat(getLevel(event) * 2) + "<batch "
+                    + "avis=\"" + avis + "\" "
+                    + "start=\"" + startDate + "\" "
+                    + "end=\"" + endDate + "\" "
+                    + "roundtrip=\"" + roundTrip + "\" "
+                    //+ "name=\"" + batch + "\""
+                    + ">");
     }
     
     @Override
@@ -34,7 +60,18 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void editionBegins(NodeBeginsParsingEvent event, String editionName) {
-        out.println(" ".repeat(getLevel(event) * 2) + "<edition name=\"" + editionName + "\">");
+        //modersmaalet_19060706_udg01_1.sektion
+        String[] editionNameSplits = editionName.split("_", 4);
+        LocalDate editionDate = LocalDate.parse(editionNameSplits[1], dateFormatter);
+        String udgave = editionNameSplits[2];
+        String section = editionNameSplits[3];
+        out.println(" ".repeat(getLevel(event) * 2)
+                    + "<edition "
+                    + "date=\"" + editionDate + "\" "
+                    + "udgave=\"" + udgave + "\" "
+                    + "section=\"" + section + "\" "
+                    + "name=\"" + editionName + "\""
+                    + ">");
     }
     
     @Override

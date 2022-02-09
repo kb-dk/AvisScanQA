@@ -38,18 +38,18 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     /**
      * Construct an iterator rooted at a given directory
      *
-     * @param specififBatch         the directory at which to root the iterator.
+     * @param specificBatch         the directory at which to root the iterator.
      * @param folderForBatches      The directory containing the batch folders
      *
      */
-    public TransparintingFileSystemIterator(File specififBatch,
+    public TransparintingFileSystemIterator(File specificBatch,
                                             File folderForBatches,
                                             List<String> transparentDirNames,
                                             String editionRegexp,
                                             String pageRegexp,
                                             String checksumRegexp,
                                             String checksumExtension) {
-        super(specififBatch);
+        super(specificBatch);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.editionRegexp       = editionRegexp;
@@ -132,8 +132,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                    .collect(Collectors.groupingBy(this::getPrefix));
     }
     
-    protected String getPrefix(File attribute) {
-        String prefix = attribute.getName().split(editionRegexp)[0];
+    protected String getPrefix(File file) {
+        String prefix = file.getName().split(editionRegexp)[0];
         return prefix;
     }
     

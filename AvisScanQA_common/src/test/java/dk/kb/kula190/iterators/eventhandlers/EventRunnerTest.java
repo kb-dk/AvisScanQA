@@ -9,6 +9,8 @@ import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIt
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.List;
 
@@ -19,32 +21,55 @@ class EventRunnerTest {
     
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
-            //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
-            File file = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
+            //File specificBatch = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
+            File specificBatch = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
             
-            System.out.println(file);
-            iterator = new TransparintingFileSystemIterator(file,
-                                                            file.getParentFile(),
-                                                            List.of("MIX", "TIFF", "PDF", "ALTO"),
-                                                            "_[^_]+$",
-                                                            "\\.[^_]+$",
-                                                            "\\.[^_]+$",
-                                                            ".md5");
+            System.out.println(specificBatch);
+            //Files named as modersmaalet_19060703_udg01_1.sektion_0004.mix.xml
+            File batchesFolder = specificBatch.getParentFile();
+            iterator = new TransparintingFileSystemIterator(
+                    //Folder for the specific batch to run on
+                    specificBatch,
+                    
+                    //Folder where the batches reside. Nessesary to see what part of the specific batch is name
+                    batchesFolder,
+                    
+                    //These folders will NOT be nodes, but regarded as transparent
+                    List.of("MIX", "TIFF", "PDF", "ALTO"),
+                    
+                    //Part to remove to generate the edition name
+                    //will output modersmaalet_19060703_udg01_1.sektion
+                    "_[^_]+$",
+                    //filename.split(editionRegexp)[0];
+                    
+                    //Part to remove to generate the page name
+                    //will output modersmaalet_19060703_udg01_1.sektion_0004
+                    "\\.[^_]+$",
+                    //filename.split(pageRegexp)[0];
+                    
+                    //How to adapt the filename for the checksum extension below
+                    "\\.[^_]+$",
+                    
+                    ".md5");
         }
         return iterator;
         
     }
     
     @Test
-    void run() throws URISyntaxException {
-        ResultCollector resultCollector = new ResultCollector("Testing tool","Testing version", 100);
-        List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector), new NoMissingMiddlePagesChecker(resultCollector),
-                                                       new DecoratedConsoleLogger(System.out,resultCollector));
-    
-        EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);
+    void run() throws URISyntaxException, FileNotFoundException {
+        ResultCollector resultCollector = new ResultCollector("Testing tool", "Testing version", 100);
         
-        runner.run();
-    
+        try (PrintStream out = new PrintStream("decoratedBatch.xml")) {
+            
+            List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector),
+                                                           new NoMissingMiddlePagesChecker(resultCollector),
+                                                           new DecoratedConsoleLogger(out, resultCollector));
+            
+            EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);
+            
+            runner.run();
+        }
         System.out.println(resultCollector.toReport());
         //new
     }
