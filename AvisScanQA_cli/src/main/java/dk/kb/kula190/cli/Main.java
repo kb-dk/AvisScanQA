@@ -31,7 +31,7 @@ public class Main {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         ResultCollector resultCollector = component.doWorkOnItem(batch);
     
-        System.out.println(resultCollector);
+        System.out.println(resultCollector.toReport());
     }
     
 
