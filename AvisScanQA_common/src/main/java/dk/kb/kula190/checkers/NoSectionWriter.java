@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +25,6 @@ import static org.apache.commons.io.FilenameUtils.isExtension;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 //TODO NOT THREADSAFE
-//TODO copy checksums as well
 public class NoSectionWriter extends DecoratedEventHandler {
     
     private final DateTimeFormatter formatter;
@@ -147,16 +145,6 @@ public class NoSectionWriter extends DecoratedEventHandler {
         writeSectionlessXmlFile(event, getNewfilePath(avis, editionDate, udgave, folder, extension));
     }
     
-    private Path getNewfilePath(String avis, LocalDate editionDate, String udgave, String mix, String extension) {
-        return Path.of(parentDir.toAbsolutePath().toString(),
-                       batchName,
-                       mix,
-                       String.join("_",
-                                   avis,
-                                   editionDate.format(formatter),
-                                   udgave,
-                                   String.format("%04d", pageNumberLastSeen)) + extension);
-    }
     
     @Override
     public void tiffFile(AttributeParsingEvent event,
@@ -166,9 +154,9 @@ public class NoSectionWriter extends DecoratedEventHandler {
                          String sectionName,
                          Integer pageNumber) throws IOException {
         //TODO hardlink instead of copy
-        String mix = "TIFF";
+        String folder = "TIFF";
         String extension = ".tif";
-        writeSectionlessFile(event, avis, editionDate, udgave, mix, extension);
+        writeSectionlessBinaryFile(event, avis, editionDate, udgave, folder, extension);
     }
     
     @Override
@@ -191,9 +179,9 @@ public class NoSectionWriter extends DecoratedEventHandler {
                         String sectionName,
                         Integer pageNumber) throws IOException {
         //TODO hardlink instead of copy
-        String mix = "PDF";
+        String folder = "PDF";
         String extension = ".pdf";
-        writeSectionlessFile(event, avis, editionDate, udgave, mix, extension);
+        writeSectionlessBinaryFile(event, avis, editionDate, udgave, folder, extension);
     }
     
     private void writeSectionlessXmlFile(AttributeParsingEvent event, Path newfilePath) throws IOException {
@@ -212,7 +200,8 @@ public class NoSectionWriter extends DecoratedEventHandler {
                     StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
-        
+        writeMD5File(newfilePath, event);
+    
     }
     
     private void writeSectionlessGlobalXmlFile(AttributeParsingEvent event, Path newfilePath) throws IOException {
@@ -230,7 +219,52 @@ public class NoSectionWriter extends DecoratedEventHandler {
                     StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
+        writeMD5File(newfilePath, event);
+    }
+
+    private void writeSectionlessBinaryFile(AttributeParsingEvent event,
+                                            String avis,
+                                            LocalDate editionDate,
+                                            String udgave,
+                                            String mix,
+                                            String extension) throws IOException {
         
+        
+        
+        Path newfilePath = Path.of(parentDir.toAbsolutePath().toString(),
+                               batchName,
+                               mix,
+                               String.join("_",
+                                           avis,
+                                           editionDate.format(formatter),
+                                           udgave,
+                                           String.format("%04d", pageNumberLastSeen)) + extension);
+        Files.deleteIfExists(newfilePath);
+        Files.createLink(newfilePath, Path.of(event.getLocation()));
+        
+        //try (InputStream data = event.getData();) {
+        //    Files.copy(data, newfilePath);
+        //}
+        writeMD5File(newfilePath, event);
+    
+    }
+    
+    private void writeMD5File(Path newfilePath, AttributeParsingEvent event) throws IOException {
+        Files.writeString(Path.of(removeExtension(newfilePath.toString()) + ".md5"),
+                          event.getChecksum() + "  " + newfilePath.getFileName().toString(),
+                          StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
+    }
+    
+    
+    private Path getNewfilePath(String avis, LocalDate editionDate, String udgave, String mix, String extension) {
+        return Path.of(parentDir.toAbsolutePath().toString(),
+                       batchName,
+                       mix,
+                       String.join("_",
+                                   avis,
+                                   editionDate.format(formatter),
+                                   udgave,
+                                   String.format("%04d", pageNumberLastSeen)) + extension);
     }
     
     private String removeXmlExtension(String filename) {
@@ -241,23 +275,5 @@ public class NoSectionWriter extends DecoratedEventHandler {
         }
     }
     
-    private void writeSectionlessFile(AttributeParsingEvent event,
-                                      String avis,
-                                      LocalDate editionDate,
-                                      String udgave,
-                                      String mix,
-                                      String extension) throws IOException {
-        Path mixFile = Path.of(parentDir.toAbsolutePath().toString(),
-                               batchName,
-                               mix,
-                               String.join("_",
-                                           avis,
-                                           editionDate.format(formatter),
-                                           udgave,
-                                           String.format("%04d", pageNumberLastSeen)) + extension);
-        try (InputStream data = event.getData();) {
-            Files.copy(data, mixFile);
-        }
-    }
     
 }
