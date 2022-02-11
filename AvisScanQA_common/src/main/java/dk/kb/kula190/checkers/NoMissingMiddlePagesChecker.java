@@ -6,6 +6,7 @@ import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +25,8 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     private ThreadLocal<List<Integer>> pages = new ThreadLocal<>();
     
     @Override
-    public void editionBegins(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void sectionBegins(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+            throws IOException {
         pages.set(new ArrayList<>());
     }
     
@@ -39,14 +41,15 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     }
     
     @Override
-    public void editionEnds(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void sectionEnds(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+            throws IOException {
         List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {
                 resultCollector.addFailure(event.getName(),
                                            "MissingPages",
                                            this.getClass().getSimpleName(),
-                                           "Edition have gaps in page sequence",
+                                           "Section have gaps in page sequence",
                                            sortedPages.stream().map(x -> "" + x).collect(Collectors.joining(",")));
             }
         }
