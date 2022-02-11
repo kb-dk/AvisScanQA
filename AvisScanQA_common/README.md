@@ -17,3 +17,14 @@ TODO Patrick checkers:
 
 
 TODO lokal udgave af schemaer
+
+* DONE: script til at strippe section fra batch og fix løbenummer
+
+
+
+TODO Mix checks
+* filesize correct
+* checksum
+* objectIdentifierValue ref til korrekt tiff
+* height vs width?
+

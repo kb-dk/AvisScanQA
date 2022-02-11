@@ -4,6 +4,7 @@ import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.MixXmlSchemaChecker;
 import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.NoSectionWriter;
 import dk.kb.kula190.checkers.PageStructureChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedConsoleLogger;
@@ -14,6 +15,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
+import java.nio.file.Path;
 import java.util.List;
 
 class EventRunnerTest {
@@ -24,7 +26,7 @@ class EventRunnerTest {
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
             //File specificBatch = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
-            File specificBatch = new File("/home/pabr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
+            File specificBatch = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
 
             System.out.println(specificBatch);
 
@@ -71,11 +73,15 @@ class EventRunnerTest {
 
         try (PrintStream out = new PrintStream("decoratedBatch.xml")) {
 
-            List<TreeEventHandler> eventHandlers = List.of(//new ChecksumChecker(resultCollector),
-                    //new NoMissingMiddlePagesChecker(resultCollector),
-                    new PageStructureChecker(resultCollector),
-                    new MixXmlSchemaChecker(resultCollector),
-                    new DecoratedConsoleLogger(out, resultCollector));
+            List<TreeEventHandler> eventHandlers = List.of(
+                    new DecoratedConsoleLogger(out, resultCollector)
+                    //This beast is slow, so feel free to disable it
+                    ,new NoSectionWriter(resultCollector, Path.of("noSection"))
+                    ,new ChecksumChecker(resultCollector)
+                    ,new NoMissingMiddlePagesChecker(resultCollector)
+                    ,new PageStructureChecker(resultCollector)
+                    ,new MixXmlSchemaChecker(resultCollector)
+                                                          );
 
             EventRunner runner = new EventRunner(getIterator(), eventHandlers, resultCollector);
 
