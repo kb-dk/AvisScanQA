@@ -3,24 +3,19 @@ package dk.kb.kula190.checkers;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.EventRunner;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import org.slf4j.Logger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
-
 import javax.xml.XMLConstants;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.transform.Source;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -101,4 +96,6 @@ public class MixXmlSchemaChecker extends DecoratedEventHandler {
 
 
     }
+
+
 }
