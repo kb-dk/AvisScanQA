@@ -25,6 +25,8 @@ import java.util.stream.Stream;
 import static org.apache.commons.io.FilenameUtils.isExtension;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
+//TODO NOT THREADSAFE
+//TODO copy checksums as well
 public class NoSectionWriter extends DecoratedEventHandler {
     
     private final DateTimeFormatter formatter;
@@ -163,6 +165,7 @@ public class NoSectionWriter extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
+        //TODO hardlink instead of copy
         String mix = "TIFF";
         String extension = ".tif";
         writeSectionlessFile(event, avis, editionDate, udgave, mix, extension);
@@ -187,6 +190,7 @@ public class NoSectionWriter extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
+        //TODO hardlink instead of copy
         String mix = "PDF";
         String extension = ".pdf";
         writeSectionlessFile(event, avis, editionDate, udgave, mix, extension);
