@@ -21,7 +21,7 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
-            File file = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
+            File file = new File("/home/pabr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
             
             System.out.println(file);
             iterator = new TransparintingFileSystemIterator(file,
