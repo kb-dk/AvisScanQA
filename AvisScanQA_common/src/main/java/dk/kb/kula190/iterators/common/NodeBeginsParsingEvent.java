@@ -5,14 +5,14 @@ package dk.kb.kula190.iterators.common;
  * parsing of the node contents begin.
  */
 public class NodeBeginsParsingEvent extends NodeParsingEvent {
-
+    
     public NodeBeginsParsingEvent(String name) {
-           super(name, ParsingEventType.NodeBegin, null);
-       }
-
+        super(name, ParsingEventType.NodeBegin, null);
+    }
+    
     public NodeBeginsParsingEvent(String name, String location) {
         super(name, ParsingEventType.NodeBegin, location);
     }
-
-
+    
+    
 }

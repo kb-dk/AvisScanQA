@@ -1,10 +1,8 @@
-package dk.kb.kula190.checkers;
+package dk.kb.kula190.checkers.sections;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
-import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
-import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.common.NodeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,26 +10,25 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
+public class NoMissingMiddlePagesChecker extends DecoratedEventHandlerWithSections {
     private final ResultCollector resultCollector;
+    //Note that all fields in these checkers should be threadlocal. Otherwise they will not work on multithreaded runs
+    //There is only one checker instance shared between all the threads
+    private ThreadLocal<List<Integer>> pages = new ThreadLocal<>();
     
     public NoMissingMiddlePagesChecker(ResultCollector resultCollector) {
         super(resultCollector);
         this.resultCollector = resultCollector;
     }
     
-    //Note that all fields in these checkers should be threadlocal. Otherwise they will not work on multithreaded runs
-    //There is only one checker instance shared between all the threads
-    private ThreadLocal<List<Integer>> pages = new ThreadLocal<>();
-    
     @Override
-    public void sectionBegins(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {
         pages.set(new ArrayList<>());
     }
     
     @Override
-    public void pageBegins(ParsingEvent event,
+    public void pageBegins(NodeParsingEvent event,
                            String editionName,
                            LocalDate editionDate,
                            String udgave,
@@ -41,7 +38,7 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     }
     
     @Override
-    public void sectionEnds(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionEnds(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {
         List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {

@@ -1,13 +1,6 @@
 package dk.kb.kula190.iterators.common;
 
 
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
-import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
-import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
-import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.common.TreeIterator;
-
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -25,28 +18,27 @@ import java.util.NoSuchElementException;
  * @param <T> The type of identifier used for the nodes.
  */
 public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
-
-
+    
+    
+    protected final T id;
     private Iterator<? extends DelegatingTreeIterator> childrenIterator;
     private Iterator<T> attributeIterator;
-    protected final T id;
-    
     private DelegatingTreeIterator delegate = null;
     private boolean done = false;
     private boolean begun = false;
-
+    
     protected AbstractIterator(T id) {
         this.id = id;
     }
-
+    
     @Override
     public final boolean hasNext() {
         // We are done with this node and all subnodes.
         return !done;
-
+        
     }
-
-
+    
+    
     /**
      * This iterator iterates over the current node. It lists first all attributes of the current node and then begins
      * iterating over the child nodes. It has the side effect that once it is finished iterating over attributes, it
@@ -65,7 +57,7 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
             throw new NoSuchElementException("The iterator is out of objects");
         }
         //So now we must figure out what kind of event is next
-
+        
         //We have not sent the "NodeBeginEvent" yet, so get that done before anything else
         if (!begun) {
             //!begun implied delegate==null
@@ -79,8 +71,8 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
             T attributeID = getAttributeIterator().next();
             return makeAttributeEvent(id, attributeID);
         }
-
-
+        
+        
         //We are now finished iterating the attributes, and we check if we have a delegate
         //If we have one, forward the request to the delegate
         if (delegate != null) {
@@ -107,9 +99,9 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
                 return createNodeEndsParsingEvent();
             }
         }
-
+        
     }
-
+    
     /**
      * Utility method to create teh nodeEnds event. A method so that subclasses can override it to return their
      * own specialisations of this event. In this implementation the location is set to the String representation of
@@ -131,7 +123,7 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
     protected NodeBeginsParsingEvent createNodeBeginsParsingEvent() {
         return new NodeBeginsParsingEvent(getIdOfNode(), id.toString());
     }
-
+    
     /**
      * Get the children iterator, initilised lazily.
      *
@@ -143,7 +135,7 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
         }
         return childrenIterator;
     }
-
+    
     /**
      * This is a factory method which creates an iterator over all the children of this element. Typically it will
      * just call a constructor defined in an implementation of this class for each child and return an iterator of the
@@ -152,8 +144,8 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
      * @return the children iterator
      */
     protected abstract Iterator<? extends DelegatingTreeIterator> initializeChildrenIterator();
-
-
+    
+    
     /**
      * Get the iterator over attributes of the current element, initializing if needed.
      *
@@ -169,8 +161,8 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
         }
         return attributeIterator;
     }
-
-
+    
+    
     /**
      * This is a factory method which creates an iterator over all attributes of this element, for example all files
      * in a directory.
@@ -178,28 +170,27 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
      * @return
      */
     protected abstract Iterator<T> initilizeAttributeIterator() throws IOException;
-
+    
     /**
      * Returns an instance of a concrete subclass of AttributeEvent appropriate for this attribute. There could be
      * different kinds of attribute in a given element and these could be identified and given different behaviours.
      *
      * @param nodeID      the identifier of the node that the attribute resides in
      * @param attributeID the identifier of the attribute.
-     *
      * @return an AttributeParsingEvent
      */
     protected abstract AttributeParsingEvent makeAttributeEvent(T nodeID, T attributeID);
-
+    
     protected String getIdOfNode() {
         return id.toString();
     }
-
+    
     @Override
     public void remove() {
         throw new UnsupportedOperationException("Remove not supported");
     }
-
-
+    
+    
     @Override
     /**
      * This method recursively follows the chain of delegates down from the node it was called on to the node currently
@@ -207,7 +198,7 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
      * whose delegate has no delegate.
      */
     public TreeIterator skipToNextSibling() {
-
+        
         if (delegate == null) {
             //we have no delegate. The only way this can happen is if this method have been called on the
             //root node. We would never recurse to a node without a delegate.
@@ -215,16 +206,16 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
             return this;
         }
         //Okay, so we are not the root node, as we have a delegate.
-
+        
         //If our delegate also have a delegate, we know that we are not the current node either
         if (delegate.getDelegate() != null) {
             //, so proceed downwards
             return delegate.skipToNextSibling();
         }
-
+        
         //Okay, so we know that we have a delegate, and this delegate does not have a delegate. We are in
         //the correct location
-
+        
         //Save our delegate
         DelegatingTreeIterator oldDelegate = delegate;
         //disconnect it. If the delegate is null, the children iterator will be next'ed to get a next child as
@@ -234,20 +225,22 @@ public abstract class AbstractIterator<T> implements DelegatingTreeIterator {
         oldDelegate.reset();
         //return it
         return oldDelegate;
-
-
+        
+        
     }
-
-    /** Reset this iterator/node, so that iteration from here will start fresh. */
+    
+    /**
+     * Reset this iterator/node, so that iteration from here will start fresh.
+     */
     @Override
     public void reset() {
-        delegate = null;
-        done = false;
-        begun = false;
-        childrenIterator = null;
+        delegate          = null;
+        done              = false;
+        begun             = false;
+        childrenIterator  = null;
         attributeIterator = null;
     }
-
+    
     @Override
     public final TreeIterator getDelegate() {
         return delegate;

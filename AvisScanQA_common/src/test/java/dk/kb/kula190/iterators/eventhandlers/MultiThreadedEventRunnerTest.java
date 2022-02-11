@@ -2,12 +2,11 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.MixXmlSchemaChecker;
-import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.PageStructureChecker;
+import dk.kb.kula190.checkers.nosections.MixXmlSchemaChecker;
+import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.nosections.PageStructureChecker;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedConsoleLogger;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
 

@@ -8,15 +8,15 @@ import java.io.InputStream;
  * file system file or a fedora datastream.
  */
 public abstract class AttributeParsingEvent extends ParsingEvent {
-
+    
     public AttributeParsingEvent(String name) {
-            super(name, ParsingEventType.Attribute, null);
-        }
-
+        super(name, ParsingEventType.Attribute, null);
+    }
+    
     public AttributeParsingEvent(String name, String location) {
         super(name, ParsingEventType.Attribute, location);
     }
-
+    
     /**
      * Get the corresponding data
      *
@@ -24,7 +24,7 @@ public abstract class AttributeParsingEvent extends ParsingEvent {
      * @throws IOException
      */
     public abstract InputStream getData() throws IOException;
-
+    
     /**
      * Returns the checksum of the content or null
      *
@@ -32,5 +32,5 @@ public abstract class AttributeParsingEvent extends ParsingEvent {
      * @throws IOException if there was a problem retrieving the data
      */
     public abstract String getChecksum() throws IOException;
-
+    
 }

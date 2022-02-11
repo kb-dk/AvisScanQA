@@ -26,21 +26,18 @@ import java.util.stream.Collectors;
 
 public class TransparintingFileSystemIterator extends SimpleIteratorForFilesystems {
     
-    private final File batchFolder;
-    
-    private final List<String> transparentDirNames;
     protected final List<String> virtualLevelsRegexp;
-
     protected final String checksumRegexp;
     protected final String checksumExtension;
+    private final File batchFolder;
+    private final List<String> transparentDirNames;
     
     
     /**
      * Construct an iterator rooted at a given directory
      *
-     * @param specificBatch         the directory at which to root the iterator.
-     * @param folderForBatches      The directory containing the batch folders
-     *
+     * @param specificBatch    the directory at which to root the iterator.
+     * @param folderForBatches The directory containing the batch folders
      */
     public TransparintingFileSystemIterator(File specificBatch,
                                             File folderForBatches,
@@ -129,7 +126,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     }
     
     protected String getPrefix(File file) {
-        if (virtualLevelsRegexp.isEmpty()){
+        if (virtualLevelsRegexp.isEmpty()) {
             return file.getName();
         }
         String regex = virtualLevelsRegexp.get(0);

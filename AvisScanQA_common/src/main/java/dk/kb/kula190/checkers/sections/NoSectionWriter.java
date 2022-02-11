@@ -1,10 +1,12 @@
-package dk.kb.kula190.checkers;
+package dk.kb.kula190.checkers.sections;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.common.NodeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import org.apache.commons.codec.digest.DigestUtils;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -25,12 +27,22 @@ import static org.apache.commons.io.FilenameUtils.isExtension;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 //TODO NOT THREADSAFE
-public class NoSectionWriter extends DecoratedEventHandler {
+public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     
     private final DateTimeFormatter formatter;
     private final Path parentDir;
     
     private String batchName;
+    /**
+     * This map stores all the filename renames (without extension)
+     * It is used to ensure that we rename all relevant names in the METS file
+     */
+    private Map<String, String> filenameMappings = new HashMap<>();
+    //The mets data event
+    private AttributeParsingEvent metsData;
+    //This variable is part of the renumbering scheme. As pagenumbers previously ran inside the section, we now
+    //need to run them per edition
+    private Integer pageNumberLastSeen;
     
     
     public NoSectionWriter(ResultCollector resultCollector, Path parentDir) {
@@ -45,7 +57,11 @@ public class NoSectionWriter extends DecoratedEventHandler {
     }
     
     @Override
-    public void batchBegins(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void batchBegins(NodeParsingEvent event,
+                            String avis,
+                            String roundTrip,
+                            LocalDate startDate,
+                            LocalDate endDate) {
         batchName = String.join("_", avis, startDate.format(formatter), endDate.format(formatter), "RT" + roundTrip);
         
         Path batchDir = Path.of(parentDir.toAbsolutePath().toString(), batchName);
@@ -75,15 +91,6 @@ public class NoSectionWriter extends DecoratedEventHandler {
         writeSectionlessXmlFile(event, newFile);
     }
     
-    
-    /**
-     * This map stores all the filename renames (without extension)
-     * It is used to ensure that we rename all relevant names in the METS file
-     */
-    private Map<String, String> filenameMappings = new HashMap<>();
-    
-    //The mets data event
-    private AttributeParsingEvent metsData;
     @Override
     public void metsFile(AttributeParsingEvent event,
                          String avis,
@@ -94,29 +101,27 @@ public class NoSectionWriter extends DecoratedEventHandler {
         //Otherwise, we would not know which renames to perform
         metsData = event;
     }
+    
     @Override
-    public void batchEnds(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate)
+    public void batchEnds(NodeParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate)
             throws IOException {
         //Now that the batch have ended, it is time to rename the METS file
         Path metsFile = Path.of(parentDir.toAbsolutePath().toString(),
-                               batchName,
-                               "METS",
-                               batchName + ".mets.xml");
+                                batchName,
+                                "METS",
+                                batchName + ".mets.xml");
         writeSectionlessGlobalXmlFile(metsData, metsFile);
     }
     
-    //This variable is part of the renumbering scheme. As pagenumbers previously ran inside the section, we now
-    //need to run them per edition
-    private Integer pageNumberLastSeen;
     @Override
-    public void editionBegins(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         //When we start an edition, reset the page numbering
         pageNumberLastSeen = 0;
     }
     
     
     @Override
-    public void pageBegins(ParsingEvent event,
+    public void pageBegins(NodeParsingEvent event,
                            String editionName,
                            LocalDate editionDate,
                            String udgave,
@@ -200,8 +205,9 @@ public class NoSectionWriter extends DecoratedEventHandler {
                     StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
-        writeMD5File(newfilePath, event);
-    
+        try (InputStream newContents = new FileInputStream(newfilePath.toFile())) {
+            writeMD5File(newfilePath, DigestUtils.md5Hex(newContents));
+        }
     }
     
     private void writeSectionlessGlobalXmlFile(AttributeParsingEvent event, Path newfilePath) throws IOException {
@@ -219,9 +225,11 @@ public class NoSectionWriter extends DecoratedEventHandler {
                     StandardOpenOption.WRITE,
                     StandardOpenOption.CREATE,
                     StandardOpenOption.TRUNCATE_EXISTING);
-        writeMD5File(newfilePath, event);
+        try (InputStream newContents = new FileInputStream(newfilePath.toFile())) {
+            writeMD5File(newfilePath, DigestUtils.md5Hex(newContents));
+        }
     }
-
+    
     private void writeSectionlessBinaryFile(AttributeParsingEvent event,
                                             String avis,
                                             LocalDate editionDate,
@@ -230,28 +238,27 @@ public class NoSectionWriter extends DecoratedEventHandler {
                                             String extension) throws IOException {
         
         
-        
         Path newfilePath = Path.of(parentDir.toAbsolutePath().toString(),
-                               batchName,
-                               mix,
-                               String.join("_",
-                                           avis,
-                                           editionDate.format(formatter),
-                                           udgave,
-                                           String.format("%04d", pageNumberLastSeen)) + extension);
+                                   batchName,
+                                   mix,
+                                   String.join("_",
+                                               avis,
+                                               editionDate.format(formatter),
+                                               udgave,
+                                               String.format("%04d", pageNumberLastSeen)) + extension);
         Files.deleteIfExists(newfilePath);
         Files.createLink(newfilePath, Path.of(event.getLocation()));
         
         //try (InputStream data = event.getData();) {
         //    Files.copy(data, newfilePath);
         //}
-        writeMD5File(newfilePath, event);
-    
+        writeMD5File(newfilePath, event.getChecksum());
+        
     }
     
-    private void writeMD5File(Path newfilePath, AttributeParsingEvent event) throws IOException {
-        Files.writeString(Path.of(removeExtension(newfilePath.toString()) + ".md5"),
-                          event.getChecksum() + "  " + newfilePath.getFileName().toString(),
+    private void writeMD5File(Path newfilePath, String checksum) throws IOException {
+        Files.writeString(Path.of(removeXmlExtension(newfilePath.toString()) + ".md5"),
+                          checksum + "  " + newfilePath.getFileName().toString(),
                           StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
     }
     

@@ -3,6 +3,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.checkers.sections.NoSectionWriter;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,10 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 
-class EventRunnerTest {
+class WriteNoSectionBatchTest {
     
     private final File specificBatch
-            = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/noSection/modersmaalet_19060701_19061231_RT1"); //orig
+            = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1"); //orig
     private final File noSectionFolder
             = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/noSection/");
     private TreeIterator iterator;
@@ -72,8 +73,9 @@ class EventRunnerTest {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
+                        new NoSectionWriter(resultCollector, noSectionFolder.toPath())
                         //new ChecksumChecker(resultCollector)
-                        //new NoMissingMiddlePagesChecker(resultCollector)
+                        //new NoMissingMiddlePagesChecker(resultCollector),
                         //new PageStructureChecker(resultCollector),
                         //new MixXmlSchemaChecker(resultCollector)
                         );

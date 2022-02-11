@@ -6,15 +6,15 @@ package dk.kb.kula190.iterators.common;
  * and subtrees from the current node, just before leaving it.
  */
 public class NodeEndParsingEvent extends NodeParsingEvent {
-
-
+    
+    
     public NodeEndParsingEvent(String name) {
         super(name, ParsingEventType.NodeEnd, null);
     }
-
+    
     public NodeEndParsingEvent(String name, String location) {
         super(name, ParsingEventType.NodeEnd, location);
     }
-
-
+    
+    
 }

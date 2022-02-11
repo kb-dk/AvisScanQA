@@ -12,10 +12,10 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class TransparintingFileIterator extends TransparintingFileSystemIterator {
-    protected String prefix;
     private final List<File> group;
     private final File batchFolder;
     private final List<String> transparentDirNames;
+    protected String prefix;
     
     
     public TransparintingFileIterator(File id,

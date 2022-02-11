@@ -4,9 +4,9 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.MixXmlSchemaChecker;
-import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.PageStructureChecker;
+import dk.kb.kula190.checkers.nosections.MixXmlSchemaChecker;
+import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.nosections.PageStructureChecker;
 import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 
 import java.nio.file.Path;
@@ -28,7 +28,7 @@ public class Main {
         };
     
         Path batchPath = Path.of(args[0]).toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
+        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, Boolean.parseBoolean(args[1]));
         ResultCollector resultCollector = component.doWorkOnItem(batch);
     
         System.out.println(resultCollector.toReport());

@@ -1,7 +1,6 @@
 package dk.kb.kula190.iterators.filesystem;
 
 
-
 import dk.kb.kula190.iterators.common.AbstractIterator;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.DelegatingTreeIterator;
@@ -22,8 +21,8 @@ import java.util.List;
  * to a directory.
  */
 public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
-
-
+    
+    
     /**
      * Construct an iterator rooted at a given directory
      *
@@ -32,7 +31,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     public SimpleIteratorForFilesystems(File dir) {
         super(dir);
     }
-
+    
     @Override
     protected Iterator<? extends DelegatingTreeIterator> initializeChildrenIterator() {
         //The id attribute is the id of this node, ie. the File corresponding to the directory
@@ -44,19 +43,19 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         }
         return result.iterator();
     }
-
+    
     @Override
     protected Iterator<File> initilizeAttributeIterator() {
         List<File> attributes = new ArrayList<>(FileUtils.listFiles(id, FileFileFilter.FILE, null));
         Collections.sort(attributes);
         return attributes.iterator();
     }
-
+    
     @Override
     protected AttributeParsingEvent makeAttributeEvent(File nodeID, File attributeID) {
         return new FileAttributeParsingEvent(attributeID.getPath(), attributeID);
     }
-
+    
     /**
      * The name of the directory is used as the Id of the node.
      *
@@ -66,6 +65,6 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     protected String getIdOfNode() {
         return id.getPath();
     }
-
-
+    
+    
 }

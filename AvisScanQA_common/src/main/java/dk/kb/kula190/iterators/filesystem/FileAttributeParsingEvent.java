@@ -11,35 +11,36 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 
-/** This class represents a the Parsing Event of encountering a File
- *  In this implementation of ParsingEvent, the location field is associated with the
- *  absolute filepath to the file being represented.
- * */
+/**
+ * This class represents a the Parsing Event of encountering a File
+ * In this implementation of ParsingEvent, the location field is associated with the
+ * absolute filepath to the file being represented.
+ */
 
 public class FileAttributeParsingEvent extends AttributeParsingEvent {
-
-
+    
+    
     private File file;
     private File checksumFile;
-
+    
     public FileAttributeParsingEvent(String name, File file) {
         super(name, file.getAbsolutePath());
-        this.file = file;
+        this.file         = file;
         this.checksumFile = null;
     }
-
+    
     public FileAttributeParsingEvent(String name, File file, String checksumRegexp, String checksumPostfix) {
         super(name, file.getAbsolutePath());
-        this.file = file;
-        this.checksumFile = new File(file.getAbsolutePath().replaceFirst(checksumRegexp,checksumPostfix));
+        this.file         = file;
+        this.checksumFile = new File(file.getAbsolutePath().replaceFirst(checksumRegexp, checksumPostfix));
     }
-
-
+    
+    
     @Override
     public InputStream getData() throws IOException {
         return new FileInputStream(file);
     }
-
+    
     @Override
     public String getChecksum() throws IOException {
         if (checksumFile != null) {
@@ -55,7 +56,7 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
         }
         return null;
     }
-
+    
     private String firstWord(String firstLine) {
         firstLine = firstLine.trim();
         String[] splits = firstLine.split("\\s", 2);
@@ -64,6 +65,6 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
         }
         return splits[0];
     }
-
-
+    
+    
 }

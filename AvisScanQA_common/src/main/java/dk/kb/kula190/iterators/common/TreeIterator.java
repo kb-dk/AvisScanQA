@@ -13,7 +13,7 @@ import java.util.Iterator;
  * @see NodeBeginsParsingEvent
  */
 public interface TreeIterator extends Iterator<ParsingEvent> {
-
+    
     /**
      * Do:
      * Extract the subtree originating from the current node as a separate TreeIterator.
@@ -22,6 +22,6 @@ public interface TreeIterator extends Iterator<ParsingEvent> {
      * @return the subtree originating from the current node
      */
     public TreeIterator skipToNextSibling();
-
-
+    
+    
 }

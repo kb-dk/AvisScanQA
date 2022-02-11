@@ -1,6 +1,6 @@
 package dk.kb.kula190.iterators.common;
 
-public class NodeParsingEvent extends ParsingEvent{
+public class NodeParsingEvent extends ParsingEvent {
     /**
      * Constructor for this class.
      *

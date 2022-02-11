@@ -1,9 +1,11 @@
-package dk.kb.kula190.iterators.eventhandlers.decorating;
+package dk.kb.kula190.checkers.sections;
 
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,15 +17,14 @@ import java.time.temporal.ChronoField;
 /**
  * Prints the tree to the console. Used for testing purposes.
  */
-public class DecoratedConsoleLogger extends DecoratedEventHandler {
-    
-    private PrintStream out;
+public class DecoratedConsoleLogger extends DecoratedEventHandlerWithSections {
     
     private static final DateTimeFormatter dateFormatter =
             new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
                                           .appendValue(ChronoField.MONTH_OF_YEAR, 2)
                                           .appendValue(ChronoField.DAY_OF_MONTH, 2)
                                           .toFormatter();
+    private PrintStream out;
     
     public DecoratedConsoleLogger(PrintStream out, ResultCollector resultCollector) {
         super(resultCollector);
@@ -49,7 +50,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     
     @Override
-    public void batchBegins(ParsingEvent event,
+    public void batchBegins(NodeParsingEvent event,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
@@ -64,37 +65,57 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void batchEnds(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void batchEnds(NodeParsingEvent event,
+                          String avis,
+                          String roundTrip,
+                          LocalDate startDate,
+                          LocalDate endDate) {
         indent(event);
         out.println("</batch>");
     }
     
     @Override
-    public void modsBegins(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void modsBegins(NodeParsingEvent event,
+                           String avis,
+                           String roundTrip,
+                           LocalDate startDate,
+                           LocalDate endDate) {
         indent(event);
         out.println("<mods>");
     }
     
     @Override
-    public void modsEnds(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void modsEnds(NodeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) {
         indent(event);
         out.println("</mods>");
     }
     
     @Override
-    public void metsBegins(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void metsBegins(NodeParsingEvent event,
+                           String avis,
+                           String roundTrip,
+                           LocalDate startDate,
+                           LocalDate endDate) {
         indent(event);
         out.println("<mets>");
     }
     
     @Override
-    public void metsEnds(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void metsEnds(NodeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) {
         indent(event);
         out.println("</mets>");
     }
     
     @Override
-    public void editionBegins(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         indent(event);
         out.println("<edition "
                     + "date=\"" + editionDate + "\" "
@@ -103,13 +124,13 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void editionEnds(ParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionEnds(NodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         indent(event);
         out.println("</edition>");
     }
     
     @Override
-    public void sectionBegins(ParsingEvent event,
+    public void sectionBegins(NodeParsingEvent event,
                               String avis,
                               LocalDate editionDate,
                               String udgave,
@@ -121,7 +142,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void sectionEnds(ParsingEvent event,
+    public void sectionEnds(NodeParsingEvent event,
                             String avis,
                             LocalDate editionDate,
                             String udgave,
@@ -131,7 +152,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void pageBegins(ParsingEvent event,
+    public void pageBegins(NodeParsingEvent event,
                            String editionName,
                            LocalDate editionDate,
                            String udgave,
@@ -142,7 +163,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void pageEnds(ParsingEvent event,
+    public void pageEnds(NodeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,

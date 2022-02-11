@@ -23,8 +23,14 @@ public class ChecksumChecker extends DefaultTreeEventHandler {
             try (InputStream data = event.getData()) {
                 computedMD5 = DigestUtils.md5Hex(data);
                 String givenMD5 = event.getChecksum();
-                if (! computedMD5.equalsIgnoreCase(givenMD5)){
-                    resultCollector.addFailure(event.getName(), "ChecksumMismatch", this.getClass().getSimpleName(), "File have checksum "+computedMD5+" but should have checksum "+givenMD5 );
+                if (!computedMD5.equalsIgnoreCase(givenMD5)) {
+                    resultCollector.addFailure(event.getName(),
+                                               "ChecksumMismatch",
+                                               this.getClass().getSimpleName(),
+                                               "File have checksum "
+                                               + computedMD5
+                                               + " but should have checksum "
+                                               + givenMD5);
                 }
             } catch (IOException e) {
                 resultCollector.addFailure(event.getName(),

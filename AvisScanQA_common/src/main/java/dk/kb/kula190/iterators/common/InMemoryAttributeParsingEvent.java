@@ -9,11 +9,11 @@ import java.io.InputStream;
  * InjectingTreeEventHandler
  */
 public class InMemoryAttributeParsingEvent extends AttributeParsingEvent {
-
-
+    
+    
     private final byte[] data;
     private final String checksum;
-
+    
     /**
      * Constructur
      *
@@ -23,15 +23,15 @@ public class InMemoryAttributeParsingEvent extends AttributeParsingEvent {
      */
     public InMemoryAttributeParsingEvent(String name, byte[] data, String checksum) {
         super(name, null);
-        this.data = data;
+        this.data     = data;
         this.checksum = checksum;
     }
-
+    
     @Override
     public InputStream getData() throws IOException {
         return new ByteArrayInputStream(data);
     }
-
+    
     @Override
     public String getChecksum() throws IOException {
         return checksum;

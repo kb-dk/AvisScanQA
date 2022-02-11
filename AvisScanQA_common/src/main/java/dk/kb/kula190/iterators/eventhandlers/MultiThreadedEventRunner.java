@@ -16,25 +16,35 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class MultiThreadedEventRunner extends EventRunner {
-
-
+    
+    
+    public static EventCondition singleThreaded = new EventCondition() {
+        @Override
+        public boolean shouldFork(ParsingEvent nodeBeginsParsingEvent) {
+            return false;
+        }
+        
+        @Override
+        public boolean shouldJoin(ParsingEvent nodeEndParsingEvent) {
+            return false;
+        }
+    };
     private final EventCondition forker;
     private final ExecutorService executor;
     private List<Future<?>> childTasks = new ArrayList<>();
-
-
+    
     public MultiThreadedEventRunner(TreeIterator iterator, List<TreeEventHandler> eventHandlers,
                                     ResultCollector resultCollector, EventCondition forker, ExecutorService executor) {
         super(iterator, eventHandlers, resultCollector);
-        this.forker = forker;
+        this.forker   = forker;
         this.executor = executor;
     }
-
+    
     @Override
     public void handleFinish() {
         super.handleFinish();
     }
-
+    
     @Override
     public void handleNodeBegins(NodeBeginsParsingEvent current) {
         if (forker.shouldFork(current)) {
@@ -43,48 +53,40 @@ public class MultiThreadedEventRunner extends EventRunner {
             //It will then return than iterator.
             //And the iterator where this was called will skip to the next node begins that was not this tree
             TreeIterator childIterator = iterator.skipToNextSibling();
-            EventRunner childRunner = new EventRunner(childIterator,eventHandlers,resultCollector,true);
+            EventRunner childRunner = new EventRunner(childIterator, eventHandlers, resultCollector, true);
             Future<?> future = executor.submit(childRunner);
             childTasks.add(future);
         } else {
             super.handleNodeBegins(current);
         }
-
+        
     }
-
+    
     @Override
     public void handleNodeEnd(NodeEndParsingEvent current) {
-
+        
         if (forker.shouldJoin(current)) {
             for (Future<?> childTask : childTasks) {
                 try {
                     childTask.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    resultCollector.addFailure(current.getName(), EventRunner.EXCEPTION,
-                            this.getClass().getSimpleName(), EventRunner.UNEXPECTED_ERROR + e.toString(),
-                                               Arrays.stream(e.getStackTrace()).map(st -> st.toString()).collect(Collectors.joining("\n")));
+                    resultCollector.addFailure(current.getName(),
+                                               EventRunner.EXCEPTION,
+                                               this.getClass().getSimpleName(),
+                                               EventRunner.UNEXPECTED_ERROR + e.toString(),
+                                               Arrays.stream(e.getStackTrace())
+                                                     .map(st -> st.toString())
+                                                     .collect(Collectors.joining("\n")));
                 }
             }
         }
         super.handleNodeEnd(current);
     }
-
-    public interface EventCondition{
+    
+    public interface EventCondition {
         public boolean shouldFork(ParsingEvent nodeBeginsParsingEvent);
-
+        
         public boolean shouldJoin(ParsingEvent nodeEndParsingEvent);
     }
-
-    public static EventCondition singleThreaded = new EventCondition() {
-        @Override
-        public boolean shouldFork(ParsingEvent nodeBeginsParsingEvent) {
-            return false;
-        }
-
-        @Override
-        public boolean shouldJoin(ParsingEvent nodeEndParsingEvent) {
-            return false;
-        }
-    };
-
+    
 }
