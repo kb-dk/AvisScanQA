@@ -2,7 +2,9 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.ChecksumChecker;
+import dk.kb.kula190.checkers.MixXmlSchemaChecker;
 import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.PageStructureChecker;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedConsoleLogger;
@@ -23,7 +25,7 @@ class MultiThreadedEventRunnerTest {
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
-            File file = new File("/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
+            File file = new File("/home/pabr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
             
             System.out.println(file);
             iterator = new TransparintingFileSystemIterator(file,
@@ -45,7 +47,11 @@ class MultiThreadedEventRunnerTest {
         
         List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector),
                                                        new NoMissingMiddlePagesChecker(resultCollector),
-                                                       new DecoratedConsoleLogger(System.out, resultCollector));
+                                                       new MixXmlSchemaChecker(resultCollector),
+                                                       new PageStructureChecker(resultCollector)
+                                                       //new DecoratedConsoleLogger(System.out, resultCollector)
+                                                       );
+
         
         MultiThreadedEventRunner.EventCondition forkOnEdition = new MultiThreadedEventRunner.EventCondition() {
             private int level = 0;
