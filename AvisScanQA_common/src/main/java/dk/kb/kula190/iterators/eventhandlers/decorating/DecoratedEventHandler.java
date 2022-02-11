@@ -21,8 +21,9 @@ import java.util.stream.Collectors;
 
 public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     
-    private InheritableThreadLocal<String> batch = new InheritableThreadLocal<>();
+    private InheritableThreadLocal<String> batchName = new InheritableThreadLocal<>();
     
+    private InheritableThreadLocal<String> batchLocation = new InheritableThreadLocal<>();
     
     private final ResultCollector resultCollector;
     
@@ -33,18 +34,19 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
                                           .appendValue(ChronoField.DAY_OF_MONTH, 2)
                                           .toFormatter();
     
-    protected DecoratedEventHandler(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
+    public DecoratedEventHandler(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
     
-    public final void handleNode(NodeParsingEvent event) {
+    public final void handleNode(NodeParsingEvent event) throws IOException {
         String lastName = lastName(event.getName());
-        if (batch.get() == null) {
+        if (batchName.get() == null) {
             //modersmaalet_19060701_19061231_RT1
-            batch.set(lastName);
+            batchName.set(lastName);
+            batchLocation.set(event.getLocation());
             handleBatch(event, lastName);
         } else if (isMETS(event)) {
-            this.handleMets(event, batch.get());
+            this.handleMets(event, batchName.get());
         } else if (isMODS(event)) {
-            handleMods(event, batch.get());
+            handleMods(event, batchName.get());
         } else if (isEdition(event)) {
             handleEdition(event, lastName);
         } else if (isSection(event)) {
@@ -55,16 +57,21 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     }
     
     @Override
-    public final void handleNodeBegin(NodeBeginsParsingEvent event) {
+    public void handleFinish() throws IOException {
+        handleBatch(new NodeEndParsingEvent(batchName.get(), batchLocation.get()), batchName.get());
+    }
+    
+    @Override
+    public final void handleNodeBegin(NodeBeginsParsingEvent event) throws IOException {
         handleNode(event);
     }
     
     @Override
-    public final void handleNodeEnd(NodeEndParsingEvent event) {
+    public final void handleNodeEnd(NodeEndParsingEvent event) throws IOException {
         handleNode(event);
     }
     
-    private void handleBatch(NodeParsingEvent event, String lastName) {
+    private void handleBatch(NodeParsingEvent event, String lastName) throws IOException {
         String[] splits = lastName.split("_", 4);
         LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
         LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
@@ -76,7 +83,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
         }
     }
     
-    private void handleMets(NodeParsingEvent event, String batchID) {
+    private void handleMets(NodeParsingEvent event, String batchID) throws IOException {
         String[] splits = batchID.split("_", 4);
         LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
         LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
@@ -88,7 +95,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
         }
     }
     
-    private void handleMods(NodeParsingEvent event, String batchID) {
+    private void handleMods(NodeParsingEvent event, String batchID) throws IOException {
         String[] splits = batchID.split("_", 4);
         LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
         LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
@@ -100,7 +107,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
         }
     }
     
-    private void handleEdition(NodeParsingEvent event, String edition) {
+    private void handleEdition(NodeParsingEvent event, String edition) throws IOException {
         //modersmaalet_19060706_udg01
         String[] splits = edition.split("_", 3);
         String avis = splits[0];
@@ -112,7 +119,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
         }
     }
     
-    private void handleSection(NodeParsingEvent event, String section) {
+    private void handleSection(NodeParsingEvent event, String section) throws IOException {
         //modersmaalet_19060706_udg01_1.sektion
         String[] splits = section.split("_", 4);
         String avis = splits[0];
@@ -125,7 +132,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
         }
     }
     
-    private void handlePage(NodeParsingEvent event, String lastName) {
+    private void handlePage(NodeParsingEvent event, String lastName) throws IOException {
         //modersmaalet_19060706_udg01_1.sektion_0001
         String[] splits = lastName.split("_", 5);
         String avis = splits[0];
@@ -150,7 +157,7 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
             //modersmaalet_19060701_19061231_RT1.mets.xml
             if (event.getName().matches(".*\\.((mets)|(mods))(\\.xml)?$")) {
                 String name = lastName(event.getName());
-                String[] splits = batch.get().split("_", 4);
+                String[] splits = batchName.get().split("_", 4);
                 LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
                 LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
                 String avis = splits[0];
@@ -232,24 +239,24 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
     
     
     public void batchBegins(ParsingEvent event,
-                            String batch,
+                            String avis,
                             String roundTrip,
                             LocalDate startDate,
-                            LocalDate endDate) {}
+                            LocalDate endDate) throws IOException {}
     
     
     public void batchEnds(ParsingEvent event,
-                          String batch,
+                          String avis,
                           String roundTrip,
                           LocalDate startDate,
-                          LocalDate endDate) {}
+                          LocalDate endDate) throws IOException {}
     
     
     public void modsBegins(ParsingEvent event,
                            String avis,
                            String roundTrip,
                            LocalDate startDate,
-                           LocalDate endDate) {}
+                           LocalDate endDate) throws IOException {}
     
     public void modsFile(AttributeParsingEvent event,
                          String avis,
@@ -261,14 +268,14 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
-                         LocalDate endDate) {}
+                         LocalDate endDate) throws IOException {}
     
     
     public void metsBegins(ParsingEvent event,
                            String avis,
                            String roundTrip,
                            LocalDate startDate,
-                           LocalDate endDate) {}
+                           LocalDate endDate) throws IOException {}
     
     
     public void metsFile(AttributeParsingEvent event,
@@ -281,59 +288,59 @@ public abstract class DecoratedEventHandler extends DefaultTreeEventHandler {
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
-                         LocalDate endDate) {}
+                         LocalDate endDate) throws IOException {}
     
     
     public void editionBegins(ParsingEvent event,
                               String avis,
                               LocalDate editionDate,
-                              String editionName) {}
+                              String editionName) throws IOException {}
     
     public void editionEnds(ParsingEvent event,
                             String avis,
                             LocalDate editionDate,
-                            String editionName) {}
+                            String editionName) throws IOException {}
     
     
     public void sectionBegins(ParsingEvent event,
-                              String editionName,
+                              String avis,
                               LocalDate editionDate,
-                              String udgave, String section) {}
+                              String udgave, String section) throws IOException {}
     
     public void sectionEnds(ParsingEvent event,
-                            String editionName,
+                            String avis,
                             LocalDate editionDate,
-                            String udgave, String section) {}
+                            String udgave, String section) throws IOException {}
     
     
     public void pageBegins(ParsingEvent event,
-                           String editionName,
+                           String avis,
                            LocalDate editionDate,
-                           String udgave, String sectionName, Integer pageNumber) {}
+                           String udgave, String sectionName, Integer pageNumber) throws IOException {}
     
     public void pageEnds(ParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
-                         String udgave, String sectionName, Integer pageNumber) {}
+                         String udgave, String sectionName, Integer pageNumber) throws IOException {}
     
     
     public void mixFile(AttributeParsingEvent event,
-                        String editionName,
+                        String avis,
                         LocalDate editionDate,
                         String udgave, String sectionName, Integer pageNumber) throws IOException {}
     
     public void tiffFile(AttributeParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
                          String udgave, String sectionName, Integer pageNumber) throws IOException {}
     
     public void altoFile(AttributeParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
                          String udgave, String sectionName, Integer pageNumber) throws IOException {}
     
     public void pdfFile(AttributeParsingEvent event,
-                        String editionName,
+                        String avis,
                         LocalDate editionDate,
                         String udgave, String sectionName, Integer pageNumber) throws IOException {}
     

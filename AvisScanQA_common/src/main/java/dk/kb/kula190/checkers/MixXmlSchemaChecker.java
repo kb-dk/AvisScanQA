@@ -29,7 +29,7 @@ public class MixXmlSchemaChecker extends DecoratedEventHandler {
     }
 
     @Override
-    public void batchBegins(ParsingEvent event, String batch, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void batchBegins(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
         try (InputStream schemaStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("MixSchema.xsd")) {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(new StreamSource(schemaStream));
@@ -74,13 +74,7 @@ public class MixXmlSchemaChecker extends DecoratedEventHandler {
     }
 
     @Override
-    public void batchEnds(ParsingEvent event, String batch, String roundTrip, LocalDate startDate, LocalDate
-            endDate) {
-        super.batchEnds(event, batch, roundTrip, startDate, endDate);
-    }
-
-    @Override
-    public synchronized void mixFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String
+    public synchronized void mixFile(AttributeParsingEvent event, String avis, LocalDate editionDate, String
             udgave, String sectionName, Integer pageNumber) throws IOException {
         parsingEvent = event;
         try (InputStream stream = event.getData()) {

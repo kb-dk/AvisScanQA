@@ -64,7 +64,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void batchEnds(ParsingEvent event, String batch, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void batchEnds(ParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate) {
         indent(event);
         out.println("</batch>");
     }
@@ -110,7 +110,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void sectionBegins(ParsingEvent event,
-                              String editionName,
+                              String avis,
                               LocalDate editionDate,
                               String udgave,
                               String section) {
@@ -122,7 +122,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void sectionEnds(ParsingEvent event,
-                            String editionName,
+                            String avis,
                             LocalDate editionDate,
                             String udgave,
                             String section) {
@@ -143,7 +143,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void pageEnds(ParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
                          String udgave,
                          String sectionName,
@@ -166,7 +166,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void mixFile(AttributeParsingEvent event,
-                        String editionName,
+                        String avis,
                         LocalDate editionDate,
                         String udgave,
                         String sectionName,
@@ -177,7 +177,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void tiffFile(AttributeParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
                          String udgave,
                          String sectionName,
@@ -188,7 +188,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void altoFile(AttributeParsingEvent event,
-                         String editionName,
+                         String avis,
                          LocalDate editionDate,
                          String udgave,
                          String sectionName,
@@ -199,7 +199,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void pdfFile(AttributeParsingEvent event,
-                        String editionName,
+                        String avis,
                         LocalDate editionDate,
                         String udgave,
                         String sectionName,

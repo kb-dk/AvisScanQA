@@ -20,13 +20,13 @@ public class PageStructureChecker extends DecoratedEventHandler {
     }
 
     @Override
-    public void pageBegins(ParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) {
+    public void pageBegins(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) {
         //Checkes that each page consists of MIX ALTO TIFF
         types.get().clear();
     }
 
     @Override
-    public void pageEnds(ParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) {
+    public void pageEnds(ParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) {
 
         if(!types.get().containsAll(Set.of("MIX","ALTO","TIFF"))){
             getResultCollector().addFailure(event.getName(),
@@ -38,17 +38,17 @@ public class PageStructureChecker extends DecoratedEventHandler {
     }
 
     @Override
-    public void mixFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public void mixFile(AttributeParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
         types.get().add("MIX");
     }
 
     @Override
-    public void altoFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public void altoFile(AttributeParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
         types.get().add("ALTO");
     }
 
     @Override
-    public void tiffFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public void tiffFile(AttributeParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
         types.get().add("TIFF");
     }
 }
