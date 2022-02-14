@@ -1,6 +1,7 @@
-package dk.kb.avischk.qa.web;
+package dk.kb.kula190.webservice;
 
 import dk.kb.avischk.dao.NewspaperQADaoFactory;
+import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.util.yaml.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import java.io.IOException;
  * Listener to handle the various setups and configuration sanity checks that can be carried out at when the
  * context is deployed/initalized.
  */
-public class WebQAContextListener implements ServletContextListener {
+public class ContextListener implements ServletContextListener {
     private final Logger log = LoggerFactory.getLogger(getClass());
 
 
