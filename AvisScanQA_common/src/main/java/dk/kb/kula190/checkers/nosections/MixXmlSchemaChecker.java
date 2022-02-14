@@ -39,7 +39,7 @@ public class MixXmlSchemaChecker extends DecoratedEventHandler {
                             LocalDate endDate) {
         try (InputStream schemaStream = Thread.currentThread()
                                               .getContextClassLoader()
-                                              .getResourceAsStream("MixSchema.xsd")) {
+                                              .getResourceAsStream("MetadataSchema/MixSchema.xsd")) {
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
             Schema schema = factory.newSchema(new StreamSource(schemaStream));
             validator = schema.newValidator();

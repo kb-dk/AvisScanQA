@@ -2,9 +2,9 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.nosections.MixXmlSchemaChecker;
-import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.nosections.PageStructureChecker;
+import dk.kb.kula190.checkers.XmlSchemaChecker;
+import dk.kb.kula190.checkers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.PageStructureChecker;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
@@ -46,7 +46,7 @@ class MultiThreadedEventRunnerTest {
         
         List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector),
                                                        new NoMissingMiddlePagesChecker(resultCollector),
-                                                       new MixXmlSchemaChecker(resultCollector),
+                                                       new XmlSchemaChecker(resultCollector),
                                                        new PageStructureChecker(resultCollector)
                                                        //new DecoratedConsoleLogger(System.out, resultCollector)
                                                        );
