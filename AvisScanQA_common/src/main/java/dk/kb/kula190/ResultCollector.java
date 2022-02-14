@@ -5,11 +5,12 @@ import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.generated.Failures;
 import dk.kb.kula190.generated.ObjectFactory;
 import dk.kb.kula190.generated.Result;
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Marshaller;
+
 import org.slf4j.Logger;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;

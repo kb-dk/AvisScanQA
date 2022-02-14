@@ -29,6 +29,9 @@
 
         <license.name>Apache License, Version 2.0</license.name>
         <license.url>https://www.apache.org/licenses/LICENSE-2.0.txt</license.url>
+
+        <jackson.version>2.13.0</jackson.version>
+        <cxf.version>3.5.0</cxf.version>
     </properties>
 
     <modules>
@@ -37,4 +40,34 @@
         <module>AvisScanQA_web</module>
     </modules>
 
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.apache.cxf/cxf-bom -->
+            <dependency>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-bom</artifactId>
+                <version>${cxf.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>com.fasterxml.jackson</groupId>
+                <artifactId>jackson-bom</artifactId>
+                <version>${jackson.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
+
+
+            <dependency>
+                <groupId>dk.kb.util</groupId>
+                <artifactId>kb-util</artifactId>
+                <version>1.4.7-SNAPSHOT</version>
+            </dependency>
+
+        </dependencies>
+
+    </dependencyManagement>
 </project>

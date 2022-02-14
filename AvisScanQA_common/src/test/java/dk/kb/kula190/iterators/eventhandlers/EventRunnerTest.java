@@ -4,6 +4,7 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.XmlSchemaChecker;
+import dk.kb.kula190.checkers.sections.XpathChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ import java.util.List;
 class EventRunnerTest {
 
     private final File specificBatch
-            = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/noSection/modersmaalet_19060701_19061231_RT1"); //orig
+            = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1"); //orig
     private final File noSectionFolder
             = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/noSection/");
     private TreeIterator iterator;
@@ -77,6 +78,7 @@ class EventRunnerTest {
                         //new NoMissingMiddlePagesChecker(resultCollector)
                         //new PageStructureChecker(resultCollector),
                         //new MixXmlSchemaChecker(resultCollector)
+                        new XpathChecker(resultCollector),
                         new XmlSchemaChecker(resultCollector));
             }
 
@@ -84,7 +86,7 @@ class EventRunnerTest {
         };
 
         Path batchPath = specificBatch.toPath().toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, false);
+        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, true);
         ResultCollector resultCollector = component.doWorkOnItem(batch);
 
         System.out.println(resultCollector.toReport());

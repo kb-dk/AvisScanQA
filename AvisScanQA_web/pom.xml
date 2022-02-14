@@ -14,34 +14,15 @@
     <packaging>war</packaging>
 
     <properties>
-        <jackson.version>2.12.6</jackson.version>
-        <cxf.version>3.4.5</cxf.version>
+
         <project.package>dk.kb.kula190</project.package>
     </properties>
 
-    <dependencyManagement>
-        <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.apache.cxf/cxf-bom -->
-            <dependency>
-                <groupId>org.apache.cxf</groupId>
-                <artifactId>cxf-bom</artifactId>
-                <version>${cxf.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
-                <version>${jackson.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-
-        </dependencies>
-
-    </dependencyManagement>
     <dependencies>
+        <dependency>
+            <groupId>dk.kb.util</groupId>
+            <artifactId>kb-util</artifactId>
+        </dependency>
 
         <!-- Apache CXF and servlet stuff -->
         <dependency>
@@ -139,12 +120,6 @@
         </dependency>
 
 
-
-        <dependency>
-            <groupId>dk.kb.util</groupId>
-            <artifactId>kb-util</artifactId>
-            <version>1.4.6</version>
-        </dependency>
 
         <!-- Logging dependencies -->
         <dependency>
