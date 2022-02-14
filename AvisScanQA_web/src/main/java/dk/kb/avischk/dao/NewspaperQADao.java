@@ -1,18 +1,17 @@
 package dk.kb.avischk.dao;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import dk.kb.avischk.dto.CharacterizationInfo;
-import dk.kb.avischk.dto.NewspaperEntity;
+import dk.kb.kula190.model.CharacterizationInfo;
+import dk.kb.kula190.model.NewspaperEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigInteger;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -90,7 +89,7 @@ public class NewspaperQADao {
            }
     }
     
-    public List<Date> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
+    public List<LocalDate> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}', in year", id, year);
         
         String SQL = "select distinct(edition_date) from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ?";
@@ -102,14 +101,12 @@ public class NewspaperQADao {
                ps.setString(2, year);
                //ps.setString(3, year);
                try (ResultSet res = ps.executeQuery()) {
-                   List<Date> list = new ArrayList<>();
+                   List<LocalDate> list = new ArrayList<>();
                    
                    while(res.next()) {
-                       // Workaround to ensure that summer/winter time is not causing issues
-                       Calendar cal = Calendar.getInstance();
-                       cal.setTime(res.getDate(1));
-                       cal.set(Calendar.HOUR_OF_DAY, 12);
-                       list.add(cal.getTime());
+    
+                       java.sql.Date date = res.getDate(1);
+                       list.add(date.toLocalDate());
                    }
                    return list;
                }
@@ -136,16 +133,16 @@ public class NewspaperQADao {
                        NewspaperEntity entity = new NewspaperEntity();
                        entity.setOrigRelpath(res.getString("orig_relpath"));
                        entity.setFormatType(res.getString("format_type"));
-                       entity.setEditionDate(res.getDate("edition_date"));
+                       entity.setEditionDate(res.getDate("edition_date").toLocalDate());
                        entity.setSinglePage(res.getBoolean("single_page"));
                        entity.setPageNumber(res.getInt("page_number"));
                        entity.setAvisid(res.getString("avisid"));
-                       entity.setAvisTitle(res.getString("avistitle"));
+                       entity.setAvistitle(res.getString("avistitle"));
                        entity.setShadowPath(res.getString("shadow_path"));
                        entity.setSectionTitle(res.getString("section_title"));
                        entity.setEditionTitle(res.getString("edition_title"));
-                       entity.setDeliveryDate(res.getDate("delivery_date"));
-                       entity.setHandle(BigInteger.valueOf(res.getLong("handle")));
+                       entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
+                       entity.setHandle(res.getLong("handle"));
                        entity.setFraktur(res.getBoolean("fraktur"));
                        list.add(entity);
                    }
@@ -211,7 +208,7 @@ public class NewspaperQADao {
                        CharacterizationInfo info = new CharacterizationInfo();
                        info.setOrigRelpath(res.getString("orig_relpath"));
                        info.setTool(res.getString("tool"));
-                       info.setCharacterisationDate(res.getDate("characterisation_date"));
+                       info.setCharacterisationDate(res.getDate("characterisation_date").toLocalDate());
                        info.setToolOutput(res.getString("tool_output"));
                        info.setStatus(res.getString("status"));
                        list.add(info);

@@ -9,7 +9,7 @@
 #
 #
 avischk-web-qa:
-  jdbc-connection-string: "jdbc:h2:~/Projects/AvisScanQA/AvisScanQA_web/target/test-classes/h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
+  jdbc-connection-string: "jdbc:h2:~/Projects/AvisScanQA/h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
   jdbc-user: ""
   jdbc-password: ""
 

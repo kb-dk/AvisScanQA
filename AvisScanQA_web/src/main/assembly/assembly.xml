@@ -29,14 +29,11 @@
 
     </fileSets>
     <files>
-        <file>
-            <outputDirectory>services/conf/resources/</outputDirectory>
-            <source>conf/devel12/fop.xconf</source>
-        </file>
-        <file>
-            <outputDirectory>tomcat/conf/Catalina/localhost/</outputDirectory>
-            <source>conf/devel12/${project.artifactId}.xml</source>
-        </file>
+
+<!--        <file>-->
+<!--            <outputDirectory>tomcat/conf/Catalina/localhost/</outputDirectory>-->
+<!--            <source>conf/devel12/${project.artifactId}.xml</source>-->
+<!--        </file>-->
 
 
         <file>
@@ -50,7 +47,7 @@
         </file>
         <file>
             <outputDirectory>.</outputDirectory>
-            <source>CHANGELOG.md</source>
+            <source>../CHANGELOG.md</source>
         </file>
 
     </files>

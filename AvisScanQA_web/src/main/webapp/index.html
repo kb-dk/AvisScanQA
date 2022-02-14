@@ -5,7 +5,7 @@
 	    <link href="bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet">
 	    <link href="dashboard.css" rel="stylesheet">
 	</head>
-		
+
 	<body>
         <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
             <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#/dashboard/">Avis web-qa</a>
@@ -23,7 +23,7 @@
 	                </a>
 	              </li>
 	            </ul>
-	
+
 	            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
 	              <span>Kendte aviser</span>
 	              <a class="d-flex align-items-center text-muted" href="#">
@@ -34,7 +34,7 @@
 	            </ul>
 	          </div>
 	        </nav>
-	
+
 	        <main role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
 	        <div id="headline-div"></div>
 <!-- 	          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
@@ -56,9 +56,9 @@
 	        </main>
 	      </div>
 	    </div>
-	
-	
-	
+
+
+
 	    <script src="jquery-3.3.1.min.js"></script>
 	    <script src="bootstrap-4.1.3/js/bootstrap.min.js"></script>
 	    <script src="jquery.routes.js"></script>
@@ -68,17 +68,17 @@
 	    <script src="displayEntities.js"></script>
 	    <script src="displayNewspapers.js"></script>
 	    <script>
-	
+
 	    var currentEntities;
 	    var currentEntityIndex;
 	    var currentPageIndex;
-	    
+
 	    var newspaperYears;
 	    var currentNewspaperYear;
 	    var currentNewspaper;
-	    
+
 	    function loadDatesForNewspaper(id, year) {
-	        var url = 'web-qa/dates/' + id;
+	        var url = 'api/dates/' + id;
 	        $.getJSON(url, {}, function(dates) {
 	            var html = "<h1>Dates for " + id + "</h1>";
 	            for(var i = 0; i < dates.length; i++) {
@@ -88,11 +88,11 @@
 	            $("#primary-show").html(html);
             });
         }
-	    
+
        function loadYearsForNewspaper(id, year) {
     	   currentNewspaperYear = year;
     	   currentNewspaper = id;
-    	   var url = 'web-qa/years/' + id;
+    	   var url = 'api/years/' + id;
     	   $.getJSON(url, {}, function(years) {
     		   newspaperYears = years;
            }).done(function() {
@@ -107,17 +107,17 @@
         	    }
            });
         }
-       
-	    
+
+
 	    function loadEntitiesForNewspaperOnDate(id, date, entityIndex, pageIndex) {
             var day = moment(date).format('YYYY-MM-DD');
-	        var url = 'web-qa/dates/' + id + "/" + day + '/mappedEntities';
+	        var url = 'api/dates/' + id + "/" + day + '/mappedEntities';
 	        currentEntityIndex = entityIndex;
 	        currentPageIndex = pageIndex;
             $.getJSON(url, {}, function(entities) {
                 currentEntities = entities;
                 $("#headline-div").html("<h1>Entities for " + id + " on " + day + "</h1>");
-                
+
             }).done(function() {
                 console.log("Starting rendering of entites.");
                 renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex);
@@ -126,17 +126,17 @@
             	    alert("Could not load entities");
             });
         }
-	    
-    
+
+
 	    function loadNewspaperIDs() {
-	      $.getJSON('web-qa/getNewspaperIDs', {}, function(ids) {
+	      $.getJSON('api/getNewspaperIDs', {}, function(ids) {
 	        for(var i = 0; i < ids.length; i++) {
 	            $("#avisIDer").append(
 	            		"<li class=\"nav-item\"><a class=\"nav-link\" href=\"#/newspaper/" + ids[i] + "/0/\">" + ids[i] + "</a></li>");
 	        }
 	      });
 	    }
-	    
+
 	    $.routes.add('/dashboard/', function() {
             $("#primary-show").html("Vælg avis i menuen til venstre");
         }); // Dashboard
@@ -149,14 +149,14 @@
 	    	$("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
 	    	loadEntitiesForNewspaperOnDate(this.id, this.day, this.entity, this.page);
 	    }); // Display all months in a given year
-	    
+
 	    $(document).ready(function(){
 	    	moment.locale("da");
 	        // load newspaper IDs
 	        loadNewspaperIDs();
-	      }); 
+	      });
 	    </script>
-	    
+
 	</body>
 
 </html>

@@ -22,7 +22,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array of strings TODO
+                type: array
+                items:
+                  type: string
 
   /years/{ID}:
     get:
@@ -38,7 +40,9 @@ paths:
           content:
             application/json:
               schema:
-                type: array of strings TODO
+                type: array
+                items:
+                  type: string
 
   /dates/{ID}/{year}:
     get:
@@ -59,7 +63,10 @@ paths:
           content:
             application/json:
               schema:
-                type: array of Dates TODO
+                type: array
+                items:
+                  type: string
+                  format: date
 
   /dates/{ID}/{date}/mappedEntities:
     get:
@@ -80,7 +87,7 @@ paths:
           content:
             application/json:
               schema:
-                type: "Map<String, List<NewspaperEntity>>"
+                $ref: '#/components/schemas/NewspaperEntityMapping'
 
   /entity/{handle}/url/{type}:
     get:
@@ -89,7 +96,8 @@ paths:
           in: path
           required: true
           schema:
-            type: string
+            type: integer
+            format: int64
         - name: type
           in: path
           required: true
@@ -101,7 +109,9 @@ paths:
           content:
             application/json:
               schema:
-                type: URL
+                type: string
+                format: uri
+
 
   /entity/{handle}/characterization}:
     get:
@@ -110,111 +120,75 @@ paths:
           in: path
           required: true
           schema:
-            type: string
-        - name: type
-          in: path
-          required: true
-          schema:
-            type: string
+            type: integer
+            format: int64
+
       responses:
         '200':
           description: ""
           content:
             application/json:
               schema:
-                type: List<CharacterizationInfo>
-
-  /getPdfMetadata/{pdfFile}:
-    get:
-      tags:
-        - "${project.name}"
-      summary: 'Request the metadata for a given pdf file'
-      operationId: getPdfMetadata
-      x-streamingOutput: false # If enabled the method will return StreamingOutput.
-      parameters:
-        - name: pdfFile
-          in: path
-          required: true
-          schema:
-            type: string
-            example: 130018852943.pdf
-      responses:
-        '200':
-          description: A pdf with attached page
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PdfMetadata'
+                type: array
+                items:
+                  $ref: '#/components/schemas/CharacterizationInfo'
 
 
 components:
   schemas:
-    ApronType:
-      type: string
-      nullable: true
-      enum:
-        - A
-        - B
-        - C
-        - D
-        - F
-        - G
-        - H
-        - I
-        - J
-        - K
-        - L
-        - M
-        - N
-        - O
-        - P
-        - Q
-        - R
-        - S
-        - T
-        - U
-        - V
-        - W
-        - X
-        - Y
-        - Z
-        - Unknown
 
-    PdfMetadata:
+    NewspaperEntityMapping: # <---- dictionary
+      type: object
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/NewspaperEntity'
+
+    NewspaperEntity:
       type: object
       properties:
-        authors:
+        origRelpath:
           type: string
-        title:
+        formatType:
           type: string
-        alternativeTitle:
-          type: string
-          nullable: true
-        udgavebetegnelse:
-          type: string
-          default: ""
-        volume:
-          type: string
-          default: ""
-        placeAndYear:
-          type: string
-          default: ""
-        size:
-          type: string
-          default: ""
-        publicationDate:
+        editionDate:
           type: string
           format: date
-        publicationDateString:
-          type: string
-          default: ""
-        isWithinCopyright:
+        singlePage:
           type: boolean
-        apronType:
-          $ref: '#/components/schemas/ApronType'
-        keywords:
+        pageNumber:
+          type: integer
+        avisid:
           type: string
-          default: ""
-        primoLink:
+        avistitle:
           type: string
-          default: ""
+        shadowPath:
+          type: string
+        sectionTitle:
+          type: string
+        editionTitle:
+          type: string
+        deliveryDate:
+          type: string
+          format: date
+        handle:
+          type: integer
+          format: int64
+        fraktur:
+          type: boolean
+
+
+    CharacterizationInfo:
+      type: object
+      properties:
+        origRelpath:
+          type: string
+        tool:
+          type: string
+        characterisationDate:
+          type: string
+          format: date
+        toolOutput:
+          type: string
+        status:
+          type: string

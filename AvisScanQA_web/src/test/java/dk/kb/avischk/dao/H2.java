@@ -16,7 +16,7 @@ public class H2 {
     
     private static final String H2_DRIVER = "org.h2.Driver";
     private static final String test_classes_path = new File(Thread.currentThread().getContextClassLoader().getResource("logback-test.xml").getPath()).getParentFile().getAbsolutePath();
-    private static final String URL = "jdbc:h2:"+test_classes_path+"/h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE";
+    private static final String URL = "jdbc:h2:./h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE";
     private static final String USERNAME = "";
     private static final String PASSWORD = "";
     

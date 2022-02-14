@@ -19,7 +19,7 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
         }
 	}
 
-	var url = 'web-qa/dates/' + newspaper + '/' + currentyear;
+	var url = 'api/dates/' + newspaper + '/' + currentyear;
 	$.getJSON(url, {}, function(dates) {
 		datesInYear = splitDatesIntoMonths(dates);
 		$("#year-show").load("calendarDisplay.html", function() {

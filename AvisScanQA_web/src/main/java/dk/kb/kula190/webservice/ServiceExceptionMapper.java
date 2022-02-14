@@ -11,7 +11,7 @@ import java.util.Locale;
  * Catches {@link ServiceException}s and adjusts the response accordingly.
  */
 @Provider
-public class ServiceObjectionMapper implements ExceptionMapper<ServiceException> {
+public class ServiceExceptionMapper implements ExceptionMapper<ServiceException> {
     
     @Override
     public Response toResponse(ServiceException exception) {
