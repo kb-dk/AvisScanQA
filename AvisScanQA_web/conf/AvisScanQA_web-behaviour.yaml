@@ -1,0 +1,18 @@
+#
+# This config contains behaviour data: Thread allocation, allowed fields for lookup, limits for arguments etc.
+#
+# The behaviour config is normally controlled by developers and is part of the code repository.
+# Sensitive information such as machine names and user/passwords should not be part of this config.
+#
+# It will be automatically merged with the environment config when accessed through the
+# application config system.
+#
+#
+avischk-web-qa:
+  jdbc-connection-string: "jdbc:h2:~/Projects/AvisScanQA/AvisScanQA_web/target/test-classes/h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
+  jdbc-user: ""
+  jdbc-password: ""
+
+  http-content-base-string: ""
+  image-content-base-string: ""
+  iipsrv-base-string: ""

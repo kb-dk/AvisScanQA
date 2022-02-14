@@ -1,0 +1,6 @@
+<configuration scan="true" scanPeriod="5 minutes">
+    <insertFromJNDI env-entry-name="java:comp/env/avischk-web-qa/logback" as="logbackConfiguration"/>
+
+    <include file="${logbackConfiguration}"/>
+
+</configuration>

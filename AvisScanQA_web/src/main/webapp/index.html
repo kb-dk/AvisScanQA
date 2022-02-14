@@ -1,0 +1,162 @@
+<html lang="da">
+	<head>
+	    <title>QA tool til avis arkiver</title>
+	    <meta charset="utf-8">
+	    <link href="bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet">
+	    <link href="dashboard.css" rel="stylesheet">
+	</head>
+		
+	<body>
+        <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
+            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#/dashboard/">Avis web-qa</a>
+        </nav>
+
+	    <div class="container-fluid">
+	      <div class="row">
+	        <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+	          <div class="sidebar-sticky">
+	            <ul class="nav flex-column">
+	              <li class="nav-item">
+	                <a class="nav-link active" href="#/dashboard/">
+	                  <span data-feather="home"></span>
+	                  Dashboard <span class="sr-only">(current)</span>
+	                </a>
+	              </li>
+	            </ul>
+	
+	            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+	              <span>Kendte aviser</span>
+	              <a class="d-flex align-items-center text-muted" href="#">
+	                <span data-feather="plus-circle"></span>
+	              </a>
+	            </h6>
+	            <ul class="nav flex-column mb-2" id="avisIDer">
+	            </ul>
+	          </div>
+	        </nav>
+	
+	        <main role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
+	        <div id="headline-div"></div>
+<!-- 	          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+	            <h1 class="h2">Dashboard</h1>
+	            <div class="btn-toolbar mb-2 mb-md-0">
+	              <div class="btn-group mr-2">
+	                <button class="btn btn-sm btn-outline-secondary">Share</button>
+	                <button class="btn btn-sm btn-outline-secondary">Export</button>
+	              </div>
+	              <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
+	                <span data-feather="calendar"></span>
+	                This week
+	              </button>
+	            </div>
+	          </div>
+	 -->
+	<!--           <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas> -->
+	        <div id="primary-show"></div>
+	        </main>
+	      </div>
+	    </div>
+	
+	
+	
+	    <script src="jquery-3.3.1.min.js"></script>
+	    <script src="bootstrap-4.1.3/js/bootstrap.min.js"></script>
+	    <script src="jquery.routes.js"></script>
+	    <script src="moment.locale.js"></script>
+	    <script src="pdfobject.min.js"></script>
+	    <script src="openseadragon/openseadragon.min.js"></script>
+	    <script src="displayEntities.js"></script>
+	    <script src="displayNewspapers.js"></script>
+	    <script>
+	
+	    var currentEntities;
+	    var currentEntityIndex;
+	    var currentPageIndex;
+	    
+	    var newspaperYears;
+	    var currentNewspaperYear;
+	    var currentNewspaper;
+	    
+	    function loadDatesForNewspaper(id, year) {
+	        var url = 'web-qa/dates/' + id;
+	        $.getJSON(url, {}, function(dates) {
+	            var html = "<h1>Dates for " + id + "</h1>";
+	            for(var i = 0; i < dates.length; i++) {
+	                var day = moment(dates[i]).format('YYYY-MM-DD');
+	                html += "<a href=\"#/newspapers/" + id + "/" + day +"/0/\">" + day + "</a><br>";
+	            }
+	            $("#primary-show").html(html);
+            });
+        }
+	    
+       function loadYearsForNewspaper(id, year) {
+    	   currentNewspaperYear = year;
+    	   currentNewspaper = id;
+    	   var url = 'web-qa/years/' + id;
+    	   $.getJSON(url, {}, function(years) {
+    		   newspaperYears = years;
+           }).done(function() {
+        	    if(currentNewspaperYear == 0) {
+        	    	currentNewspaperYear = newspaperYears[0];
+        	        var parts = location.hash.split("/");
+        	        parts[parts.length-2] = currentNewspaperYear;
+        	        location.hash = parts.join("/");
+        	    } else {
+        	    	$("#headline-div").html("<h1>År med " + id + "</h1>");
+        	        renderNewspaperForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
+        	    }
+           });
+        }
+       
+	    
+	    function loadEntitiesForNewspaperOnDate(id, date, entityIndex, pageIndex) {
+            var day = moment(date).format('YYYY-MM-DD');
+	        var url = 'web-qa/dates/' + id + "/" + day + '/mappedEntities';
+	        currentEntityIndex = entityIndex;
+	        currentPageIndex = pageIndex;
+            $.getJSON(url, {}, function(entities) {
+                currentEntities = entities;
+                $("#headline-div").html("<h1>Entities for " + id + " on " + day + "</h1>");
+                
+            }).done(function() {
+                console.log("Starting rendering of entites.");
+                renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex);
+            }).fail(function() {
+            	    console.log("Failed to load entites");
+            	    alert("Could not load entities");
+            });
+        }
+	    
+    
+	    function loadNewspaperIDs() {
+	      $.getJSON('web-qa/getNewspaperIDs', {}, function(ids) {
+	        for(var i = 0; i < ids.length; i++) {
+	            $("#avisIDer").append(
+	            		"<li class=\"nav-item\"><a class=\"nav-link\" href=\"#/newspaper/" + ids[i] + "/0/\">" + ids[i] + "</a></li>");
+	        }
+	      });
+	    }
+	    
+	    $.routes.add('/dashboard/', function() {
+            $("#primary-show").html("Vælg avis i menuen til venstre");
+        }); // Dashboard
+	    $.routes.add('/newspaper/{id:string}/{year:int}', function() {
+	    	$("#primary-show").html("Indlæser datoer for: " + this.id + " i år: " + this.year);
+	    	//loadDatesForNewspaper(this.id, this.year);
+	    	loadYearsForNewspaper(this.id, this.year);
+	    }); // Display all years
+	    $.routes.add('/newspapers/{id:string}/{day:date}/{entity:int}/{page:int}', function() {
+	    	$("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
+	    	loadEntitiesForNewspaperOnDate(this.id, this.day, this.entity, this.page);
+	    }); // Display all months in a given year
+	    
+	    $(document).ready(function(){
+	    	moment.locale("da");
+	        // load newspaper IDs
+	        loadNewspaperIDs();
+	      }); 
+	    </script>
+	    
+	</body>
+
+</html>

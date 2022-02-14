@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+    <display-name>avischk-web-qa</display-name>
+
+    <servlet>
+        <servlet-name>web-qa-servlet</servlet-name>
+        <servlet-class>org.apache.cxf.jaxrs.servlet.CXFNonSpringJaxrsServlet</servlet-class>
+        <init-param>
+            <param-name>javax.ws.rs.Application</param-name>
+            <param-value>dk.kb.avischk.qa.web.WebQAApplication</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>web-qa-servlet</servlet-name>
+        <url-pattern>/web-qa/*</url-pattern>
+    </servlet-mapping>
+
+    <listener>
+        <listener-class>dk.kb.avischk.qa.web.WebQAContextListener</listener-class>
+    </listener>
+
+
+</web-app>
+
