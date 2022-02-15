@@ -1,11 +1,10 @@
-package dk.kb.kula190.checkers;
+package dk.kb.kula190.checkers.sections;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.EventRunner;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
 import org.slf4j.Logger;
 import org.xml.sax.ErrorHandler;
