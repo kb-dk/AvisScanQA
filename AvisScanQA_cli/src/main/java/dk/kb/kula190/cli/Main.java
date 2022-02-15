@@ -6,7 +6,7 @@ import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.nosections.MixXmlSchemaChecker;
 import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.nosections.PageStructureChecker;
+import dk.kb.kula190.checkers.sections.PageStructureChecker;
 import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 
 import java.nio.file.Path;

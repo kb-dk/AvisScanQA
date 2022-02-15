@@ -1,11 +1,7 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.nosections.PageStructureChecker;
-import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.nosections.PageStructureChecker;
+import dk.kb.kula190.checkers.sections.PageStructureChecker;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
@@ -25,7 +21,7 @@ class MultiThreadedEventRunnerTest {
     public TreeIterator getIterator() throws URISyntaxException {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
-            File file = new File("/home/pabr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1");
+            File file = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
             
             System.out.println(file);
             iterator = new TransparintingFileSystemIterator(file,
@@ -45,9 +41,10 @@ class MultiThreadedEventRunnerTest {
         ResultCollector resultCollector = new ResultCollector("Testing tool", "Testing version", 100);
         
         
-        List<TreeEventHandler> eventHandlers = List.of(new ChecksumChecker(resultCollector),
-                                                       new NoMissingMiddlePagesChecker(resultCollector),
-                                                       new XmlSchemaChecker(resultCollector),
+        List<TreeEventHandler> eventHandlers = List.of(
+                //new ChecksumChecker(resultCollector),
+                                                       //new NoMissingMiddlePagesChecker(resultCollector),
+                                                       //new XmlSchemaChecker(resultCollector),
                                                        new PageStructureChecker(resultCollector)
                                                        //new DecoratedConsoleLogger(System.out, resultCollector)
                                                        );

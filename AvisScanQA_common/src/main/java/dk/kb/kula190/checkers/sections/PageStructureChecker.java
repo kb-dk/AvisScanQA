@@ -1,9 +1,10 @@
-package dk.kb.kula190.checkers.nosections;
+package dk.kb.kula190.checkers.sections;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -11,9 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-//TODO NOT THREADSAFE
-public class PageStructureChecker extends DecoratedEventHandler {
-    private ThreadLocal<Set<String>> types = new ThreadLocal<>();
+public class PageStructureChecker extends DecoratedEventHandlerWithSections {
+    private InheritableThreadLocal<Set<String>> types = new InheritableThreadLocal<>();
     
     public PageStructureChecker(ResultCollector resultCollector) {
         super(resultCollector);
@@ -26,7 +26,8 @@ public class PageStructureChecker extends DecoratedEventHandler {
                            String avis,
                            LocalDate editionDate,
                            String udgave,
-                           Integer pageNumber) {
+                           String sectionName,
+                           Integer pageNumber) throws IOException {
         //Checkes that each page consists of MIX ALTO TIFF
         types.get().clear();
     }
@@ -36,8 +37,8 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String avis,
                          LocalDate editionDate,
                          String udgave,
-                         Integer pageNumber) {
-        
+                         String sectionName,
+                         Integer pageNumber) throws IOException {
         if (!types.get().containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
             getResultCollector().addFailure(event.getName(),
                                             "Missing files per page",
@@ -53,6 +54,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                         String avis,
                         LocalDate editionDate,
                         String udgave,
+                        String sectionName,
                         Integer pageNumber) throws IOException {
         types.get().add("MIX");
     }
@@ -62,6 +64,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String avis,
                          LocalDate editionDate,
                          String udgave,
+                         String sectionName,
                          Integer pageNumber) throws IOException {
         types.get().add("ALTO");
     }
@@ -71,6 +74,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String avis,
                          LocalDate editionDate,
                          String udgave,
+                         String sectionName,
                          Integer pageNumber) throws IOException {
         types.get().add("TIFF");
     }
