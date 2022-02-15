@@ -1,4 +1,4 @@
-package dk.kb.kula190.checkers.sections;
+package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
@@ -17,8 +17,8 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public class XpathChecker extends DecoratedEventHandlerWithSections {
-    public XpathChecker(ResultCollector resultCollector) {
+public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
+    public XpathCrossChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
     

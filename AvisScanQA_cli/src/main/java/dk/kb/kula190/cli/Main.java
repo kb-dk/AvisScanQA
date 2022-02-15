@@ -4,9 +4,9 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.nosections.MixXmlSchemaChecker;
-import dk.kb.kula190.checkers.sections.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.sections.PageStructureChecker;
+import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
+import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 
 import java.nio.file.Path;
@@ -23,7 +23,7 @@ public class Main {
                         new ChecksumChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
                         new PageStructureChecker(resultCollector),
-                        new MixXmlSchemaChecker(resultCollector));
+                        new XmlSchemaChecker(resultCollector));
             }
         };
     

@@ -1,7 +1,7 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.sections.PageStructureChecker;
+import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
