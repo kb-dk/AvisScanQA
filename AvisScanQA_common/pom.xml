@@ -92,6 +92,11 @@
         </dependency>
 
         <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>dk.kb.util</groupId>
             <artifactId>kb-util</artifactId>
         </dependency>
@@ -118,6 +123,7 @@
             <version>2.3.4</version>
             <scope>runtime</scope>
         </dependency>
+
         <!--XML end-->
     </dependencies>
 

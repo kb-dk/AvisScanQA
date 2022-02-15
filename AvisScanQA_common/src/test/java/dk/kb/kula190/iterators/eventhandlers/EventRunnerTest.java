@@ -3,6 +3,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
 import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
@@ -78,8 +79,10 @@ class EventRunnerTest {
                         //new NoMissingMiddlePagesChecker(resultCollector)
                         //new PageStructureChecker(resultCollector),
                         //new MixXmlSchemaChecker(resultCollector)
-                        new XpathCrossChecker(resultCollector),
-                        new XmlSchemaChecker(resultCollector));
+                        new TiffChecker(resultCollector)
+                        //new XpathCrossChecker(resultCollector),
+                        //new XmlSchemaChecker(resultCollector)
+                        );
             }
 
 
