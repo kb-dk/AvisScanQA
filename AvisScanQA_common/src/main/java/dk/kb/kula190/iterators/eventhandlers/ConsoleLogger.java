@@ -1,6 +1,7 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 
+import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
@@ -16,6 +17,11 @@ import java.util.List;
 public class ConsoleLogger extends DefaultTreeEventHandler {
     private static final String indentString = "..................................................";
     int indentLevel = 0;
+    
+    public ConsoleLogger(ResultCollector resultCollector) {
+        super(resultCollector);
+    }
+    
     
     /**
      * Prints a begin node and indents a step

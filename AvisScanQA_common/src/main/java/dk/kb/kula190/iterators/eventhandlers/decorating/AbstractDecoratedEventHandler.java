@@ -28,9 +28,10 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                           .toFormatter();
     protected final InheritableThreadLocal<String> batchName = new InheritableThreadLocal<>();
     protected final InheritableThreadLocal<String> batchLocation = new InheritableThreadLocal<>();
-    protected final ResultCollector resultCollector;
     
-    public AbstractDecoratedEventHandler(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
+    public AbstractDecoratedEventHandler(ResultCollector resultCollector) {
+        super(resultCollector);
+    }
     
     void handleNode(NodeParsingEvent event) throws IOException {
         String lastName = lastName(event.getName());
@@ -138,19 +139,13 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
             } else if (event.getName().matches(".*\\.(((mix|alto)(\\.xml)?)|(pdf)|(tiff?))$")) {
                 handlePerPageFile(event);
             } else {
-                resultCollector.addFailure(event.getName(),
+                getResultCollector().addFailure(event.getName(),
                                            "Unknown Filetype",
                                            this.getClass().getSimpleName(),
                                            "Encounted unexpected file");
             }
         } catch (IOException e) {
-            resultCollector.addFailure(event.getName(),
-                                       EventRunner.EXCEPTION,
-                                       this.getClass().getSimpleName(),
-                                       EventRunner.UNEXPECTED_ERROR + e,
-                                       Arrays.stream(e.getStackTrace())
-                                             .map(StackTraceElement::toString)
-                                             .collect(Collectors.joining("\n")));
+            reportException(event,e);
         }
     }
     
@@ -316,7 +311,5 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                  String udgave, Integer pageNumber) throws IOException;
     
     
-    public final ResultCollector getResultCollector() {
-        return resultCollector;
-    }
+    
 }

@@ -1,6 +1,7 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 
+import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 
 import java.util.Queue;
@@ -16,6 +17,10 @@ public class InjectingTreeEventHandler extends DefaultTreeEventHandler {
             return new ConcurrentLinkedQueue<>();
         }
     };
+    
+    public InjectingTreeEventHandler(ResultCollector resultCollector) {
+        super(resultCollector);
+    }
     
     
     public final void pushEvent(AttributeParsingEvent event) {

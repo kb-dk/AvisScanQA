@@ -12,38 +12,20 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public class ChecksumChecker extends DefaultTreeEventHandler {
-    private final ResultCollector resultCollector;
     
-    public ChecksumChecker(ResultCollector resultCollector) {this.resultCollector = resultCollector;}
+    public ChecksumChecker(ResultCollector resultCollector) {
+        super(resultCollector);
+    }
     
     @Override
     public void handleAttribute(AttributeParsingEvent event) {
-        if (event.getName().endsWith(".xml")) { //is XML File
-            String computedMD5;
-            try (InputStream data = event.getData()) {
-                computedMD5 = DigestUtils.md5Hex(data);
-                String givenMD5 = event.getChecksum();
-                if (!computedMD5.equalsIgnoreCase(givenMD5)) {
-                    resultCollector.addFailure(event.getName(),
-                                               "ChecksumMismatch",
-                                               this.getClass().getSimpleName(),
-                                               "File have checksum "
-                                               + computedMD5
-                                               + " but should have checksum "
-                                               + givenMD5);
-                }
-            } catch (IOException e) {
-                resultCollector.addFailure(event.getName(),
-                                           EventRunner.EXCEPTION,
-                                           this.getClass().getSimpleName(),
-                                           EventRunner.UNEXPECTED_ERROR + e,
-                                           Arrays.stream(e.getStackTrace())
-                                                 .map(StackTraceElement::toString)
-                                                 .collect(Collectors.joining("\n")));
-                return;
-            }
-            
-            
+        String computedMD5;
+        try (InputStream data = event.getData()) {
+            computedMD5 = DigestUtils.md5Hex(data);
+            String givenMD5 = event.getChecksum();
+            checkEquals(event, "ChecksumMismatch",computedMD5, givenMD5,"File have checksum {actual} but should have checksum {expected}");
+        } catch (IOException e) {
+            reportException(event, e);
         }
     }
 }

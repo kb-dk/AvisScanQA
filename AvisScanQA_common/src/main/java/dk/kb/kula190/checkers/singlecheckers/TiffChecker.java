@@ -38,38 +38,30 @@ public class TiffChecker extends DecoratedEventHandlerWithSections {
                          String sectionName,
                          Integer pageNumber) throws IOException {
         log.debug("Checking {}", event.getLocation());
+        
         List<String> lines = runImageMagick(event);
         YAML yaml = parseImageMagickOutput(lines);
         
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
         
-        check(event,
-              yaml.getString("Image.Format"),
-              "TIFF (Tagged Image File Format)",
-              "ImageMagick reports invalid format {actual}. Should have been {expected}");
+        checkEquals(event,
+                    "INVALID_TIFF", yaml.getString("Image.Format"),
+                    "TIFF (Tagged Image File Format)",
+                    "ImageMagick reports invalid format {actual}. Should have been {expected}");
         
-        check(event,
-              yaml.getString("Image.Colorspace"),
-              "sRGB",
-              "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}");
+        checkEquals(event,
+                    "INVALID_TIFF", yaml.getString("Image.Colorspace"),
+                    "sRGB",
+                    "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}");
         
-        check(event,
-              yaml.getString("Image.Depth"),
-              "8-bit",
-              "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}");
+        checkEquals(event,
+                    "INVALID_TIFF", yaml.getString("Image.Depth"),
+                    "8-bit",
+                    "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}");
         
         //TODO other tests
     }
     
-    private void check(AttributeParsingEvent event, String actual, String expected, String description) {
-        if (!actual.equals(expected)) {
-            resultCollector.addFailure(event.getLocation(),
-                                       "INVALID_TIFF",
-                                       this.getClass().getSimpleName(),
-                                       description.replace("{expected}", expected).replace("{actual}", actual),
-                                       actual);
-        }
-    }
     
     private YAML parseImageMagickOutput(List<String> lines) throws IOException {
         String json = parseImagemagickOutput(lines);

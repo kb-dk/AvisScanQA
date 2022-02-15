@@ -3,9 +3,14 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.checkers.ChecksumChecker;
+import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
 import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
+import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
@@ -75,13 +80,21 @@ class EventRunnerTest {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
-                        //new ChecksumChecker(resultCollector)
-                        //new NoMissingMiddlePagesChecker(resultCollector)
-                        //new PageStructureChecker(resultCollector),
-                        //new MixXmlSchemaChecker(resultCollector)
-                        new TiffChecker(resultCollector)
-                        //new XpathCrossChecker(resultCollector),
-                        //new XmlSchemaChecker(resultCollector)
+                        //Simple Checkers
+                        new ChecksumChecker(resultCollector),
+                        
+                        //Per file- checkers
+                        new XmlSchemaChecker(resultCollector),
+                        new TiffChecker(resultCollector),
+                        new XpathAltoChecker(resultCollector),
+                        new XpathMixChecker(resultCollector),
+                        
+                        //CrossCheckers
+                        new XpathCrossChecker(resultCollector),
+                        new NoMissingMiddlePagesChecker(resultCollector),
+                        new PageStructureChecker(resultCollector)
+                        
+                        
                         );
             }
 
