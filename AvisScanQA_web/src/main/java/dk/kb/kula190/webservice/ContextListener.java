@@ -1,6 +1,6 @@
 package dk.kb.kula190.webservice;
 
-import dk.kb.avischk.dao.NewspaperQADaoFactory;
+import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.util.yaml.YAML;
 import org.slf4j.Logger;

@@ -1,4 +1,4 @@
-package dk.kb.avischk.dao;
+package dk.kb.kula190.dao;
 
 public class DAOFailureException extends Exception {
 

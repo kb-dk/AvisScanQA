@@ -1,8 +1,8 @@
 package dk.kb.kula190.api.impl;
 
-import dk.kb.avischk.dao.DAOFailureException;
-import dk.kb.avischk.dao.NewspaperQADao;
-import dk.kb.avischk.dao.NewspaperQADaoFactory;
+import dk.kb.kula190.dao.DAOFailureException;
+import dk.kb.kula190.dao.NewspaperQADao;
+import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.model.CharacterizationInfo;
@@ -20,9 +20,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
-import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
@@ -63,7 +61,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     private transient Request request;
     
     @Context
-    private transient ContextResolver contextResolver;
+    private transient ContextResolver<?> contextResolver;
     
     @Context
     private transient HttpServletRequest httpServletRequest;
@@ -83,55 +81,47 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     private NewspaperQADao dao;
     
-    private final DateFormat sdf = new SimpleDateFormat("YYYY-mm-DD");
-    
     public DefaultApiServiceImpl() {
         log.info("Initializing service");
         dao = NewspaperQADaoFactory.getInstance();
     }
     
     @Override
-    public Map<String, List<NewspaperEntity>> datesIDDateMappedEntitiesGet(String ID, String date)
-            throws ServiceException {
-        Map<String, List<NewspaperEntity>> entities;
+    public Map<String, List<NewspaperEntity>> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
         try {
-            entities = dao.getMappedEditionsForNewspaperOnDate(ID, date);
+            Map<String, List<NewspaperEntity>> entities = dao.getMappedEditionsForNewspaperOnDate(newspaperID, date);
             return entities;
         } catch (DAOFailureException e) {
-            log.error("Could not get entities for date {} for newspaper ID {}", date, ID);
+            log.error("Could not get entities for date {} for newspaper ID {}", date, newspaperID);
             throw handleException(e);
         }
         
     }
     
     @Override
-    public List<LocalDate> datesIDYearGet(String ID, String year) throws ServiceException {
-        List<LocalDate> dates;
+    public List<LocalDate> getDatesForNewspaperYear(String newspaperID, String year) {
         try {
-            dates = dao.getDatesForNewspaperID(ID, year);
+            List<LocalDate> dates = dao.getDatesForNewspaperID(newspaperID, year);
             return dates;
         } catch (DAOFailureException e) {
-            log.error("Could not get dates for newspaper ID {}", ID);
+            log.error("Could not get dates for newspaper ID {}", newspaperID);
             throw handleException(e);
         }
     }
     
     @Override
-    public List<CharacterizationInfo> entityHandleCharacterizationGet(Long handle)
-            throws ServiceException {
+    public List<CharacterizationInfo> getEntityCharacterization(Long handle) {
         try {
             List<CharacterizationInfo> characterisations = dao.getCharacterizationForEntity(handle);
             return characterisations;
         } catch (DAOFailureException e) {
             log.error("Could not get characterisation for newspaper with handle {}", handle);
             throw handleException(e);
-
         }
-        
     }
     
     @Override
-    public URI entityHandleUrlTypeGet(Long handle, String type) throws ServiceException {
+    public URI getEntityURL(Long handle, String type) {
         String relPath;
         try {
             relPath = dao.getOrigRelPath(handle);
@@ -149,10 +139,9 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<String> getNewspaperIDsGet() throws ServiceException {
-        List<String> IDs;
+    public List<String> getNewspaperIDs() {
         try {
-            IDs = dao.getNewspaperIDs();
+            List<String> IDs = dao.getNewspaperIDs();
             return IDs;
         } catch (DAOFailureException e) {
             log.error("Could not get newspaper IDs from backend");
@@ -161,13 +150,12 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<String> yearsIDGet(String ID) throws ServiceException {
-        List<String> years;
+    public List<String> getYearsForNewspaper(String newspaperID) {
         try {
-            years = dao.getYearsForNewspaperID(ID);
+            List<String> years = dao.getYearsForNewspaperID(newspaperID);
             return years;
         } catch (DAOFailureException e) {
-            log.error("Could not get dates for newspaper ID {}", ID);
+            log.error("Could not get dates for newspaper ID {}", newspaperID);
             throw handleException(e);
         }
     }

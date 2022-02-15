@@ -1,4 +1,4 @@
-package dk.kb.avischk.dao;
+package dk.kb.kula190.dao;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.slf4j.Logger;

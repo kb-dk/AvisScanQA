@@ -16,6 +16,7 @@ servers:
 paths:
   /getNewspaperIDs:
     get:
+      operationId: getNewspaperIDs
       responses:
         '200':
           description: ""
@@ -26,10 +27,11 @@ paths:
                 items:
                   type: string
 
-  /years/{ID}:
+  /years/{newspaperID}:
     get:
+      operationId: getYearsForNewspaper
       parameters:
-        - name: ID
+        - name: newspaperID
           in: path
           required: true
           schema:
@@ -44,10 +46,11 @@ paths:
                 items:
                   type: string
 
-  /dates/{ID}/{year}:
+  /dates/{newspaperID}/{year}:
     get:
+      operationId: getDatesForNewspaperYear
       parameters:
-        - name: ID
+        - name: newspaperID
           in: path
           required: true
           schema:
@@ -68,10 +71,11 @@ paths:
                   type: string
                   format: date
 
-  /dates/{ID}/{date}/mappedEntities:
+  /dates/{newspaperID}/{date}/mappedEntities:
     get:
+      operationId: getMappedEntititesForNewspaperDate
       parameters:
-        - name: ID
+        - name: newspaperID
           in: path
           required: true
           schema:
@@ -91,6 +95,7 @@ paths:
 
   /entity/{handle}/url/{type}:
     get:
+      operationId: getEntityURL
       parameters:
         - name: handle
           in: path
@@ -115,6 +120,7 @@ paths:
 
   /entity/{handle}/characterization}:
     get:
+      operationId: getEntityCharacterization
       parameters:
         - name: handle
           in: path
