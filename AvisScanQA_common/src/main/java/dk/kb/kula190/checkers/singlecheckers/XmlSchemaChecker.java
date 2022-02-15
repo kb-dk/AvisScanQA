@@ -70,7 +70,7 @@ public class XmlSchemaChecker extends DecoratedEventHandlerWithSections {
     }
 
     @Override
-    public void altoFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public synchronized void altoFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
         parsingEvent = event;
         try (InputStream stream = event.getData()) {
 
