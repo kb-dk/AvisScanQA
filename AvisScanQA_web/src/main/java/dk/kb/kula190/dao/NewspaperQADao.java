@@ -99,7 +99,7 @@ public class NewspaperQADao {
                 PreparedStatement ps = conn.prepareStatement(SQL)) {
                
                ps.setString(1, id);
-               ps.setString(2, year);
+               ps.setInt(2, Integer.parseInt(year));
                //ps.setString(3, year);
                try (ResultSet res = ps.executeQuery()) {
                    List<NewspaperDate> list = new ArrayList<>();

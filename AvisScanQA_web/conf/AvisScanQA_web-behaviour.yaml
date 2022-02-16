@@ -9,9 +9,10 @@
 #
 #
 avischk-web-qa:
-  jdbc-connection-string: "jdbc:h2:~/Projects/AvisScanQA/h2/avischk-web-qa;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE"
-  jdbc-user: ""
-  jdbc-password: ""
+  jdbc-connection-string: "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel"
+  jdbc-user: "avisscqa"
+  jdbc-password: "DO NOT SET HERE"
+  jdbc-driver: "org.postgresql.Driver"
 
   http-content-base-string: ""
   image-content-base-string: ""

@@ -39,7 +39,8 @@ public class ContextListener implements ServletContextListener {
             String jdbcConnectionString = (String) serviceConfig.getString("avischk-web-qa.jdbc-connection-string");
             String jdbcUser = (String) serviceConfig.getString("avischk-web-qa.jdbc-user");
             String jdbcPassword = (String) serviceConfig.getString("avischk-web-qa.jdbc-password");
-            NewspaperQADaoFactory.initialize(jdbcConnectionString, jdbcUser, jdbcPassword);
+            String jdbcDriver = (String) serviceConfig.getString("avischk-web-qa.jdbc-driver");
+            NewspaperQADaoFactory.initialize(jdbcConnectionString, jdbcUser, jdbcPassword, jdbcDriver);
             
             String httpContentBase = (String) serviceConfig.getString("avischk-web-qa.http-content-base-string");
             String imageContentBase = (String) serviceConfig.getString("avischk-web-qa.image-content-base-string");

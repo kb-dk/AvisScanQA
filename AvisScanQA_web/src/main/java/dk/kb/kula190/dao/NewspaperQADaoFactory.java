@@ -17,7 +17,7 @@ public class NewspaperQADaoFactory {
     private static NewspaperQADao daoInstance = null;
     
     public static synchronized void initialize(String jdbcConnectionString, String jdbcUser,
-            String jdbcPassword) throws PropertyVetoException {
+            String jdbcPassword, String driver) throws PropertyVetoException {
         if(! initialized) {
             log.info("Initializing NewspaperQADaoFactory");
             initialized = true;
@@ -28,7 +28,7 @@ public class NewspaperQADaoFactory {
             System.setProperties(p);
             
             connectionPool = new ComboPooledDataSource();
-            connectionPool.setDriverClass(H2_DRIVER);
+            connectionPool.setDriverClass(driver);
             connectionPool.setJdbcUrl(jdbcConnectionString);
             connectionPool.setUser(jdbcUser);
             connectionPool.setPassword(jdbcPassword);
