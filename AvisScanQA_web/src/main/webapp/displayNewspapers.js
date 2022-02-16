@@ -21,7 +21,6 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
     //See dk.kb.kula190.api.impl.DefaultApiServiceImpl.getDatesForNewspaperYear
     var url = 'api/dates/' + newspaper + '/' + currentyear;
     $.getJSON(url, {}, function (dates) {
-        //TODO this should return more than just dates. A bit of metadata per date, such as the page count and if any errors occurred
         datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
@@ -71,15 +70,17 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         let dayInMonth = daysInMonth[d];
 
-        let date = dayInMonth.day.date();
+        let date = ("0"+dayInMonth.day.date());
+        //Ensure same width of date numbers
+        date = date.substring(date.length-2);
 
         calHtml += "<div class='col-sm-1' >"
 
         if (dayInMonth.available) {
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
-            calHtml += "<a  title='"+dayInMonth.count+" pages' class='btn btn-success btn-sm' role='button' onmouseover='' href='"+link+"'>" + date + "</a>";
+            calHtml += "<a title='"+dayInMonth.count+" pages' class='btn btn-success btn-sm' style='padding-left: 0; padding-right: 0' href='"+link+"'> " + date + " </a>";
         } else {
-            calHtml += "<button type='button' class='btn btn-light btn-sm'>" + date + "</button>";
+            calHtml += "<button type='button' class='btn btn-light btn-sm' style='padding-left: 0; padding-right: 0'> " + date + " </button>";
         }
         calHtml += "</div>";
     }
