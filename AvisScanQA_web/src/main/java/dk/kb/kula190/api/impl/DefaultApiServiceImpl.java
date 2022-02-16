@@ -6,6 +6,7 @@ import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.model.CharacterizationInfo;
+import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperEntity;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
@@ -99,9 +100,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<LocalDate> getDatesForNewspaperYear(String newspaperID, String year) {
+    public List<NewspaperDate> getDatesForNewspaperYear(String newspaperID, String year) {
+        //TODO this should return more than just dates.
+        // A bit of metadata per date, such as the page count and if any errors occurred
         try {
-            List<LocalDate> dates = dao.getDatesForNewspaperID(newspaperID, year);
+            List<NewspaperDate> dates = dao.getDatesForNewspaperID(newspaperID, year);
             return dates;
         } catch (DAOFailureException e) {
             log.error("Could not get dates for newspaper ID {}", newspaperID);
@@ -109,6 +112,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
     
+    //This is used for the content display, which we do not need any more
     @Override
     public List<CharacterizationInfo> getEntityCharacterization(Long handle) {
         try {
@@ -120,6 +124,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
     
+    //This is used for the content display, which we do not need any more
     @Override
     public URI getEntityURL(Long handle, String type) {
         String relPath;

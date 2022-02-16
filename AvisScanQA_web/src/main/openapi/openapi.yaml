@@ -1,4 +1,5 @@
 openapi: 3.0.2
+
 info:
   version: "${project.version}"
   title: "${project.name}"
@@ -9,10 +10,12 @@ info:
   license:
     name: "${license.name}"
     url: "${license.url}"
+
 servers:
   #  /api must match servlet-mapping in web.xml
   - url: "/${project.artifactId}/api"
     description: "Current server"
+
 paths:
   /getNewspaperIDs:
     get:
@@ -48,6 +51,7 @@ paths:
 
   /dates/{newspaperID}/{year}:
     get:
+      #TODO this should return more than just dates. A bit of metadata per date, such as the page count and if any errors occurred
       operationId: getDatesForNewspaperYear
       parameters:
         - name: newspaperID
@@ -68,8 +72,7 @@ paths:
               schema:
                 type: array
                 items:
-                  type: string
-                  format: date
+                  $ref: '#/components/schemas/NewspaperDate'
 
   /dates/{newspaperID}/{date}/mappedEntities:
     get:
@@ -117,7 +120,6 @@ paths:
                 type: string
                 format: uri
 
-
   /entity/{handle}/characterization}:
     get:
       operationId: getEntityCharacterization
@@ -128,7 +130,6 @@ paths:
           schema:
             type: integer
             format: int64
-
       responses:
         '200':
           description: ""
@@ -142,6 +143,14 @@ paths:
 
 components:
   schemas:
+    NewspaperDate:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        pageCount:
+          type: integer
 
     NewspaperEntityMapping: # <---- dictionary
       type: object

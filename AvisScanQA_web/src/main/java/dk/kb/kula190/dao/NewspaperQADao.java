@@ -2,6 +2,7 @@ package dk.kb.kula190.dao;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import dk.kb.kula190.model.CharacterizationInfo;
+import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,10 +90,10 @@ public class NewspaperQADao {
            }
     }
     
-    public List<LocalDate> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
-        log.debug("Looking up dates for newspaper id: '{}', in year", id, year);
+    public List<NewspaperDate> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
+        log.debug("Looking up dates for newspaper id: '{}', in year {}", id, year);
         
-        String SQL = "select distinct(edition_date) from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ?";
+        String SQL = "select edition_date,count(*)  from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
         
         try (Connection conn = connectionPool.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SQL)) {
@@ -101,12 +102,17 @@ public class NewspaperQADao {
                ps.setString(2, year);
                //ps.setString(3, year);
                try (ResultSet res = ps.executeQuery()) {
-                   List<LocalDate> list = new ArrayList<>();
+                   List<NewspaperDate> list = new ArrayList<>();
                    
                    while(res.next()) {
     
                        java.sql.Date date = res.getDate(1);
-                       list.add(date.toLocalDate());
+                       int count = res.getInt(2);
+                       
+                       NewspaperDate result = new NewspaperDate();
+                       result.setDate(date.toLocalDate());
+                       result.setPageCount(count);
+                       list.add(result);
                    }
                    return list;
                }
