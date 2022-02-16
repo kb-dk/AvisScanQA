@@ -57,7 +57,21 @@ public class XpathAltoChecker extends DecoratedEventHandlerWithSections {
                     "OK",
                     "ALTO quality should have been {expected} but was {actual}");
         //TODO compare against acceptable levels
-        
+        //Checks page Height is within range. what was meant with acceptable levels?
+        checkWithinRange(event,
+                "INVALID_ALTO",
+                Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()),
+                10000,
+                50000,
+                "ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: {actual}");
+        //Checks page Width is within range
+        checkWithinRange(event,
+                "INVALID_ALTO",
+                Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
+                10000,
+                50000,
+                "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
+
     }
     
 }

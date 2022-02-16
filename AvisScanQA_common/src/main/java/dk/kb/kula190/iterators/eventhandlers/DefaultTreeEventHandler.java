@@ -11,6 +11,7 @@ import javax.activation.DataHandler;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Abstract tree event handler, with no-op methods
@@ -67,6 +68,20 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                             type,
                                             this.getClass().getSimpleName(),
                                             description.replace("{required}", required.toString()).replace("{actual}", actual.toString()));
+        }
+    }
+    protected void checkWithinRange(ParsingEvent event,
+                                String type,
+                                Double actual,
+                                Integer requiredMin,
+                                Integer requiredMax,
+                                String description) {
+
+        if (actual < requiredMin || actual > requiredMax) {
+            getResultCollector().addFailure(event.getLocation(),
+                    type,
+                    this.getClass().getSimpleName(),
+                    description.replace("{requiredMin}", requiredMin.toString()).replace("{actual}", actual.toString()).replace("{requiredMax}",requiredMax.toString()));
         }
     }
     
