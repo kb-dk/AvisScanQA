@@ -83,44 +83,49 @@ class EventRunnerTest {
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
                         //Simple Checkers
-                        new ChecksumChecker(resultCollector),
+                        new ChecksumChecker(resultCollector)
                         
-                        //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
-                        new TiffChecker(resultCollector),
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
-                        
-                        //CrossCheckers
-                        new XpathCrossChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
-                
+                        ////Per file- checkers
+                        //new XmlSchemaChecker(resultCollector),
+                        ////new TiffChecker(resultCollector),
+                        //new XpathAltoChecker(resultCollector),
+                        //new XpathMixChecker(resultCollector),
+                        //
+                        ////CrossCheckers
+                        //new XpathCrossChecker(resultCollector),
+                        //new NoMissingMiddlePagesChecker(resultCollector),
+                        //new PageStructureChecker(resultCollector)
+                        //
                 
                               );
             }
             
         };
-        //
-        //RunnableComponent databaseComponent = new RunnableComponent() {
-        //    @Override
-        //    protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-        //        return List.of(
-        //
-        //                new DatabaseRegister(resultCollector,
-        //                                     new Driver(),
-        //                                     "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel",
-        //                                     "avisscqa",
-        //                                     "")
-        //                      );
-        //    }
-        //
-        //};
+
+        /*
+        RunnableComponent databaseComponent = new RunnableComponent() {
+            @Override
+            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
+                return List.of(
+
+                        new DatabaseRegister(resultCollector,
+                                             new Driver(),
+                                             "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel",
+                                             "avisscqa",
+                                             "")
+                              );
+            }
+
+        };
+        */
         
         Path batchPath = specificBatch.toPath().toAbsolutePath();
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, true);
         ResultCollector resultCollector = component.doWorkOnItem(batch);
         
+        //TODO run all checkers on batch
+        //TODO then parse the resultCollector
+        //TODO then register in DB, along with errors
         System.out.println(resultCollector.toReport());
     }
 }

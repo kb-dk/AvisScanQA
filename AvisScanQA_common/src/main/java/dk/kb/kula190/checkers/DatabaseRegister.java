@@ -1,6 +1,7 @@
-package dk.kb.kula190.checkers.singlecheckers;
+package dk.kb.kula190.checkers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
@@ -17,6 +18,9 @@ import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class DatabaseRegister extends DecoratedEventHandlerWithSections {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
@@ -24,18 +28,22 @@ public class DatabaseRegister extends DecoratedEventHandlerWithSections {
     private final String jdbcURL;
     private final String jdbcUser;
     private final String jdbcPassword;
+    private final Map<String,Failure> registeredFailures;
+    
     private BasicDataSource dataSource;
     
     public DatabaseRegister(ResultCollector resultCollector,
                             Driver jdbcDriver,
                             String jdbcURL,
                             String jdbcUser,
-                            String jdbcPassword) {
+                            String jdbcPassword,
+                            List<Failure> registeredFailures) {
         super(resultCollector);
         this.jdbcDriver   = jdbcDriver;
         this.jdbcURL      = jdbcURL;
         this.jdbcUser     = jdbcUser;
         this.jdbcPassword = jdbcPassword;
+        this.registeredFailures = registeredFailures.stream().collect(Collectors.toMap(Failure::getFilereference, f->f));
     }
     
     @Override
@@ -88,6 +96,8 @@ public class DatabaseRegister extends DecoratedEventHandlerWithSections {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
+        
+        
         try (Connection connection = dataSource.getConnection()) {
             
             try (PreparedStatement preparedStatement = connection.prepareStatement(

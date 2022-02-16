@@ -15,15 +15,15 @@ public class DecoratedEventHandlerWithSections extends AbstractDecoratedEventHan
     }
     
     @Override
-    public void sectionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionBegins(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {}
     
     @Override
-    public void sectionEnds(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionEnds(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {}
     
     @Override
-    public void pageBegins(NodeParsingEvent event,
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            LocalDate editionDate,
                            String udgave,
@@ -33,7 +33,7 @@ public class DecoratedEventHandlerWithSections extends AbstractDecoratedEventHan
     }
     
     @Override
-    public void pageEnds(NodeParsingEvent event,
+    public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -79,21 +79,21 @@ public class DecoratedEventHandlerWithSections extends AbstractDecoratedEventHan
                         Integer pageNumber) throws IOException {}
     
     
-    public void batchBegins(NodeParsingEvent event,
+    public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {}
     
     
-    public void batchEnds(NodeParsingEvent event,
+    public void batchEnds(DecoratedNodeParsingEvent event,
                           String avis,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {}
     
     
-    public void modsBegins(NodeParsingEvent event,
+    public void modsBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            String roundTrip,
                            LocalDate startDate,
@@ -105,14 +105,14 @@ public class DecoratedEventHandlerWithSections extends AbstractDecoratedEventHan
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
-    public void modsEnds(NodeParsingEvent event,
+    public void modsEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
     
-    public void metsBegins(NodeParsingEvent event,
+    public void metsBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            String roundTrip,
                            LocalDate startDate,
@@ -125,30 +125,30 @@ public class DecoratedEventHandlerWithSections extends AbstractDecoratedEventHan
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
-    public void metsEnds(NodeParsingEvent event,
+    public void metsEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
     
-    public void editionBegins(NodeParsingEvent event,
+    public void editionBegins(DecoratedNodeParsingEvent event,
                               String avis,
                               LocalDate editionDate,
                               String editionName) throws IOException {}
     
-    public void editionEnds(NodeParsingEvent event,
+    public void editionEnds(DecoratedNodeParsingEvent event,
                             String avis,
                             LocalDate editionDate,
                             String editionName) throws IOException {}
     
     
-    public final void pageBegins(NodeParsingEvent event,
+    public final void pageBegins(DecoratedNodeParsingEvent event,
                                  String avis,
                                  LocalDate editionDate,
                                  String udgave, Integer pageNumber) throws IOException {}
     
-    public final void pageEnds(NodeParsingEvent event,
+    public final void pageEnds(DecoratedNodeParsingEvent event,
                                String avis,
                                LocalDate editionDate,
                                String udgave, Integer pageNumber) throws IOException {}

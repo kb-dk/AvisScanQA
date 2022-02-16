@@ -52,9 +52,20 @@ public abstract class AbstractDecoratedEventHandlerWithSections extends Abstract
         LocalDate editionDate = LocalDate.parse(splits[1], dateFormatter);
         String udgave = splits[2];
         String sectionName = splits[3];
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event.getName(),
+                                                                                 event.getType(),
+                                                                                 event.getLocation(),
+                                                                                 avis,
+                                                                                 null,
+                                                                                 null,
+                                                                                 null,
+                                                                                 editionDate,
+                                                                                 udgave,
+                                                                                 sectionName,
+                                                                                 null);
         switch (event.getType()) {
-            case NodeBegin -> sectionBegins(event, avis, editionDate, udgave, sectionName);
-            case NodeEnd -> sectionEnds(event, avis, editionDate, udgave, sectionName);
+            case NodeBegin -> sectionBegins(decoratedEvent, avis, editionDate, udgave, sectionName);
+            case NodeEnd -> sectionEnds(decoratedEvent, avis, editionDate, udgave, sectionName);
         }
     }
     
@@ -67,9 +78,20 @@ public abstract class AbstractDecoratedEventHandlerWithSections extends Abstract
         String udgave = splits[2];
         String sectionName = splits[3];
         Integer pageNumber = Integer.parseInt(splits[4]);
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event.getName(),
+                                                                                 event.getType(),
+                                                                                 event.getLocation(),
+                                                                                 avis,
+                                                                                 null,
+                                                                                 null,
+                                                                                 null,
+                                                                                 editionDate,
+                                                                                 udgave,
+                                                                                 sectionName,
+                                                                                 null);
         switch (event.getType()) {
-            case NodeBegin -> pageBegins(event, avis, editionDate, udgave, sectionName, pageNumber);
-            case NodeEnd -> pageEnds(event, avis, editionDate, udgave, sectionName, pageNumber);
+            case NodeBegin -> pageBegins(decoratedEvent, avis, editionDate, udgave, sectionName, pageNumber);
+            case NodeEnd -> pageEnds(decoratedEvent, avis, editionDate, udgave, sectionName, pageNumber);
         }
     }
     
@@ -94,40 +116,25 @@ public abstract class AbstractDecoratedEventHandlerWithSections extends Abstract
             pdfFile(event, avis, editionDate, udgave, sectionName, pageNumber);
         }
     }
+
     
-    @Override
-    void handleMetsModsFile(AttributeParsingEvent event) throws IOException {
-        String name = lastName(event.getName());
-        String[] splits = batchName.get().split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
-        String avis = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
-        if (name.endsWith(".mets") || name.endsWith(".mets.xml")) {
-            metsFile(event, avis, roundTrip, startDate, endDate);
-        } else if (name.endsWith(".mods") || name.endsWith(".mods.xml")) {
-            modsFile(event, avis, roundTrip, startDate, endDate);
-        }
-    }
-    
-    
-    public abstract void sectionBegins(NodeParsingEvent event,
+    public abstract void sectionBegins(DecoratedNodeParsingEvent event,
                                        String avis,
                                        LocalDate editionDate,
                                        String udgave, String section) throws IOException;
     
-    public abstract void sectionEnds(NodeParsingEvent event,
+    public abstract void sectionEnds(DecoratedNodeParsingEvent event,
                                      String avis,
                                      LocalDate editionDate,
                                      String udgave, String section) throws IOException;
     
     
-    public abstract void pageBegins(NodeParsingEvent event,
+    public abstract void pageBegins(DecoratedNodeParsingEvent event,
                                     String avis,
                                     LocalDate editionDate,
                                     String udgave, String sectionName, Integer pageNumber) throws IOException;
     
-    public abstract void pageEnds(NodeParsingEvent event,
+    public abstract void pageEnds(DecoratedNodeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
                                   String udgave, String sectionName, Integer pageNumber) throws IOException;
