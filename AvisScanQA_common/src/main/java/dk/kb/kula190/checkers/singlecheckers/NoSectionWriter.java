@@ -2,8 +2,9 @@ package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import java.io.FileInputStream;
@@ -27,7 +28,7 @@ import static org.apache.commons.io.FilenameUtils.isExtension;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 //TODO NOT THREADSAFE
-public class NoSectionWriter extends DecoratedEventHandlerWithSections {
+public class NoSectionWriter extends DecoratedEventHandler {
     
     private final DateTimeFormatter formatter;
     private final Path parentDir;
@@ -57,7 +58,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void batchBegins(NodeParsingEvent event,
+    public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
@@ -79,7 +80,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void modsFile(AttributeParsingEvent event,
+    public void modsFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
@@ -92,7 +93,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void metsFile(AttributeParsingEvent event,
+    public void metsFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
@@ -103,7 +104,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void batchEnds(NodeParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate)
+    public void batchEnds(DecoratedNodeParsingEvent event, String avis, String roundTrip, LocalDate startDate, LocalDate endDate)
             throws IOException {
         //Now that the batch have ended, it is time to rename the METS file
         Path metsFile = Path.of(parentDir.toAbsolutePath().toString(),
@@ -114,14 +115,14 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void editionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionBegins(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
         //When we start an edition, reset the page numbering
         pageNumberLastSeen = 0;
     }
     
     
     @Override
-    public void pageBegins(NodeParsingEvent event,
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String editionName,
                            LocalDate editionDate,
                            String udgave,
@@ -139,7 +140,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     
     
     @Override
-    public void mixFile(AttributeParsingEvent event,
+    public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
                         String udgave,
@@ -152,7 +153,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     
     
     @Override
-    public void tiffFile(AttributeParsingEvent event,
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -165,7 +166,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void altoFile(AttributeParsingEvent event,
+    public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -177,7 +178,7 @@ public class NoSectionWriter extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void pdfFile(AttributeParsingEvent event,
+    public void pdfFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
                         String udgave,

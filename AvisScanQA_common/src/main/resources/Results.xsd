@@ -99,6 +99,13 @@
     <xs:element name="failure">
         <xs:complexType>
             <xs:sequence>
+                <xs:element ref="reference">
+                    <xs:annotation>
+                        <xs:documentation>
+                            The edition that failed
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:element>
                 <xs:element ref="filereference">
                     <xs:annotation>
                         <xs:documentation>
@@ -138,6 +145,17 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="filereference" type="xs:string"/>
+    <xs:element name="reference">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="avis" type="xs:string"/>
+                <xs:element name="editionDate" type="xs:string"/>
+                <xs:element name="udgave" type="xs:string"/>
+                <xs:element name="sectionName" type="xs:string"/>
+                <xs:element name="pageNumber" type="xs:int"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="component" type="xs:NCName"/>
     <xs:element name="type" type="xs:NCName"/>
     <xs:element name="description" type="xs:string"/>

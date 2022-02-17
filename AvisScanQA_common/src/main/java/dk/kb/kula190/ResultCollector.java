@@ -4,6 +4,7 @@ import dk.kb.kula190.generated.Details;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.generated.Failures;
 import dk.kb.kula190.generated.ObjectFactory;
+import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.generated.Result;
 
 import org.slf4j.Logger;
@@ -113,13 +114,13 @@ public class ResultCollector {
      * Add a specific failure to the result collector. All these parameters, except the last, must be non-null and
      * non-empty
      *
-     * @param reference   the reference to the file/object that caused the failure
+     * @param fileReference   the reference to the file/object that caused the failure
      * @param type        the type of failure
      * @param component   the component that failed
      * @param description Description of the failure.
      * @param details     additional details, can be null
      */
-    public synchronized void addFailure(String reference,
+    public synchronized void addFailure(String fileReference,
                                         String type,
                                         String component,
                                         String description,
@@ -131,10 +132,12 @@ public class ResultCollector {
                 "of type '{}' " +
                 "from component '{}' " +
                 "with description '{}' " +
-                "and details '{}'", reference, type, component, description, String.join("\n", details));
+                "and details '{}'", fileReference, type, component, description, String.join("\n", details));
         List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
-        failure.setFilereference(reference);
+        failure.setFilereference(fileReference);
+        Reference reference = new Reference();
+        failure.setReference(reference);
         failure.setType(type);
         failure.setComponent(component);
         failure.setDescription(description);

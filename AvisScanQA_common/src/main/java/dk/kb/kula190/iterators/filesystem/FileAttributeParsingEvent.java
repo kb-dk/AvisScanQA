@@ -41,6 +41,10 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
         return new FileInputStream(file);
     }
     
+    public File getFile() {
+        return file;
+    }
+    
     @Override
     public String getChecksum() throws IOException {
         if (checksumFile != null) {

@@ -6,7 +6,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.yaml.YAML;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.ReaderInputStream;
@@ -23,7 +24,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TiffChecker extends DecoratedEventHandlerWithSections {
+public class TiffChecker extends DecoratedEventHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     
     public TiffChecker(ResultCollector resultCollector) {
@@ -31,7 +32,7 @@ public class TiffChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void tiffFile(AttributeParsingEvent event,
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,

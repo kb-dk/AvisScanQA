@@ -85,7 +85,7 @@ class WriteNoSectionBatchTest {
         };
     
         Path batchPath = specificBatch.toPath().toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, true);
+        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         ResultCollector resultCollector = component.doWorkOnItem(batch);
     
         System.out.println(resultCollector.toReport());

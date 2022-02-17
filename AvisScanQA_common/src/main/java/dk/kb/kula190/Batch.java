@@ -7,12 +7,9 @@ public class Batch {
     private String fullID;
     private Path location;
     
-    private boolean sections;
-    
-    public Batch(String fullID, Path location, boolean sections) {
+    public Batch(String fullID, Path location) {
         this.fullID   = fullID;
         this.location = location;
-        this.sections = sections;
     }
     
     public String getFullID() {
@@ -23,7 +20,4 @@ public class Batch {
         return location;
     }
     
-    public boolean isSections() {
-        return sections;
-    }
 }

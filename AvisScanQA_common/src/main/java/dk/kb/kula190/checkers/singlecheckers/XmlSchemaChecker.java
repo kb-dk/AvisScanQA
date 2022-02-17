@@ -2,10 +2,11 @@ package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.EventRunner;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import org.slf4j.Logger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
@@ -21,7 +22,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class XmlSchemaChecker extends DecoratedEventHandlerWithSections {
+public class XmlSchemaChecker extends DecoratedEventHandler {
     private static Logger log = org.slf4j.LoggerFactory.getLogger(XmlSchemaChecker.class);
     public Validator[] validators = {null,null};
     private ParsingEvent parsingEvent;
@@ -30,7 +31,7 @@ public class XmlSchemaChecker extends DecoratedEventHandlerWithSections {
     }
 
     @Override
-    public void batchBegins(NodeParsingEvent event, String batch, String roundTrip, LocalDate startDate, LocalDate endDate) {
+    public void batchBegins(DecoratedNodeParsingEvent event, String batch, String roundTrip, LocalDate startDate, LocalDate endDate) {
         try (InputStream schemaStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("MetadataSchema/MixSchema.xsd");
              InputStream schemaStream2 = Thread.currentThread().getContextClassLoader().getResourceAsStream("MetadataSchema/AltoSchema.xsd")) {
             setErrorHandler("Mix",schemaStream, 0);
@@ -52,7 +53,7 @@ public class XmlSchemaChecker extends DecoratedEventHandlerWithSections {
 
 
     @Override
-    public synchronized void mixFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String
+    public synchronized void mixFile(DecoratedAttributeParsingEvent event, String editionName, LocalDate editionDate, String
             udgave, String sectionName, Integer pageNumber) throws IOException {
         parsingEvent = event;
         try (InputStream stream = event.getData()) {
@@ -70,7 +71,7 @@ public class XmlSchemaChecker extends DecoratedEventHandlerWithSections {
     }
 
     @Override
-    public synchronized void altoFile(AttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public synchronized void altoFile(DecoratedAttributeParsingEvent event, String editionName, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
         parsingEvent = event;
         try (InputStream stream = event.getData()) {
 

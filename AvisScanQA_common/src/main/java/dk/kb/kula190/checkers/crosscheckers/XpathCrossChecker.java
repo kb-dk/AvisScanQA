@@ -3,8 +3,9 @@ package dk.kb.kula190.checkers.crosscheckers;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import dk.kb.util.xml.XML;
 import dk.kb.util.xml.XPathSelector;
 import dk.kb.util.xml.XpathUtils;
@@ -21,7 +22,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
+public class XpathCrossChecker extends DecoratedEventHandler {
     public XpathCrossChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
@@ -46,7 +47,7 @@ public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
 
     
     @Override
-    public void pageBegins(NodeParsingEvent event,
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            LocalDate editionDate,
                            String udgave,
@@ -61,7 +62,7 @@ public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void mixFile(AttributeParsingEvent event,
+    public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
                         String udgave,
@@ -93,7 +94,7 @@ public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void tiffFile(AttributeParsingEvent event,
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -107,7 +108,7 @@ public class XpathCrossChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void pageEnds(NodeParsingEvent event,
+    public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,

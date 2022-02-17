@@ -2,7 +2,8 @@ package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.xml.XML;
 import dk.kb.util.xml.XPathSelector;
 import dk.kb.util.xml.XpathUtils;
@@ -17,14 +18,14 @@ import java.time.LocalDate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class XpathAltoChecker extends DecoratedEventHandlerWithSections {
+public class XpathAltoChecker extends DecoratedEventHandler {
     public XpathAltoChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
     
     
     @Override
-    public void altoFile(AttributeParsingEvent event,
+    public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,

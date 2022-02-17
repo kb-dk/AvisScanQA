@@ -7,108 +7,155 @@ import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import java.io.IOException;
 import java.time.LocalDate;
 
-public abstract class DecoratedEventHandler extends AbstractDecoratedEventHandler {
+public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
     
     
     public DecoratedEventHandler(ResultCollector resultCollector) {
         super(resultCollector);
     }
     
-    
-    public void batchBegins(NodeParsingEvent event,
+    @Override
+    public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {}
     
-    
-    public void batchEnds(NodeParsingEvent event,
+    @Override
+    public void batchEnds(DecoratedNodeParsingEvent event,
                           String avis,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {}
     
+    @Override
+    public void modsBegins(DecoratedNodeParsingEvent event,
+                           String avis,
+                           String roundTrip,
+                           LocalDate startDate,
+                           LocalDate endDate) throws IOException {}
+    @Override
+    public void modsFile(DecoratedAttributeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) throws IOException {}
+    @Override
+    public void modsEnds(DecoratedNodeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) throws IOException {}
     
-    public void modsBegins(NodeParsingEvent event,
+    @Override
+    public void metsBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            String roundTrip,
                            LocalDate startDate,
                            LocalDate endDate) throws IOException {}
     
-    public void modsFile(AttributeParsingEvent event,
+    @Override
+    public void metsFile(DecoratedAttributeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) throws IOException {}
+    @Override
+    public void metsEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
-    public void modsEnds(NodeParsingEvent event,
-                         String avis,
-                         String roundTrip,
-                         LocalDate startDate,
-                         LocalDate endDate) throws IOException {}
-    
-    
-    public void metsBegins(NodeParsingEvent event,
-                           String avis,
-                           String roundTrip,
-                           LocalDate startDate,
-                           LocalDate endDate) throws IOException {}
-    
-    
-    public void metsFile(AttributeParsingEvent event,
-                         String avis,
-                         String roundTrip,
-                         LocalDate startDate,
-                         LocalDate endDate) throws IOException {}
-    
-    public void metsEnds(NodeParsingEvent event,
-                         String avis,
-                         String roundTrip,
-                         LocalDate startDate,
-                         LocalDate endDate) throws IOException {}
-    
-    
-    public void editionBegins(NodeParsingEvent event,
+    @Override
+    public void editionBegins(DecoratedNodeParsingEvent event,
                               String avis,
                               LocalDate editionDate,
                               String editionName) throws IOException {}
-    
-    public void editionEnds(NodeParsingEvent event,
+    @Override
+    public void editionEnds(DecoratedNodeParsingEvent event,
                             String avis,
                             LocalDate editionDate,
                             String editionName) throws IOException {}
     
     
-    public void pageBegins(NodeParsingEvent event,
+    
+    @Override
+    public void sectionBegins(DecoratedNodeParsingEvent event,
+                              String avis,
+                              LocalDate editionDate,
+                              String udgave,
+                              String section) throws IOException {
+        
+    }
+    
+    @Override
+    public void sectionEnds(DecoratedNodeParsingEvent event,
+                            String avis,
+                            LocalDate editionDate,
+                            String udgave,
+                            String section) throws IOException {
+        
+    }
+    
+    @Override
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            LocalDate editionDate,
-                           String udgave, Integer pageNumber) throws IOException {}
+                           String udgave,
+                           String sectionName,
+                           Integer pageNumber) throws IOException {
+        
+    }
     
-    public void pageEnds(NodeParsingEvent event,
+    @Override
+    public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
-                         String udgave, Integer pageNumber) throws IOException {}
+                         String udgave,
+                         String sectionName,
+                         Integer pageNumber) throws IOException {
+        
+    }
     
-    
-    public void mixFile(AttributeParsingEvent event,
+   
+    @Override
+    public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
-                        String udgave, Integer pageNumber) throws IOException {}
+                        String udgave,
+                        String sectionName,
+                        Integer pageNumber) throws IOException {
+        
+    }
     
-    public void tiffFile(AttributeParsingEvent event,
+    @Override
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
-                         String udgave, Integer pageNumber) throws IOException {}
+                         String udgave,
+                         String sectionName,
+                         Integer pageNumber) throws IOException {
+        
+    }
     
-    public void altoFile(AttributeParsingEvent event,
+    @Override
+    public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
-                         String udgave, Integer pageNumber) throws IOException {}
+                         String udgave,
+                         String sectionName,
+                         Integer pageNumber) throws IOException {
+        
+    }
     
-    public void pdfFile(AttributeParsingEvent event,
+    @Override
+    public void pdfFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
-                        String udgave, Integer pageNumber) throws IOException {}
-    
-    
+                        String udgave,
+                        String sectionName,
+                        Integer pageNumber) throws IOException {
+        
+    }
 }
