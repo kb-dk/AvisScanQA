@@ -5,6 +5,7 @@ import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.DatabaseRegister;
+import dk.kb.kula190.checkers.crosscheckers.MixAltoChecker;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
@@ -42,20 +43,20 @@ class EventRunnerTest {
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
                         //Simple Checkers
-                        new ChecksumChecker(resultCollector),
+                     //   new ChecksumChecker(resultCollector),
                         
                         //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
+                     //   new XmlSchemaChecker(resultCollector),
                         new TiffAnalyzer(resultCollector),
-                        new TiffChecker(resultCollector),
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
+                       // new TiffChecker(resultCollector),
+                      //  new XpathAltoChecker(resultCollector),
+                       // new XpathMixChecker(resultCollector),
 
                         //CrossCheckers
                         new XpathCrossChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
-
+                       // new NoMissingMiddlePagesChecker(resultCollector),
+                        //new PageStructureChecker(resultCollector),
+                        new MixAltoChecker(resultCollector)
                 
                               );
             }
