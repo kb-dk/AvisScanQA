@@ -7,25 +7,17 @@ import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
 import java.util.Objects;
 import java.util.Set;
 
 import static org.apache.commons.io.FilenameUtils.isExtension;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHandler {
-    
-    static final DateTimeFormatter dateFormatter =
-            new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
-                                          .appendValue(ChronoField.MONTH_OF_YEAR, 2)
-                                          .appendValue(ChronoField.DAY_OF_MONTH, 2)
-                                          .toFormatter();
+
     protected final InheritableThreadLocal<String> batchName = new InheritableThreadLocal<>();
     protected final InheritableThreadLocal<String> batchLocation = new InheritableThreadLocal<>();
     
@@ -34,7 +26,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     public final void handleNode(NodeParsingEvent event) throws IOException {
-        String lastName = lastName(event.getName());
+        String lastName = EventHandlerUtils.lastName(event.getName());
         if (batchName.get() == null) {
             //modersmaalet_19060701_19061231_RT1
             batchName.set(lastName);
@@ -185,7 +177,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     
     
     boolean isEdition(ParsingEvent event) {
-        return getLevel(event) == 2 && !Set.of("METS", "MODS").contains(lastName(event.getName())) && event.getName()
+        return getLevel(event) == 2 && !Set.of("METS", "MODS").contains(EventHandlerUtils.lastName(event.getName())) && event.getName()
                                                                                                            .matches(
                                                                                                                    ".*\\d{8}_udg\\d{2}$");
     }
@@ -199,21 +191,13 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     boolean isMETS(ParsingEvent event) {
-        return getLevel(event) == 2 && Objects.equals("METS", lastName(event.getName()));
+        return getLevel(event) == 2 && Objects.equals("METS", EventHandlerUtils.lastName(event.getName()));
     }
     
     boolean isMODS(ParsingEvent event) {
-        return getLevel(event) == 2 && Objects.equals("MODS", lastName(event.getName()));
+        return getLevel(event) == 2 && Objects.equals("MODS", EventHandlerUtils.lastName(event.getName()));
     }
-    
-    static String lastName(String name) {
-        return name.replaceFirst("^(.+?)/([^/]+)$", "$2");
-    }
-    
-    static String firstName(String name) {
-        return name.replaceFirst("^([^/]+)/.*$", "$1");
-    }
-    
+
     public final int getLevel(ParsingEvent event) {
         return event.getName().split("/").length;
     }
@@ -242,7 +226,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         DecoratedAttributeParsingEvent
                 decoratedEvent
                 = createDecoratedParsingEvent(event);
-        String name = lastName(event.getName());
+        String name = EventHandlerUtils.lastName(event.getName());
         if (name.endsWith(".alto") || name.contains(".alto.xml")) {
             altoFile(decoratedEvent,
                      decoratedEvent.getAvis(),
@@ -275,7 +259,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     void handleMetsModsFile(AttributeParsingEvent event) throws IOException {
-        String name = lastName(event.getName());
+        String name = EventHandlerUtils.lastName(event.getName());
         
         DecoratedAttributeParsingEvent
                 decoratedEvent

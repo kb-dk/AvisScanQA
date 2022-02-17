@@ -1,14 +1,13 @@
 package dk.kb.kula190.iterators.eventhandlers.decorating;
 
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.ParsingEventType;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 
 import static org.apache.commons.io.FilenameUtils.isExtension;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
     
@@ -28,7 +27,7 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
         //modersmaalet_19060701_udg01_MODERSMAALETS Søndagsblad_0001.mix.xml
         //modersmaalet_19060701_19061231_RT1.mods.xml
     
-        final String lastName = removeXmlExtension(AbstractDecoratedEventHandler.lastName(delegate.getName()));
+        final String lastName = EventHandlerUtils.removeXmlExtension(EventHandlerUtils.lastName(delegate.getName()));
     
         String avis = null;
         LocalDate editionDate = null;
@@ -43,7 +42,7 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
             //mets/mods:  modersmaalet_19060701_19061231_RT1
             batch = lastName;
         } else { //page/section/edition-like
-            batch = AbstractDecoratedEventHandler.firstName(delegate.getName());
+            batch = EventHandlerUtils.firstName(delegate.getName());
         
         
             //section: modersmaalet_19060706_udg01_1.sektion
@@ -51,7 +50,7 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
             //page: modersmaalet_19060706_udg01_1.sektion_001
             String[] splits = lastName.split("_", 5);
             avis        = splits[0];
-            editionDate = LocalDate.parse(splits[1], AbstractDecoratedEventHandler.dateFormatter);
+            editionDate = LocalDate.parse(splits[1], EventHandlerUtils.dateFormatter);
             udgave      = splits[2];
             if (splits.length > 3) {
                 sectionName = splits[3];
@@ -63,8 +62,8 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
     
     
         String[] splits2 = batch.split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits2[1], AbstractDecoratedEventHandler.dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits2[2], AbstractDecoratedEventHandler.dateFormatter);
+        LocalDate startDate = LocalDate.parse(splits2[1], EventHandlerUtils.dateFormatter);
+        LocalDate endDate = LocalDate.parse(splits2[2], EventHandlerUtils.dateFormatter);
         String avis2 = splits2[0];
         String roundTrip = splits2[3].replaceFirst("^RT", "");
         
@@ -120,13 +119,6 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
     public Integer getPageNumber() {
         return pageNumber;
     }
-    
-    
-    private String removeXmlExtension(String filename) {
-        if (isExtension(filename, "xml")) {
-            return removeXmlExtension(removeExtension(filename));
-        } else {
-            return removeExtension(filename);
-        }
-    }
+
+
 }

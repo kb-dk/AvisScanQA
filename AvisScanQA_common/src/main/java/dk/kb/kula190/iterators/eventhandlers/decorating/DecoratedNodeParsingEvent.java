@@ -1,7 +1,7 @@
 package dk.kb.kula190.iterators.eventhandlers.decorating;
 
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
-import dk.kb.kula190.iterators.common.ParsingEventType;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.time.LocalDate;
 
@@ -22,7 +22,7 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent {
         super(delegate.getName(), delegate.getType(), delegate.getLocation());
     
     
-        final String lastName = AbstractDecoratedEventHandler.lastName(delegate.getName());
+        final String lastName = EventHandlerUtils.lastName(delegate.getName());
     
         String avis = null;
         LocalDate editionDate = null;
@@ -37,7 +37,7 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent {
             //mets/mods:  modersmaalet_19060701_19061231_RT1
             batch = lastName;
         } else { //page/section/edition-like
-            batch = AbstractDecoratedEventHandler.firstName(delegate.getName());
+            batch = EventHandlerUtils.firstName(delegate.getName());
     
             //section: modersmaalet_19060706_udg01_1.sektion
             //edition: modersmaalet_19060706_udg01
@@ -45,7 +45,7 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent {
             String[] splits = lastName.split("_", 5);
             if (splits.length > 1) {
                 avis        = splits[0];
-                editionDate = LocalDate.parse(splits[1], AbstractDecoratedEventHandler.dateFormatter);
+                editionDate = LocalDate.parse(splits[1], EventHandlerUtils.dateFormatter);
                 udgave      = splits[2];
                 if (splits.length > 3) {
                     sectionName = splits[3];
@@ -58,8 +58,8 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent {
     
     
         String[] splits2 = batch.split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits2[1], AbstractDecoratedEventHandler.dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits2[2], AbstractDecoratedEventHandler.dateFormatter);
+        LocalDate startDate = LocalDate.parse(splits2[1], EventHandlerUtils.dateFormatter);
+        LocalDate endDate = LocalDate.parse(splits2[2], EventHandlerUtils.dateFormatter);
         String avis2 = splits2[0];
         String roundTrip = splits2[3].replaceFirst("^RT", "");
     

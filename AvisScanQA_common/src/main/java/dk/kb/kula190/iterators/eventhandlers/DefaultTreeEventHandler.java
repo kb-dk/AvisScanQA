@@ -45,19 +45,28 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     
     protected void checkEquals(ParsingEvent event,
                                String type,
-                               String actual,
-                               String expected,
+                               Object actual,
+                               Object expected,
                                String description) {
-        if (!actual.equalsIgnoreCase(expected)) {
+        String actualString = asString(actual);
+        String expectedString = asString(expected);
+        if (!actualString.equalsIgnoreCase(actualString)) {
             getResultCollector().addFailure(event.getLocation(),
                                             type,
                                             this.getClass().getSimpleName(),
-                                            description.replace("{expected}", expected).replace("{actual}", actual));
+                                            description.replace("{expected}", expectedString).replace("{actual}", actualString));
         }
     }
-    
-    
-    
+
+    private String asString(Object object) {
+        if (object == null){
+            return "null"; //TODO...
+        } else {
+            return object.toString();
+        }
+    }
+
+
     protected void checkAtLeast(ParsingEvent event,
                                 String type,
                                 Double actual,
@@ -73,8 +82,8 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     protected void checkWithinRange(ParsingEvent event,
                                 String type,
                                 Double actual,
-                                Integer requiredMin,
-                                Integer requiredMax,
+                                    Double requiredMin,
+                                    Double requiredMax,
                                 String description) {
 
         if (actual < requiredMin || actual > requiredMax) {

@@ -63,16 +63,16 @@ public class XpathAltoChecker extends DecoratedEventHandler {
         //Checks page Height is within range. what was meant with acceptable levels?
         checkWithinRange(event,
                 "INVALID_ALTO",
-                Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()),
-                10000,
-                50000,
+                Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()), //TODO configurable
+                10000.0,
+                50000.0,
                 "ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: {actual}");
         //Checks page Width is within range
         checkWithinRange(event,
                 "INVALID_ALTO",
                 Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
-                4000,
-                50000,
+                4000.0, //TODO configurable
+                50000.0,
                 "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
         //Checks page ID is corresponding with filename.
 
@@ -85,14 +85,6 @@ public class XpathAltoChecker extends DecoratedEventHandler {
 
 
     }
-    /*
-    private String regexOnEventName(Pattern p,String text){
-        Matcher m = p.matcher(text);
-        if(m.find()){
-            return m.group(1);
-        }
-        return "";
-    }
-*/
+
     
 }
