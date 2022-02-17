@@ -135,10 +135,12 @@ public class ResultCollector {
         List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
         
-        failure.setFilereference(fileReference.getLocation());
+        
         
         Reference reference = createSpecificReference(fileReference);
         failure.setReference(reference);
+    
+        failure.setFilereference(fileReference.getLocation().substring(fileReference.getLocation().indexOf(reference.getAvis()) ));
         
         failure.setType(type);
         failure.setComponent(component);

@@ -153,6 +153,7 @@ public class NewspaperQADao {
                        entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
                        entity.setHandle(res.getLong("handle"));
                        entity.setFraktur(res.getBoolean("fraktur"));
+                       entity.setProblems(res.getString("problems"));
                        list.add(entity);
                    }
                    return list;

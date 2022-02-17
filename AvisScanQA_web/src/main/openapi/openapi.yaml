@@ -193,6 +193,9 @@ components:
           format: int64
         fraktur:
           type: boolean
+        problems:
+          type: string
+
 
 
     CharacterizationInfo:
