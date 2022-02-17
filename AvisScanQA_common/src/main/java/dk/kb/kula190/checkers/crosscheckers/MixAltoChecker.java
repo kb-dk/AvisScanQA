@@ -95,16 +95,16 @@ public class MixAltoChecker extends DecoratedEventHandler {
                          String sectionName,
                          Integer pageNumber) throws IOException {
         Document document = handleDocument(event);
-        XPathSelector xpath = XpathUtils.createXPathSelector("alto", "http://www.loc.gov/alto/v2");
+        XPathSelector xpath = XpathUtils.createXPathSelector("alto", "http://www.loc.gov/standards/alto/ns-v2#");
 
 
         String fileName = xpath.selectString(document,
-                "/alto/Description/sourceImageInformation/fileName");
+                "/alto:alto/alto:Description/alto:sourceImageInformation/alto:fileName");
         AltoFileName.set(removeExtension(lastName(fileName)));
 
 
         //TODO alto: before each in that xpath
-        List<String> lines = Arrays.stream(xpath.selectString(document, "/alto/Description/OCRProcessing/ocrProcessingStep/processingStepSettings").split("\n")).toList();
+        List<String> lines = Arrays.stream(xpath.selectString(document, "/alto:alto/alto:Description/alto:OCRProcessing/alto:ocrProcessingStep/alto:processingStepSettings").split("\n")).toList();
 
         //Line is "width:2180" | gets -1
         Integer width = Integer.parseInt(lines.stream()

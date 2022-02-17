@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
 import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
@@ -8,6 +9,7 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 import dk.kb.util.xml.XML;
 import dk.kb.util.xml.XPathSelector;
 import dk.kb.util.xml.XpathUtils;
+import dk.kb.util.yaml.YAML;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -16,6 +18,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Objects;
 
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
@@ -114,6 +117,26 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         TifFileName.set(tiffFileName);
 
         ChecksumTif.set(event.getChecksum());
+    }
+
+    @Override
+    public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)){
+            return;
+        }
+        YAML result;
+        try (InputStream in = decoratedEvent.getData()) {
+            result = YAML.parse(in);
+        }
+        YAML yaml = result;
+        //See src/test/resources/sampleImageMagickOutput.yaml for what and how
+
+        String geo = yaml.getString("Image.Geometry").split("\\+", 2)[0];
+        String[] geoSplits = geo.split("x");
+        String width = geoSplits[0];
+        String height = geoSplits[1];
+
+
     }
 
     @Override
