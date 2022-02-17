@@ -6,6 +6,7 @@ import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.singlecheckers.NoSectionWriter;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -13,7 +14,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 
-class WriteNoSectionBatchTest {
+public class WriteNoSectionBatchTest {
     
     private final File specificBatch
             = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1"); //orig
@@ -66,6 +67,7 @@ class WriteNoSectionBatchTest {
     }
     
     @Test
+    @Disabled
     void run() throws Exception {
     
     
