@@ -6,7 +6,9 @@ import dk.kb.kula190.generated.Failures;
 import dk.kb.kula190.generated.ObjectFactory;
 import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.generated.Result;
-
+import dk.kb.kula190.iterators.common.ParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -106,7 +108,7 @@ public class ResultCollector {
      * @param component   the component that failed
      * @param description Description of the failure.
      */
-    public void addFailure(String reference, String type, String component, String description) {
+    public void addFailure(ParsingEvent reference, String type, String component, String description) {
         addFailure(reference, type, component, description, new String[]{});
     }
     
@@ -114,13 +116,13 @@ public class ResultCollector {
      * Add a specific failure to the result collector. All these parameters, except the last, must be non-null and
      * non-empty
      *
-     * @param fileReference   the reference to the file/object that caused the failure
-     * @param type        the type of failure
-     * @param component   the component that failed
-     * @param description Description of the failure.
-     * @param details     additional details, can be null
+     * @param fileReference the reference to the file/object that caused the failure
+     * @param type          the type of failure
+     * @param component     the component that failed
+     * @param description   Description of the failure.
+     * @param details       additional details, can be null
      */
-    public synchronized void addFailure(String fileReference,
+    public synchronized void addFailure(ParsingEvent fileReference,
                                         String type,
                                         String component,
                                         String description,
@@ -135,13 +137,17 @@ public class ResultCollector {
                 "and details '{}'", fileReference, type, component, description, String.join("\n", details));
         List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
-        failure.setFilereference(fileReference);
-        Reference reference = new Reference();
+        
+        failure.setFilereference(fileReference.getLocation());
+        
+        Reference reference = createSpecificReference(fileReference);
         failure.setReference(reference);
+        
         failure.setType(type);
         failure.setComponent(component);
         failure.setDescription(description);
-        if (details != null && details.length > 0) {
+        
+        if (details.length > 0) {
             Details xmlDetails = new Details();
             xmlDetails.getContent().add(String.join("\n", details));
             failure.setDetails(xmlDetails);
@@ -167,40 +173,31 @@ public class ResultCollector {
         setSuccess(false);
     }
     
-    /**
-     * Merge the failures from this ResultCollector into the given result collector. The maxResults specified in the
-     * "that" argument is respected.
-     *
-     * @param that the result collector to merge into
-     * @return that
-     */
-    public ResultCollector mergeInto(ResultCollector that) {
-        for (Failure failure : getFailures()) {
-            ArrayList<String> details = new ArrayList<>();
-            if (failure.getDetails() != null) {
-                for (Object content : failure.getDetails().getContent()) {
-                    details.add(content.toString());
-                }
-            }
-            that.addFailure(
-                    failure.getFilereference(),
-                    failure.getType(),
-                    failure.getComponent(),
-                    failure.getDescription(),
-                    details.toArray(new String[details.size()]));
-            if (that.getTimestamp().before(this.getTimestamp())) {
-                that.setTimestamp(this.getTimestamp());
-            }
+    private Reference createSpecificReference(ParsingEvent fileReference) {
+        Reference reference = new Reference();
+        if (fileReference instanceof DecoratedAttributeParsingEvent decoratedParsingEvent) {
+            reference.setAvis(decoratedParsingEvent.getAvis());
+            reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
+            reference.setUdgave(decoratedParsingEvent.getUdgave());
+            reference.setSectionName(decoratedParsingEvent.getSectionName());
+            reference.setPageNumber(decoratedParsingEvent.getPageNumber());
+        } else if (fileReference instanceof DecoratedNodeParsingEvent decoratedParsingEvent) {
+            reference.setAvis(decoratedParsingEvent.getAvis());
+            reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
+            reference.setUdgave(decoratedParsingEvent.getUdgave());
+            reference.setSectionName(decoratedParsingEvent.getSectionName());
+            reference.setPageNumber(decoratedParsingEvent.getPageNumber());
         }
-        return that;
+        return reference;
     }
+    
     
     /**
      * Get the list of failures. This method is only meant to be used for merging purposes
      *
      * @return the failures
      */
-    private List<Failure> getFailures() {
+    public List<Failure> getFailures() {
         return Collections.unmodifiableList(
                 resultStructure.getFailures().getFailure());
     }

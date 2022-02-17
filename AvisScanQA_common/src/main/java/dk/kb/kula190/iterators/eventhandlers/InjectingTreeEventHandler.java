@@ -3,6 +3,8 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.iterators.common.InjectedAttributeParsingEvent;
+import dk.kb.kula190.iterators.common.ParsingEvent;
 
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -23,8 +25,8 @@ public class InjectingTreeEventHandler extends DefaultTreeEventHandler {
     }
     
     
-    public final void pushEvent(AttributeParsingEvent event) {
-        this.eventQueue.get().add(event);
+    public final void pushEvent(ParsingEvent event, String type, byte[] data) {
+        eventQueue.get().add(new InjectedAttributeParsingEvent(event.getName() + ".injected", type, event.getLocation(), data, null));
     }
     
     public final AttributeParsingEvent popEvent() {

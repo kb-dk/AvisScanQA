@@ -2,7 +2,7 @@ package dk.kb.kula190.checkers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.Failure;
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
@@ -21,6 +21,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DatabaseRegister extends DecoratedEventHandler {
@@ -29,7 +30,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String jdbcURL;
     private final String jdbcUser;
     private final String jdbcPassword;
-    private final Map<String,Failure> registeredFailures;
+    private final Map<Reference,Failure> registeredFailures;
     
     private BasicDataSource dataSource;
     
@@ -44,7 +45,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
         this.jdbcURL      = jdbcURL;
         this.jdbcUser     = jdbcUser;
         this.jdbcPassword = jdbcPassword;
-        this.registeredFailures = registeredFailures.stream().collect(Collectors.toMap(Failure::getFilereference, f->f));
+        this.registeredFailures = registeredFailures.stream().collect(Collectors.toMap(Failure::getReference, f->f));
     }
     
     @Override
@@ -88,6 +89,20 @@ public class DatabaseRegister extends DecoratedEventHandler {
             // ignore errors during shutdown, we cant do anything about it anyway
             log.error("shutdown failed", e);
         }
+    }
+    
+    private boolean matchThisPage(Reference reference, DecoratedNodeParsingEvent event){
+        return Objects.equals(event.getAvis(), reference.getAvis()) &&
+               Objects.equals(event.getEditionDate(), reference.getEditionDate()) &&
+               Objects.equals(event.getUdgave(), reference.getUdgave()) &&
+               Objects.equals(event.getSectionName(), reference.getSectionName())
+                //TODO
+                ;
+        
+    }
+    
+    private boolean matchThisPage(Reference reference, DecoratedAttributeParsingEvent event){
+    return false;
     }
     
     @Override

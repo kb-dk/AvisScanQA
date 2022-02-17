@@ -40,7 +40,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String sectionName,
                          Integer pageNumber) throws IOException {
         if (!types.get().containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
-            getResultCollector().addFailure(event.getName(),
+            getResultCollector().addFailure(event,
                                             "Missing files per page",
                                             this.getClass().getSimpleName(),
                                             "Must contain mix, alto and tiff files",

@@ -8,23 +8,25 @@ import java.io.InputStream;
  * This is an implementation of the AttributeParsingEvent. It is meant to be used for injected events from the
  * InjectingTreeEventHandler
  */
-public class InMemoryAttributeParsingEvent extends AttributeParsingEvent {
+public class InjectedAttributeParsingEvent extends AttributeParsingEvent {
     
     
+    private final String injectedType;
     private final byte[] data;
     private final String checksum;
     
     /**
      * Constructur
-     *
-     * @param name     the event name
+     *  @param name     the event name
+     * @param injectedType
      * @param data     the data as a byte array
      * @param checksum the checksum for the data
      */
-    public InMemoryAttributeParsingEvent(String name, byte[] data, String checksum) {
-        super(name, null);
-        this.data     = data;
-        this.checksum = checksum;
+    public InjectedAttributeParsingEvent(String name, String injectedType, String location, byte[] data, String checksum) {
+        super(name, location);
+        this.injectedType = injectedType;
+        this.data         = data;
+        this.checksum     = checksum;
     }
     
     @Override
@@ -35,5 +37,9 @@ public class InMemoryAttributeParsingEvent extends AttributeParsingEvent {
     @Override
     public String getChecksum() throws IOException {
         return checksum;
+    }
+    
+    public String getInjectedType() {
+        return injectedType;
     }
 }

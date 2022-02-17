@@ -1,11 +1,14 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
+import org.apache.commons.io.FilenameUtils;
+
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
+import java.util.Set;
 
+import static org.apache.commons.io.FilenameUtils.getName;
 import static org.apache.commons.io.FilenameUtils.isExtension;
-import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public class EventHandlerUtils {
     public static final DateTimeFormatter dateFormatter =
@@ -15,18 +18,27 @@ public class EventHandlerUtils {
                                           .toFormatter();
 
     public static String lastName(String name) {
-        return name.replaceFirst("^(.+?)/([^/]+)$", "$2");
+        return getName(name);
     }
 
     public static String firstName(String name) {
         return name.replaceFirst("^([^/]+)/.*$", "$1");
     }
 
-    public static String removeXmlExtension(String filename) {
-        if (isExtension(filename, "xml")) {
-            return removeXmlExtension(removeExtension(filename));
+    public static String removeExtension(String filename) {
+        if (Set.of("xml","injected").contains(FilenameUtils.getExtension(filename))) {
+            return removeExtension(FilenameUtils.removeExtension(filename));
         } else {
-            return removeExtension(filename);
+            return FilenameUtils.removeExtension(filename);
         }
     }
+    
+    public static String getExtension(String filename) {
+        if (Set.of("xml").contains(FilenameUtils.getExtension(filename))) {
+            return getExtension(FilenameUtils.removeExtension(filename));
+        } else {
+            return FilenameUtils.getExtension(filename);
+        }
+    }
+    
 }

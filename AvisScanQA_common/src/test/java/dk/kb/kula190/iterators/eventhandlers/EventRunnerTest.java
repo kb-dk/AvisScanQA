@@ -4,14 +4,18 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
+import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
+import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
 import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import org.junit.jupiter.api.Test;
+import org.postgresql.Driver;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -28,8 +32,11 @@ class EventRunnerTest {
     
     @Test
     void run() throws Exception {
-        
-        
+    
+        Path batchPath = specificBatch.toPath().toAbsolutePath();
+        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
+    
+    
         RunnableComponent component = new RunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
@@ -39,7 +46,8 @@ class EventRunnerTest {
                         
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
-                        //new TiffChecker(resultCollector),
+                        new TiffAnalyzer(resultCollector),
+                        new TiffChecker(resultCollector),
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
 
@@ -53,8 +61,13 @@ class EventRunnerTest {
             }
             
         };
-
-        /*
+    
+        ResultCollector resultCollector = component.doWorkOnItem(batch);
+        
+        System.out.println(resultCollector.toReport());
+        
+        
+        
         RunnableComponent databaseComponent = new RunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
@@ -64,20 +77,15 @@ class EventRunnerTest {
                                              new Driver(),
                                              "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel",
                                              "avisscqa",
-                                             "")
+                                             "",
+                                             resultCollector.getFailures())
                               );
             }
 
         };
-        */
-        
-        Path batchPath = specificBatch.toPath().toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
-        
-        //TODO run all checkers on batch
-        //TODO then parse the resultCollector
-        //TODO then register in DB, along with errors
-        System.out.println(resultCollector.toReport());
+        //ResultCollector dbResultCollector = databaseComponent.doWorkOnItem(batch);
+    
+    
+      
     }
 }

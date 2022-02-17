@@ -1,8 +1,6 @@
 package dk.kb.kula190.iterators.eventhandlers.decorating;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -156,6 +154,16 @@ public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
+        
+    }
+    
+    @Override
+    public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
+                             String injectedType, String avis,
+                             LocalDate editionDate,
+                             String udgave,
+                             String sectionName,
+                             Integer pageNumber) throws IOException {
         
     }
 }

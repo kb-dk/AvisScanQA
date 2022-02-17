@@ -2,6 +2,7 @@ package dk.kb.kula190.iterators.eventhandlers.decorating;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.iterators.common.InjectedAttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
@@ -14,10 +15,8 @@ import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Set;
 
-import static org.apache.commons.io.FilenameUtils.isExtension;
-
 public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHandler {
-
+    
     protected final InheritableThreadLocal<String> batchName = new InheritableThreadLocal<>();
     protected final InheritableThreadLocal<String> batchLocation = new InheritableThreadLocal<>();
     
@@ -33,23 +32,23 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
             batchLocation.set(event.getLocation());
             handleBatch(event);
         } else if (isMETS(event)) {
-            this.handleMets(event, batchName.get());
+            this.handleMets(event);
         } else if (isMODS(event)) {
-            handleMods(event, batchName.get());
+            handleMods(event);
         } else if (isEdition(event)) {
-            handleEdition(event, lastName);
+            handleEdition(event);
         } else if (isSection(event)) {
-            handleSection(event, lastName);
+            handleSection(event);
         } else if (isPage(event)) {
-            handlePage(event, lastName);
+            handlePage(event);
+        } else {
+            System.out.println(lastName);
         }
     }
     
     
-    void handleSection(NodeParsingEvent event, String section) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+    void handleSection(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
             case NodeBegin -> sectionBegins(decoratedEvent,
                                             decoratedEvent.getAvis(),
@@ -63,16 +62,6 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                         decoratedEvent.getSectionName());
         }
     }
-    
-    private DecoratedNodeParsingEvent createDecoratedParsingEvent(NodeParsingEvent event) {
-        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
-        return decoratedEvent;
-    }
-    
-    private DecoratedAttributeParsingEvent createDecoratedParsingEvent(AttributeParsingEvent event) {
-        return new DecoratedAttributeParsingEvent(event);
-    }
-    
     
     
     @Override
@@ -91,9 +80,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     void handleBatch(NodeParsingEvent event) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
             case NodeBegin -> batchBegins(decoratedEvent,
                                           decoratedEvent.getAvis(),
@@ -108,10 +95,8 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         }
     }
     
-    void handleMets(NodeParsingEvent event, String batchID) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+    void handleMets(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
             case NodeBegin -> metsBegins(decoratedEvent,
                                          decoratedEvent.getAvis(),
@@ -126,10 +111,8 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         }
     }
     
-    void handleMods(NodeParsingEvent event, String batchID) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+    void handleMods(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
             case NodeBegin -> modsBegins(decoratedEvent,
                                          decoratedEvent.getAvis(),
@@ -144,14 +127,16 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         }
     }
     
-    void handleEdition(NodeParsingEvent event, String edition) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+    void handleEdition(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> editionBegins(decoratedEvent, decoratedEvent.getAvis(), decoratedEvent.getEditionDate(),
+            case NodeBegin -> editionBegins(decoratedEvent,
+                                            decoratedEvent.getAvis(),
+                                            decoratedEvent.getEditionDate(),
                                             decoratedEvent.getUdgave());
-            case NodeEnd -> editionEnds(decoratedEvent, decoratedEvent.getAvis(), decoratedEvent.getEditionDate(),
+            case NodeEnd -> editionEnds(decoratedEvent,
+                                        decoratedEvent.getAvis(),
+                                        decoratedEvent.getEditionDate(),
                                         decoratedEvent.getUdgave());
         }
     }
@@ -160,15 +145,60 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     @Override
     public final void handleAttribute(AttributeParsingEvent event) {
         try {
-            if (event.getName().matches(".*\\.((mets)|(mods))(\\.xml)?$")) {
-                handleMetsModsFile(event);
-            } else if (event.getName().matches(".*\\.(((mix|alto)(\\.xml)?)|(pdf)|(tiff?))$")) {
-                handlePerPageFile(event);
-            } else {
-                getResultCollector().addFailure(event.getName(),
-                                                "Unknown Filetype",
-                                                this.getClass().getSimpleName(),
-                                                "Encounted unexpected file");
+            final String name = event.getName();
+            String extension = EventHandlerUtils.getExtension(name);
+            
+            DecoratedAttributeParsingEvent decoratedEvent = new DecoratedAttributeParsingEvent(event);
+    
+            switch (extension) {
+                case "mets" -> metsFile(decoratedEvent,
+                                        decoratedEvent.getAvis(),
+                                        decoratedEvent.getRoundTrip(),
+                                        decoratedEvent.getStartDate(),
+                                        decoratedEvent.getEndDate());
+                case "mods" -> modsFile(decoratedEvent,
+                                        decoratedEvent.getAvis(),
+                                        decoratedEvent.getRoundTrip(),
+                                        decoratedEvent.getStartDate(),
+                                        decoratedEvent.getEndDate());
+                case "alto" -> altoFile(decoratedEvent,
+                                        decoratedEvent.getAvis(),
+                                        decoratedEvent.getEditionDate(),
+                                        decoratedEvent.getUdgave(),
+                                        decoratedEvent.getSectionName(),
+                                        decoratedEvent.getPageNumber());
+                case "mix" -> mixFile(decoratedEvent,
+                                      decoratedEvent.getAvis(),
+                                      decoratedEvent.getEditionDate(),
+                                      decoratedEvent.getUdgave(),
+                                      decoratedEvent.getSectionName(),
+                                      decoratedEvent.getPageNumber());
+                case "tif" -> tiffFile(decoratedEvent,
+                                       decoratedEvent.getAvis(),
+                                       decoratedEvent.getEditionDate(),
+                                       decoratedEvent.getUdgave(),
+                                       decoratedEvent.getSectionName(),
+                                       decoratedEvent.getPageNumber());
+                case "pdf" -> pdfFile(decoratedEvent,
+                                      decoratedEvent.getAvis(),
+                                      decoratedEvent.getEditionDate(),
+                                      decoratedEvent.getUdgave(),
+                                      decoratedEvent.getSectionName(),
+                                      decoratedEvent.getPageNumber());
+                case "injected" -> {
+                    String injectedType = ((InjectedAttributeParsingEvent) event).getInjectedType();
+                    injectedFile(decoratedEvent,
+                                 injectedType,
+                                 decoratedEvent.getAvis(),
+                                 decoratedEvent.getEditionDate(),
+                                 decoratedEvent.getUdgave(),
+                                 decoratedEvent.getSectionName(),
+                                 decoratedEvent.getPageNumber());
+                }
+                default -> getResultCollector().addFailure(event,
+                                                           "Unknown Filetype",
+                                                           this.getClass().getSimpleName(),
+                                                           "Encountered unexpected file");
             }
         } catch (IOException e) {
             reportException(event, e);
@@ -176,10 +206,15 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     
+    
+    
+    
+    
     boolean isEdition(ParsingEvent event) {
-        return getLevel(event) == 2 && !Set.of("METS", "MODS").contains(EventHandlerUtils.lastName(event.getName())) && event.getName()
-                                                                                                           .matches(
-                                                                                                                   ".*\\d{8}_udg\\d{2}$");
+        return getLevel(event) == 2
+               && !Set.of("METS", "MODS").contains(EventHandlerUtils.lastName(event.getName()))
+               && event.getName().matches( //TODO are all editions named thus??
+                                           ".*\\d{8}_udg\\d{2}$");
     }
     
     boolean isSection(ParsingEvent event) {
@@ -197,15 +232,13 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     boolean isMODS(ParsingEvent event) {
         return getLevel(event) == 2 && Objects.equals("MODS", EventHandlerUtils.lastName(event.getName()));
     }
-
+    
     public final int getLevel(ParsingEvent event) {
         return event.getName().split("/").length;
     }
     
-    void handlePage(NodeParsingEvent event, String lastName) throws IOException {
-        DecoratedNodeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
+    void handlePage(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         switch (event.getType()) {
             case NodeBegin -> pageBegins(decoratedEvent,
                                          decoratedEvent.getAvis(),
@@ -221,59 +254,6 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                      decoratedEvent.getPageNumber());
         }
     }
-    
-    void handlePerPageFile(AttributeParsingEvent event) throws IOException {
-        DecoratedAttributeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
-        String name = EventHandlerUtils.lastName(event.getName());
-        if (name.endsWith(".alto") || name.contains(".alto.xml")) {
-            altoFile(decoratedEvent,
-                     decoratedEvent.getAvis(),
-                     decoratedEvent.getEditionDate(),
-                     decoratedEvent.getUdgave(),
-                     decoratedEvent.getSectionName(),
-                     decoratedEvent.getPageNumber());
-        } else if (name.endsWith(".mix") || name.endsWith(".mix.xml")) {
-            mixFile(decoratedEvent,
-                    decoratedEvent.getAvis(),
-                    decoratedEvent.getEditionDate(),
-                    decoratedEvent.getUdgave(),
-                    decoratedEvent.getSectionName(),
-                    decoratedEvent.getPageNumber());
-        } else if (name.endsWith(".tif")) {
-            tiffFile(decoratedEvent,
-                     decoratedEvent.getAvis(),
-                     decoratedEvent.getEditionDate(),
-                     decoratedEvent.getUdgave(),
-                     decoratedEvent.getSectionName(),
-                     decoratedEvent.getPageNumber());
-        } else if (name.endsWith(".pdf")) {
-            pdfFile(decoratedEvent,
-                    decoratedEvent.getAvis(),
-                    decoratedEvent.getEditionDate(),
-                    decoratedEvent.getUdgave(),
-                    decoratedEvent.getSectionName(),
-                    decoratedEvent.getPageNumber());
-        }
-    }
-    
-    void handleMetsModsFile(AttributeParsingEvent event) throws IOException {
-        String name = EventHandlerUtils.lastName(event.getName());
-        
-        DecoratedAttributeParsingEvent
-                decoratedEvent
-                = createDecoratedParsingEvent(event);
-        
-        if (name.endsWith(".mets") || name.endsWith(".mets.xml")) {
-            metsFile(decoratedEvent, decoratedEvent.getAvis(),
-                     decoratedEvent.getRoundTrip(), decoratedEvent.getStartDate(), decoratedEvent.getEndDate());
-        } else if (name.endsWith(".mods") || name.endsWith(".mods.xml")) {
-            modsFile(decoratedEvent, decoratedEvent.getAvis(),
-                     decoratedEvent.getRoundTrip(), decoratedEvent.getStartDate(), decoratedEvent.getEndDate());
-        }
-    }
-    
     
     public abstract void batchBegins(DecoratedNodeParsingEvent event,
                                      String avis,
@@ -342,44 +322,65 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     public abstract void sectionBegins(DecoratedNodeParsingEvent event,
                                        String avis,
                                        LocalDate editionDate,
-                                       String udgave, String section) throws IOException;
+                                       String udgave,
+                                       String section) throws IOException;
     
     public abstract void sectionEnds(DecoratedNodeParsingEvent event,
                                      String avis,
                                      LocalDate editionDate,
-                                     String udgave, String section) throws IOException;
+                                     String udgave,
+                                     String section) throws IOException;
     
     
     public abstract void pageBegins(DecoratedNodeParsingEvent event,
                                     String avis,
                                     LocalDate editionDate,
-                                    String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                    String udgave,
+                                    String sectionName,
+                                    Integer pageNumber) throws IOException;
     
     public abstract void pageEnds(DecoratedNodeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
-                                  String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                  String udgave,
+                                  String sectionName,
+                                  Integer pageNumber) throws IOException;
     
     
     public abstract void mixFile(DecoratedAttributeParsingEvent event,
                                  String avis,
                                  LocalDate editionDate,
-                                 String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                 String udgave,
+                                 String sectionName,
+                                 Integer pageNumber) throws IOException;
     
     public abstract void tiffFile(DecoratedAttributeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
-                                  String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                  String udgave,
+                                  String sectionName,
+                                  Integer pageNumber) throws IOException;
     
     public abstract void altoFile(DecoratedAttributeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
-                                  String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                  String udgave,
+                                  String sectionName,
+                                  Integer pageNumber) throws IOException;
     
     public abstract void pdfFile(DecoratedAttributeParsingEvent event,
                                  String avis,
                                  LocalDate editionDate,
-                                 String udgave, String sectionName, Integer pageNumber) throws IOException;
+                                 String udgave,
+                                 String sectionName,
+                                 Integer pageNumber) throws IOException;
     
+    public abstract void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
+                                      String injectedType,
+                                      String avis,
+                                      LocalDate editionDate,
+                                      String udgave,
+                                      String sectionName,
+                                      Integer pageNumber) throws IOException;
     
 }

@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+//TODO injecting in multithreaded...
 public class MultiThreadedEventRunner extends EventRunner {
     
     
@@ -70,7 +71,7 @@ public class MultiThreadedEventRunner extends EventRunner {
                 try {
                     childTask.get();
                 } catch (InterruptedException | ExecutionException e) {
-                    resultCollector.addFailure(current.getName(),
+                    resultCollector.addFailure(current,
                                                EventRunner.EXCEPTION,
                                                this.getClass().getSimpleName(),
                                                EventRunner.UNEXPECTED_ERROR + e.toString(),

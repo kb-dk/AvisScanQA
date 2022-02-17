@@ -5,6 +5,7 @@ import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
 import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
 import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
@@ -54,7 +55,10 @@ class MultiThreadedEventRunnerTest {
         
                 //Per file- checkers
                 new XmlSchemaChecker(resultCollector),
-                //new TiffChecker(resultCollector),
+                new TiffAnalyzer(resultCollector),
+                new TiffChecker(resultCollector),
+                
+                
                 new XpathAltoChecker(resultCollector),
                 new XpathMixChecker(resultCollector),
         
@@ -62,6 +66,7 @@ class MultiThreadedEventRunnerTest {
                 new XpathCrossChecker(resultCollector),
                 new NoMissingMiddlePagesChecker(resultCollector),
                 new PageStructureChecker(resultCollector)
+               
                                                        );
 
         

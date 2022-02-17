@@ -43,7 +43,7 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
         List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {
-                resultCollector.addFailure(event.getName(),
+                resultCollector.addFailure(event,
                                            "MissingPages",
                                            this.getClass().getSimpleName(),
                                            "Section have gaps in page sequence",
