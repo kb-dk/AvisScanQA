@@ -27,7 +27,7 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
         //modersmaalet_19060701_udg01_MODERSMAALETS Søndagsblad_0001.mix.xml
         //modersmaalet_19060701_19061231_RT1.mods.xml
     
-        final String lastName = EventHandlerUtils.removeXmlExtension(EventHandlerUtils.lastName(delegate.getName()));
+        final String lastName = EventHandlerUtils.removeExtension(EventHandlerUtils.lastName(delegate.getName()));
     
         String avis = null;
         LocalDate editionDate = null;

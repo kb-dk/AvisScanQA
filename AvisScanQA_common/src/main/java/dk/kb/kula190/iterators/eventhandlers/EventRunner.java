@@ -120,7 +120,8 @@ public class EventRunner implements Runnable {
                 handler.handleFinish();
             } catch (Exception e) {
                 log.error("Caught Exception", e);
-                resultCollector.addFailure("General Batch failure",
+                //TODO why can we not get an event for this?
+                resultCollector.addFailure(null,
                                            EXCEPTION,
                                            handler.getClass().getSimpleName(),
                                            UNEXPECTED_ERROR + e.toString());
@@ -134,7 +135,7 @@ public class EventRunner implements Runnable {
                 handler.handleAttribute(current);
             } catch (Exception e) {
                 log.error("Caught Exception", e);
-                resultCollector.addFailure(current.getName(),
+                resultCollector.addFailure(current,
                                            EXCEPTION,
                                            handler.getClass().getSimpleName(),
                                            UNEXPECTED_ERROR + e.toString());
@@ -148,7 +149,7 @@ public class EventRunner implements Runnable {
                 handler.handleNodeEnd(current);
             } catch (Exception e) {
                 log.error("Caught Exception", e);
-                resultCollector.addFailure(current.getName(),
+                resultCollector.addFailure(current,
                                            EXCEPTION,
                                            handler.getClass().getSimpleName(),
                                            UNEXPECTED_ERROR + e.toString());
@@ -162,7 +163,7 @@ public class EventRunner implements Runnable {
                 handler.handleNodeBegin(current);
             } catch (Exception e) {
                 log.error("Caught Exception", e);
-                resultCollector.addFailure(current.getName(),
+                resultCollector.addFailure(current,
                                            EXCEPTION,
                                            handler.getClass().getSimpleName(),
                                            UNEXPECTED_ERROR + e.toString());

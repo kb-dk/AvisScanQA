@@ -51,7 +51,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         String actualString = asString(actual);
         String expectedString = asString(expected);
         if (!actualString.equalsIgnoreCase(actualString)) {
-            getResultCollector().addFailure(event.getLocation(),
+            getResultCollector().addFailure(event,
                                             type,
                                             this.getClass().getSimpleName(),
                                             description.replace("{expected}", expectedString).replace("{actual}", actualString));
@@ -73,7 +73,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 Double required,
                                 String description) {
         if (actual < required) {
-            getResultCollector().addFailure(event.getLocation(),
+            getResultCollector().addFailure(event,
                                             type,
                                             this.getClass().getSimpleName(),
                                             description.replace("{required}", required.toString()).replace("{actual}", actual.toString()));
@@ -87,7 +87,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 String description) {
 
         if (actual < requiredMin || actual > requiredMax) {
-            getResultCollector().addFailure(event.getLocation(),
+            getResultCollector().addFailure(event,
                     type,
                     this.getClass().getSimpleName(),
                     description.replace("{requiredMin}", requiredMin.toString()).replace("{actual}", actual.toString()).replace("{requiredMax}",requiredMax.toString()));
@@ -95,7 +95,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
     
     protected void reportException(ParsingEvent event, Exception e){
-        getResultCollector().addFailure(event.getName(),
+        getResultCollector().addFailure(event,
                                         EventRunner.EXCEPTION,
                                         this.getClass().getSimpleName(),
                                         EventRunner.UNEXPECTED_ERROR + e,
