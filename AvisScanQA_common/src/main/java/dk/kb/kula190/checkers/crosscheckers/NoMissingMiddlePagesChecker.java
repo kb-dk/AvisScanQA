@@ -1,8 +1,8 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class NoMissingMiddlePagesChecker extends DecoratedEventHandlerWithSections {
+public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     private final ResultCollector resultCollector;
     //Note that all fields in these checkers should be threadlocal. Otherwise they will not work on multithreaded runs
     //There is only one checker instance shared between all the threads
@@ -22,13 +22,13 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandlerWithSectio
     }
     
     @Override
-    public void sectionBegins(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionBegins(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {
         pages.set(new ArrayList<>());
     }
     
     @Override
-    public void pageBegins(NodeParsingEvent event,
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String editionName,
                            LocalDate editionDate,
                            String udgave,
@@ -38,7 +38,7 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandlerWithSectio
     }
     
     @Override
-    public void sectionEnds(NodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionEnds(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {
         List<Integer> sortedPages = pages.get().stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {

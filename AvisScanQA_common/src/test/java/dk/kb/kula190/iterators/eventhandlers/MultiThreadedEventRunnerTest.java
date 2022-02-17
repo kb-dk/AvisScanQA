@@ -25,7 +25,7 @@ class MultiThreadedEventRunnerTest {
     private TreeIterator iterator;
     
     
-    public TreeIterator getIterator() throws URISyntaxException {
+    public TreeIterator getIterator() {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
             File file = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
@@ -44,7 +44,7 @@ class MultiThreadedEventRunnerTest {
     }
     
     @Test
-    void run() throws URISyntaxException {
+    void run() {
         ResultCollector resultCollector = new ResultCollector("Testing tool", "Testing version", 100);
         
         

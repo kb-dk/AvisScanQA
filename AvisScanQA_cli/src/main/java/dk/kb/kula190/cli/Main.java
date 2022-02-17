@@ -28,7 +28,7 @@ public class Main {
         };
     
         Path batchPath = Path.of(args[0]).toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath, Boolean.parseBoolean(args[1]));
+        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         ResultCollector resultCollector = component.doWorkOnItem(batch);
     
         System.out.println(resultCollector.toReport());

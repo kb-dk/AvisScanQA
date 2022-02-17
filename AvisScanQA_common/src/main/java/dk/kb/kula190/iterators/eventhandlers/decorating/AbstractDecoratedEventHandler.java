@@ -16,9 +16,12 @@ import java.time.temporal.ChronoField;
 import java.util.Objects;
 import java.util.Set;
 
+import static org.apache.commons.io.FilenameUtils.isExtension;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
+
 public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHandler {
     
-    protected static final DateTimeFormatter dateFormatter =
+    static final DateTimeFormatter dateFormatter =
             new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
                                           .appendValue(ChronoField.MONTH_OF_YEAR, 2)
                                           .appendValue(ChronoField.DAY_OF_MONTH, 2)
@@ -30,14 +33,13 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         super(resultCollector);
     }
     
-    @Override
     public final void handleNode(NodeParsingEvent event) throws IOException {
         String lastName = lastName(event.getName());
         if (batchName.get() == null) {
             //modersmaalet_19060701_19061231_RT1
             batchName.set(lastName);
             batchLocation.set(event.getLocation());
-            handleBatch(event, lastName);
+            handleBatch(event);
         } else if (isMETS(event)) {
             this.handleMets(event, batchName.get());
         } else if (isMODS(event)) {
@@ -52,57 +54,38 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
     
     
-    
     void handleSection(NodeParsingEvent event, String section) throws IOException {
         DecoratedNodeParsingEvent
                 decoratedEvent
                 = createDecoratedParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> sectionBegins(decoratedEvent);
-            case NodeEnd -> sectionEnds(decoratedEvent);
+            case NodeBegin -> sectionBegins(decoratedEvent,
+                                            decoratedEvent.getAvis(),
+                                            decoratedEvent.getEditionDate(),
+                                            decoratedEvent.getUdgave(),
+                                            decoratedEvent.getSectionName());
+            case NodeEnd -> sectionEnds(decoratedEvent,
+                                        decoratedEvent.getAvis(),
+                                        decoratedEvent.getEditionDate(),
+                                        decoratedEvent.getUdgave(),
+                                        decoratedEvent.getSectionName());
         }
     }
     
     private DecoratedNodeParsingEvent createDecoratedParsingEvent(NodeParsingEvent event) {
-        //modersmaalet_19060706_udg01_1.sektion
-        String[] splits = lastName(event.getName()).split("_", 5);
-        String avis = splits[0];
-        LocalDate editionDate = LocalDate.parse(splits[1], dateFormatter);
-        String udgave = splits[2];
-        String sectionName = null;
-        if (splits.length > 3) {
-            sectionName = splits[3];
-        }
-        Integer pageNumber = null;
-        if (splits.length > 4){
-            pageNumber = Integer.parseInt(splits[4]);
-        }
-        
-        String[] splits2 = batchName.get().split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits2[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits2[2], dateFormatter);
-        String avis2 = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
-    
-        
-        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event.getName(),
-                                                                                 event.getType(),
-                                                                                 event.getLocation(),
-                                                                                 avis,
-                                                                                 roundTrip,
-                                                                                 startDate,
-                                                                                 endDate,
-                                                                                 editionDate,
-                                                                                 udgave,
-                                                                                 sectionName,
-                                                                                 pageNumber);
+        DecoratedNodeParsingEvent decoratedEvent = new DecoratedNodeParsingEvent(event);
         return decoratedEvent;
     }
+    
+    private DecoratedAttributeParsingEvent createDecoratedParsingEvent(AttributeParsingEvent event) {
+        return new DecoratedAttributeParsingEvent(event);
+    }
+    
     
     
     @Override
     public final void handleFinish() throws IOException {
-        handleBatch(new NodeEndParsingEvent(batchName.get(), batchLocation.get()), batchName.get());
+        handleBatch(new NodeEndParsingEvent(batchName.get(), batchLocation.get()));
     }
     
     @Override
@@ -115,47 +98,61 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         handleNode(event);
     }
     
-    void handleBatch(NodeParsingEvent event, String lastName) throws IOException {
-        //modersmaalet_19060701_19061231_RT1
-        String[] splits = lastName.split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
-        String avis = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
+    void handleBatch(NodeParsingEvent event) throws IOException {
+        DecoratedNodeParsingEvent
+                decoratedEvent
+                = createDecoratedParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> batchBegins(event, avis, roundTrip, startDate, endDate);
-            case NodeEnd -> batchEnds(event, avis, roundTrip, startDate, endDate);
+            case NodeBegin -> batchBegins(decoratedEvent,
+                                          decoratedEvent.getAvis(),
+                                          decoratedEvent.getRoundTrip(),
+                                          decoratedEvent.getStartDate(),
+                                          decoratedEvent.getEndDate());
+            case NodeEnd -> batchEnds(decoratedEvent,
+                                      decoratedEvent.getAvis(),
+                                      decoratedEvent.getRoundTrip(),
+                                      decoratedEvent.getStartDate(),
+                                      decoratedEvent.getEndDate());
         }
     }
     
     void handleMets(NodeParsingEvent event, String batchID) throws IOException {
-        //modersmaalet_19060701_19061231_RT1
-        String[] splits = batchID.split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
-        String avis = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
+        DecoratedNodeParsingEvent
+                decoratedEvent
+                = createDecoratedParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> metsBegins((NodeBeginsParsingEvent) event, avis, roundTrip, startDate, endDate);
-            case NodeEnd -> metsEnds((NodeEndParsingEvent) event, avis, roundTrip, startDate, endDate);
+            case NodeBegin -> metsBegins(decoratedEvent,
+                                         decoratedEvent.getAvis(),
+                                         decoratedEvent.getRoundTrip(),
+                                         decoratedEvent.getStartDate(),
+                                         decoratedEvent.getEndDate());
+            case NodeEnd -> metsEnds(decoratedEvent,
+                                     decoratedEvent.getAvis(),
+                                     decoratedEvent.getRoundTrip(),
+                                     decoratedEvent.getStartDate(),
+                                     decoratedEvent.getEndDate());
         }
     }
     
     void handleMods(NodeParsingEvent event, String batchID) throws IOException {
-        //modersmaalet_19060701_19061231_RT1
-        String[] splits = batchID.split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
-        String avis = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
+        DecoratedNodeParsingEvent
+                decoratedEvent
+                = createDecoratedParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> modsBegins(event, avis, roundTrip, startDate, endDate);
-            case NodeEnd -> modsEnds(event, avis, roundTrip, startDate, endDate);
+            case NodeBegin -> modsBegins(decoratedEvent,
+                                         decoratedEvent.getAvis(),
+                                         decoratedEvent.getRoundTrip(),
+                                         decoratedEvent.getStartDate(),
+                                         decoratedEvent.getEndDate());
+            case NodeEnd -> modsEnds(decoratedEvent,
+                                     decoratedEvent.getAvis(),
+                                     decoratedEvent.getRoundTrip(),
+                                     decoratedEvent.getStartDate(),
+                                     decoratedEvent.getEndDate());
         }
     }
     
     void handleEdition(NodeParsingEvent event, String edition) throws IOException {
-        //modersmaalet_19060706_udg01
         DecoratedNodeParsingEvent
                 decoratedEvent
                 = createDecoratedParsingEvent(event);
@@ -177,12 +174,12 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                 handlePerPageFile(event);
             } else {
                 getResultCollector().addFailure(event.getName(),
-                                           "Unknown Filetype",
-                                           this.getClass().getSimpleName(),
-                                           "Encounted unexpected file");
+                                                "Unknown Filetype",
+                                                this.getClass().getSimpleName(),
+                                                "Encounted unexpected file");
             }
         } catch (IOException e) {
-            reportException(event,e);
+            reportException(event, e);
         }
     }
     
@@ -209,60 +206,153 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         return getLevel(event) == 2 && Objects.equals("MODS", lastName(event.getName()));
     }
     
-    String lastName(String name) {
+    static String lastName(String name) {
         return name.replaceFirst("^(.+?)/([^/]+)$", "$2");
     }
     
+    static String firstName(String name) {
+        return name.replaceFirst("^([^/]+)/.*$", "$1");
+    }
     
     public final int getLevel(ParsingEvent event) {
         return event.getName().split("/").length;
     }
     
     void handlePage(NodeParsingEvent event, String lastName) throws IOException {
-        //modersmaalet_19060706_udg01_1.sektion_0001
         DecoratedNodeParsingEvent
                 decoratedEvent
                 = createDecoratedParsingEvent(event);
         switch (event.getType()) {
-            case NodeBegin -> pageBegins(decoratedEvent, decoratedEvent.getAvis(), decoratedEvent.getEditionDate(), decoratedEvent.getUdgave(), decoratedEvent.getSectionName(), decoratedEvent.getPageNumber());
-            case NodeEnd -> pageEnds(decoratedEvent, decoratedEvent.getAvis(), decoratedEvent.getEditionDate(), decoratedEvent.getUdgave(), decoratedEvent.getSectionName(), decoratedEvent.getPageNumber());
+            case NodeBegin -> pageBegins(decoratedEvent,
+                                         decoratedEvent.getAvis(),
+                                         decoratedEvent.getEditionDate(),
+                                         decoratedEvent.getUdgave(),
+                                         decoratedEvent.getSectionName(),
+                                         decoratedEvent.getPageNumber());
+            case NodeEnd -> pageEnds(decoratedEvent,
+                                     decoratedEvent.getAvis(),
+                                     decoratedEvent.getEditionDate(),
+                                     decoratedEvent.getUdgave(),
+                                     decoratedEvent.getSectionName(),
+                                     decoratedEvent.getPageNumber());
         }
     }
     
     void handlePerPageFile(AttributeParsingEvent event) throws IOException {
-        //modersmaalet_19060701_udg01_MODERSMAALETS Søndagsblad_0001.mix.xml
-        
+        DecoratedAttributeParsingEvent
+                decoratedEvent
+                = createDecoratedParsingEvent(event);
         String name = lastName(event.getName());
-        String[] splits = name.split("_", 5);
-        String avis = splits[0];
-        LocalDate editionDate = LocalDate.parse(splits[1], dateFormatter);
-        String udgave = splits[2];
-        String sectionName = splits[3];
-        Integer pageNumber = Integer.parseInt(splits[4].split("\\.", 2)[0]);
         if (name.endsWith(".alto") || name.contains(".alto.xml")) {
-            altoFile(event, avis, editionDate, udgave, sectionName, pageNumber);
+            altoFile(decoratedEvent,
+                     decoratedEvent.getAvis(),
+                     decoratedEvent.getEditionDate(),
+                     decoratedEvent.getUdgave(),
+                     decoratedEvent.getSectionName(),
+                     decoratedEvent.getPageNumber());
         } else if (name.endsWith(".mix") || name.endsWith(".mix.xml")) {
-            mixFile(event, avis, editionDate, udgave, sectionName, pageNumber);
+            mixFile(decoratedEvent,
+                    decoratedEvent.getAvis(),
+                    decoratedEvent.getEditionDate(),
+                    decoratedEvent.getUdgave(),
+                    decoratedEvent.getSectionName(),
+                    decoratedEvent.getPageNumber());
         } else if (name.endsWith(".tif")) {
-            tiffFile(event, avis, editionDate, udgave, sectionName, pageNumber);
+            tiffFile(decoratedEvent,
+                     decoratedEvent.getAvis(),
+                     decoratedEvent.getEditionDate(),
+                     decoratedEvent.getUdgave(),
+                     decoratedEvent.getSectionName(),
+                     decoratedEvent.getPageNumber());
         } else if (name.endsWith(".pdf")) {
-            pdfFile(event, avis, editionDate, udgave, sectionName, pageNumber);
+            pdfFile(decoratedEvent,
+                    decoratedEvent.getAvis(),
+                    decoratedEvent.getEditionDate(),
+                    decoratedEvent.getUdgave(),
+                    decoratedEvent.getSectionName(),
+                    decoratedEvent.getPageNumber());
         }
     }
     
     void handleMetsModsFile(AttributeParsingEvent event) throws IOException {
         String name = lastName(event.getName());
-        String[] splits = batchName.get().split("_", 4);
-        LocalDate startDate = LocalDate.parse(splits[1], dateFormatter);
-        LocalDate endDate = LocalDate.parse(splits[2], dateFormatter);
-        String avis = splits[0];
-        String roundTrip = splits[3].replaceFirst("^RT", "");
+        
+        DecoratedAttributeParsingEvent
+                decoratedEvent
+                = createDecoratedParsingEvent(event);
+        
         if (name.endsWith(".mets") || name.endsWith(".mets.xml")) {
-            metsFile(event, avis, roundTrip, startDate, endDate);
+            metsFile(decoratedEvent, decoratedEvent.getAvis(),
+                     decoratedEvent.getRoundTrip(), decoratedEvent.getStartDate(), decoratedEvent.getEndDate());
         } else if (name.endsWith(".mods") || name.endsWith(".mods.xml")) {
-            modsFile(event, avis, roundTrip, startDate, endDate);
+            modsFile(decoratedEvent, decoratedEvent.getAvis(),
+                     decoratedEvent.getRoundTrip(), decoratedEvent.getStartDate(), decoratedEvent.getEndDate());
         }
     }
+    
+    
+    public abstract void batchBegins(DecoratedNodeParsingEvent event,
+                                     String avis,
+                                     String roundTrip,
+                                     LocalDate startDate,
+                                     LocalDate endDate) throws IOException;
+    
+    
+    public abstract void batchEnds(DecoratedNodeParsingEvent event,
+                                   String avis,
+                                   String roundTrip,
+                                   LocalDate startDate,
+                                   LocalDate endDate) throws IOException;
+    
+    
+    public abstract void modsBegins(DecoratedNodeParsingEvent event,
+                                    String avis,
+                                    String roundTrip,
+                                    LocalDate startDate,
+                                    LocalDate endDate) throws IOException;
+    
+    public abstract void modsFile(DecoratedAttributeParsingEvent event,
+                                  String avis,
+                                  String roundTrip,
+                                  LocalDate startDate,
+                                  LocalDate endDate) throws IOException;
+    
+    public abstract void modsEnds(DecoratedNodeParsingEvent event,
+                                  String avis,
+                                  String roundTrip,
+                                  LocalDate startDate,
+                                  LocalDate endDate) throws IOException;
+    
+    
+    public abstract void metsBegins(DecoratedNodeParsingEvent event,
+                                    String avis,
+                                    String roundTrip,
+                                    LocalDate startDate,
+                                    LocalDate endDate) throws IOException;
+    
+    
+    public abstract void metsFile(DecoratedAttributeParsingEvent event,
+                                  String avis,
+                                  String roundTrip,
+                                  LocalDate startDate,
+                                  LocalDate endDate) throws IOException;
+    
+    public abstract void metsEnds(DecoratedNodeParsingEvent event,
+                                  String avis,
+                                  String roundTrip,
+                                  LocalDate startDate,
+                                  LocalDate endDate) throws IOException;
+    
+    
+    public abstract void editionBegins(DecoratedNodeParsingEvent event,
+                                       String avis,
+                                       LocalDate editionDate,
+                                       String editionName) throws IOException;
+    
+    public abstract void editionEnds(DecoratedNodeParsingEvent event,
+                                     String avis,
+                                     LocalDate editionDate,
+                                     String editionName) throws IOException;
     
     
     public abstract void sectionBegins(DecoratedNodeParsingEvent event,
@@ -287,122 +377,25 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                   String udgave, String sectionName, Integer pageNumber) throws IOException;
     
     
-    public abstract void mixFile(AttributeParsingEvent event,
+    public abstract void mixFile(DecoratedAttributeParsingEvent event,
                                  String avis,
                                  LocalDate editionDate,
                                  String udgave, String sectionName, Integer pageNumber) throws IOException;
     
-    public abstract void tiffFile(AttributeParsingEvent event,
+    public abstract void tiffFile(DecoratedAttributeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
                                   String udgave, String sectionName, Integer pageNumber) throws IOException;
     
-    public abstract void altoFile(AttributeParsingEvent event,
+    public abstract void altoFile(DecoratedAttributeParsingEvent event,
                                   String avis,
                                   LocalDate editionDate,
                                   String udgave, String sectionName, Integer pageNumber) throws IOException;
     
-    public abstract void pdfFile(AttributeParsingEvent event,
+    public abstract void pdfFile(DecoratedAttributeParsingEvent event,
                                  String avis,
                                  LocalDate editionDate,
                                  String udgave, String sectionName, Integer pageNumber) throws IOException;
-    
-    
-    public abstract void batchBegins(DecoratedNodeParsingEvent event,
-                                     String avis,
-                                     String roundTrip,
-                                     LocalDate startDate,
-                                     LocalDate endDate) throws IOException;
-    
-    
-    public abstract void batchEnds(DecoratedNodeParsingEvent event,
-                                   String avis,
-                                   String roundTrip,
-                                   LocalDate startDate,
-                                   LocalDate endDate) throws IOException;
-    
-    
-    public abstract void modsBegins(DecoratedNodeParsingEvent event,
-                                    String avis,
-                                    String roundTrip,
-                                    LocalDate startDate,
-                                    LocalDate endDate) throws IOException;
-    
-    public abstract void modsFile(AttributeParsingEvent event,
-                                  String avis,
-                                  String roundTrip,
-                                  LocalDate startDate,
-                                  LocalDate endDate) throws IOException;
-    
-    public abstract void modsEnds(DecoratedNodeParsingEvent event,
-                                  String avis,
-                                  String roundTrip,
-                                  LocalDate startDate,
-                                  LocalDate endDate) throws IOException;
-    
-    
-    public abstract void metsBegins(DecoratedNodeParsingEvent event,
-                                    String avis,
-                                    String roundTrip,
-                                    LocalDate startDate,
-                                    LocalDate endDate) throws IOException;
-    
-    
-    public abstract void metsFile(AttributeParsingEvent event,
-                                  String avis,
-                                  String roundTrip,
-                                  LocalDate startDate,
-                                  LocalDate endDate) throws IOException;
-    
-    public abstract void metsEnds(DecoratedNodeParsingEvent event,
-                                  String avis,
-                                  String roundTrip,
-                                  LocalDate startDate,
-                                  LocalDate endDate) throws IOException;
-    
-    
-    public abstract void editionBegins(DecoratedNodeParsingEvent event,
-                                       String avis,
-                                       LocalDate editionDate,
-                                       String editionName) throws IOException;
-    
-    public abstract void editionEnds(DecoratedNodeParsingEvent event,
-                                     String avis,
-                                     LocalDate editionDate,
-                                     String editionName) throws IOException;
-    
-    
-    public abstract void pageBegins(DecoratedNodeParsingEvent event,
-                                    String avis,
-                                    LocalDate editionDate,
-                                    String udgave, Integer pageNumber) throws IOException;
-    
-    public abstract void pageEnds(DecoratedNodeParsingEvent event,
-                                  String avis,
-                                  LocalDate editionDate,
-                                  String udgave, Integer pageNumber) throws IOException;
-    
-    
-    public abstract void mixFile(AttributeParsingEvent event,
-                                 String avis,
-                                 LocalDate editionDate,
-                                 String udgave, Integer pageNumber) throws IOException;
-    
-    public abstract void tiffFile(AttributeParsingEvent event,
-                                  String avis,
-                                  LocalDate editionDate,
-                                  String udgave, Integer pageNumber) throws IOException;
-    
-    public abstract void altoFile(AttributeParsingEvent event,
-                                  String avis,
-                                  LocalDate editionDate,
-                                  String udgave, Integer pageNumber) throws IOException;
-    
-    public abstract void pdfFile(AttributeParsingEvent event,
-                                 String avis,
-                                 LocalDate editionDate,
-                                 String udgave, Integer pageNumber) throws IOException;
-    
     
     
 }

@@ -2,9 +2,9 @@ package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PageStructureChecker extends DecoratedEventHandlerWithSections {
+public class PageStructureChecker extends DecoratedEventHandler {
     private InheritableThreadLocal<Set<String>> types = new InheritableThreadLocal<>();
     
     public PageStructureChecker(ResultCollector resultCollector) {
@@ -22,7 +22,7 @@ public class PageStructureChecker extends DecoratedEventHandlerWithSections {
     
     
     @Override
-    public void pageBegins(NodeParsingEvent event,
+    public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
                            LocalDate editionDate,
                            String udgave,
@@ -33,7 +33,7 @@ public class PageStructureChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void pageEnds(NodeParsingEvent event,
+    public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -50,7 +50,7 @@ public class PageStructureChecker extends DecoratedEventHandlerWithSections {
     
     
     @Override
-    public void mixFile(AttributeParsingEvent event,
+    public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
                         LocalDate editionDate,
                         String udgave,
@@ -60,7 +60,7 @@ public class PageStructureChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void altoFile(AttributeParsingEvent event,
+    public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
@@ -70,7 +70,7 @@ public class PageStructureChecker extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void tiffFile(AttributeParsingEvent event,
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,

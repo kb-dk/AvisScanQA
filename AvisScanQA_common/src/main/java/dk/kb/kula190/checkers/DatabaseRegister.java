@@ -3,8 +3,9 @@ package dk.kb.kula190.checkers;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandlerWithSections;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class DatabaseRegister extends DecoratedEventHandlerWithSections {
+public class DatabaseRegister extends DecoratedEventHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final Driver jdbcDriver;
     private final String jdbcURL;
@@ -47,7 +48,7 @@ public class DatabaseRegister extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void batchBegins(NodeParsingEvent event,
+    public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
@@ -74,7 +75,7 @@ public class DatabaseRegister extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void batchEnds(NodeParsingEvent event,
+    public void batchEnds(DecoratedNodeParsingEvent event,
                           String avis,
                           String roundTrip,
                           LocalDate startDate,
@@ -90,7 +91,7 @@ public class DatabaseRegister extends DecoratedEventHandlerWithSections {
     }
     
     @Override
-    public void tiffFile(AttributeParsingEvent event,
+    public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
                          LocalDate editionDate,
                          String udgave,
