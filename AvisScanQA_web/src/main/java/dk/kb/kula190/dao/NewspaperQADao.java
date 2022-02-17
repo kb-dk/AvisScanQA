@@ -93,7 +93,7 @@ public class NewspaperQADao {
     public List<NewspaperDate> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}', in year {}", id, year);
         
-        String SQL = "select edition_date,count(*)  from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
+        String SQL = "select edition_date,count(*),string_agg(problems, '\\n')  from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
         
         try (Connection conn = connectionPool.getConnection();
                 PreparedStatement ps = conn.prepareStatement(SQL)) {
@@ -108,10 +108,13 @@ public class NewspaperQADao {
     
                        java.sql.Date date = res.getDate(1);
                        int count = res.getInt(2);
+                       String problems = res.getString(3).translateEscapes().trim();
                        
                        NewspaperDate result = new NewspaperDate();
                        result.setDate(date.toLocalDate());
                        result.setPageCount(count);
+                       result.setProblems(problems);
+                       
                        list.add(result);
                    }
                    return list;

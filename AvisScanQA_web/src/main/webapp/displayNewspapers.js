@@ -25,7 +25,7 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
                 var calElem = "#month" + i;
-                var html = "<h3>Datoer i " + datesInYear[i].name + "</h3>";
+                var html = "<h3>" + datesInYear[i].name + "</h3>";
                 html += buildCalendar(currentyear, (i + 1), datesInYear[i].days, newspaper);
                 $(calElem).html(html);
             }
@@ -40,7 +40,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
-        daysInMonth.push({day: moment(d), available: false, count: 0});
+        daysInMonth.push({day: moment(d), available: false, count: 0, problems: ""});
         d.add(1, 'days');
     }
     for (let i = 0; i < availableDates.length; i++) {
@@ -48,6 +48,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
         let element = daysInMonth[availableDate.day.date() - 1];
         element.available = true;
         element.count = availableDate.count;
+        element.problems = availableDate.problems;
     }
 
     var calHtml = "";
@@ -78,7 +79,13 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         if (dayInMonth.available) {
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
-            calHtml += "<a title='"+dayInMonth.count+" pages' class='btn btn-success btn-sm' style='padding-left: 0; padding-right: 0' href='"+link+"'> " + date + " </a>";
+            calHtml += "<a title='"+dayInMonth.count+" pages' style='padding-left: 0; padding-right: 0' href='"+link+"' ";
+            if (dayInMonth.problems.length > 0){
+                calHtml += " class='btn btn-warning btn-sm' "
+            } else {
+                calHtml += " class='btn btn-success btn-sm' "
+            }
+            calHtml += " > " + date + " </a>";
         } else {
             calHtml += "<button type='button' class='btn btn-light btn-sm' style='padding-left: 0; padding-right: 0'> " + date + " </button>";
         }
@@ -111,10 +118,9 @@ function splitDatesIntoMonths(dates) {
     for (d in dates) {
         let NewspaperDate = dates[d]; //as [ 1920 , 1 ,2 ] with first month as 1
         let date = NewspaperDate.date;
-        let count = NewspaperDate.pageCount
         date[1] -= 1; //javascript uses 0-indexed months, so adapt
         let day = moment(date);
-        months[day.month()].days.push({"day":day,"count":count});
+        months[day.month()].days.push({"day":day,"count":NewspaperDate.pageCount,"problems":NewspaperDate.problems});
     }
     return months;
 }

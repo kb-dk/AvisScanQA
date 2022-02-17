@@ -151,6 +151,8 @@ components:
           format: date
         pageCount:
           type: integer
+        problems:
+          type: string
 
     NewspaperEntityMapping: # <---- dictionary
       type: object
