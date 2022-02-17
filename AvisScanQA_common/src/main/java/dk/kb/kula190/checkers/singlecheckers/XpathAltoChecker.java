@@ -14,6 +14,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class XpathAltoChecker extends DecoratedEventHandlerWithSections {
     public XpathAltoChecker(ResultCollector resultCollector) {
@@ -68,18 +70,28 @@ public class XpathAltoChecker extends DecoratedEventHandlerWithSections {
         checkWithinRange(event,
                 "INVALID_ALTO",
                 Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
-                10000,
+                4000,
                 50000,
                 "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
         //Checks page ID is corresponding with filename.
-        /*
+
         checkEquals(event,
                 "INVALID_ALTO",
                 pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
-                );
+                //"P"+regexOnEventName(Pattern.compile("([1-9]{1,4}).alto"),event.getName()),
+                "P"+pageNumber,
+                "ALTO Page ID is not {required} but was {actual}");
 
-         */
+
     }
-
+    /*
+    private String regexOnEventName(Pattern p,String text){
+        Matcher m = p.matcher(text);
+        if(m.find()){
+            return m.group(1);
+        }
+        return "";
+    }
+*/
     
 }

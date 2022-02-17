@@ -60,7 +60,7 @@ public class XpathMixChecker extends DecoratedEventHandlerWithSections {
         if(width.compareTo(height) == -1){
             resultCollectorAddFailure("Height is greater than width",event);
         }
-        */
+
 
         String colorSpace = xpath.selectString(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:PhotometricInterpretation/mix:colorSpace");
         //TODO Should always be RGB. Compare
