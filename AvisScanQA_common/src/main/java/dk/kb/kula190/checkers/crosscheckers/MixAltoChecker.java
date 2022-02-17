@@ -15,6 +15,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
@@ -37,6 +40,10 @@ public class MixAltoChecker extends DecoratedEventHandler {
     //part of the state. This is the size of the tif file, as reported by mix
     private ThreadLocal<String> MixFileName = new ThreadLocal<>();
     private ThreadLocal<String> AltoFileName = new ThreadLocal<>();
+    private ThreadLocal<Integer> AltoImageHeight = new ThreadLocal<>();
+    private ThreadLocal<Integer> AltoImageWidth = new ThreadLocal<>();
+    private ThreadLocal<Integer> MixImageHeight = new ThreadLocal<>();
+    private ThreadLocal<Integer> MixImageWidth = new ThreadLocal<>();
 
 
 
@@ -50,7 +57,10 @@ public class MixAltoChecker extends DecoratedEventHandler {
         //clear the state
         MixFileName.set(null);
         AltoFileName.set(null);
-
+        AltoImageHeight.set(null);
+        AltoImageWidth.set(null);
+        MixImageHeight.set(null);
+        MixImageWidth.set(null);
 
     }
 
@@ -61,7 +71,7 @@ public class MixAltoChecker extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
-        Document document = handleDocument(event);
+        Document document = handleDocument(event); // error with this, why doesn't this work...
 
         XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
 
@@ -69,6 +79,12 @@ public class MixAltoChecker extends DecoratedEventHandler {
         String fileName = xpath.selectString(document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:ObjectIdentifier/mix:objectIdentifierValue");
         MixFileName.set(removeExtension(lastName(fileName)));
+
+        Integer mixHeight = xpath.selectInteger(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageHeight");
+        MixImageHeight.set(mixHeight);
+        Integer mixWidth = xpath.selectInteger(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageWidth");
+        MixImageWidth.set(mixWidth);
+
     }
 
     @Override
@@ -79,12 +95,34 @@ public class MixAltoChecker extends DecoratedEventHandler {
                          String sectionName,
                          Integer pageNumber) throws IOException {
         Document document = handleDocument(event);
-        XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
+        XPathSelector xpath = XpathUtils.createXPathSelector("alto", "http://www.loc.gov/alto/v2");
 
 
         String fileName = xpath.selectString(document,
                 "/alto/Description/sourceImageInformation/fileName");
         AltoFileName.set(removeExtension(lastName(fileName)));
+
+
+        //TODO alto: before each in that xpath
+        List<String> lines = Arrays.stream(xpath.selectString(document, "/alto/Description/OCRProcessing/ocrProcessingStep/processingStepSettings").split("\n")).toList();
+
+        //Line is "width:2180" | gets -1
+        Integer width = Integer.parseInt(lines.stream()
+                                              .filter(line -> line.startsWith("width:"))
+                                              .map(line -> line.split(":", 2)[1].trim())
+                                              .findFirst()
+                                              .orElse("-1"));
+        AltoImageWidth.set(width);
+        //Line is "height:2786" | gets -1
+        Integer height = Integer.parseInt(lines.stream()
+                                               .filter(line -> line.startsWith("height:"))
+                                               .map(line -> line.split(":", 2)[1].trim())
+                                               .findFirst()
+                                               .orElse("-1"));
+        AltoImageHeight.set(height);
+        //ALTO PAGE HEIGHT / (ALTO MEASUREMENT UNIT / DPI) = TIFF HEIGHT
+
+        //DPI from MIX or TIFF METADATA
 
     }
 
@@ -96,6 +134,10 @@ public class MixAltoChecker extends DecoratedEventHandler {
                          String sectionName,
                          Integer pageNumber) {
         checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixFileName.get(),AltoFileName.get(),"Filename on mix and alto are not the same Mix: {actual} Alto: {expected}");
+        checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixImageWidth.get(),AltoImageWidth.get(),"Mix image width was {actual} Alto image width was {expected}");
+        checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixImageHeight.get(),AltoImageHeight.get(),"Mix image height was {actual} Alto image height was {expected}");
+
+
 
     }
     private Document handleDocument(DecoratedAttributeParsingEvent event) throws IOException {
