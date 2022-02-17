@@ -41,8 +41,8 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
             handleSection(event);
         } else if (isPage(event)) {
             handlePage(event);
-        } else {
-            System.out.println(lastName);
+        } else if (event.getName().equals(batchName.get())){
+            handleBatch(event);
         }
     }
     
@@ -66,7 +66,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     
     @Override
     public final void handleFinish() throws IOException {
-        handleBatch(new NodeEndParsingEvent(batchName.get(), batchLocation.get()));
+        //handleBatch(new NodeEndParsingEvent(batchName.get(), batchLocation.get()));
     }
     
     @Override

@@ -121,7 +121,7 @@ public class EventRunner implements Runnable {
             } catch (Exception e) {
                 log.error("Caught Exception", e);
                 //TODO why can we not get an event for this?
-                resultCollector.addFailure(null,
+                resultCollector.addFailure(new NodeEndParsingEvent("Finished"),
                                            EXCEPTION,
                                            handler.getClass().getSimpleName(),
                                            UNEXPECTED_ERROR + e.toString());
