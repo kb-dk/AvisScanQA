@@ -5,7 +5,7 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.time.LocalDate;
 
-public class DecoratedNodeParsingEvent extends NodeParsingEvent {
+public class DecoratedNodeParsingEvent extends NodeParsingEvent implements DecoratedParsingEvent{
     
     private String avis;
     private String roundTrip;
@@ -75,34 +75,42 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent {
         this.pageNumber  = pageNumber;
     }
     
+    @Override
     public String getAvis() {
         return avis;
     }
     
+    @Override
     public String getRoundTrip() {
         return roundTrip;
     }
     
+    @Override
     public LocalDate getStartDate() {
         return startDate;
     }
     
+    @Override
     public LocalDate getEndDate() {
         return endDate;
     }
     
+    @Override
     public LocalDate getEditionDate() {
         return editionDate;
     }
     
+    @Override
     public String getUdgave() {
         return udgave;
     }
     
+    @Override
     public String getSectionName() {
         return sectionName;
     }
     
+    @Override
     public Integer getPageNumber() {
         return pageNumber;
     }

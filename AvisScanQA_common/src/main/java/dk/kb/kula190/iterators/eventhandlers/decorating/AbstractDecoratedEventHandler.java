@@ -195,7 +195,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                  decoratedEvent.getSectionName(),
                                  decoratedEvent.getPageNumber());
                 }
-                default -> getResultCollector().addFailure(event,
+                default -> addFailure(event,
                                                            "Unknown Filetype",
                                                            this.getClass().getSimpleName(),
                                                            "Encountered unexpected file");

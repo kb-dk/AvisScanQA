@@ -39,7 +39,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
 
 
         } catch (IOException | SAXException e) {
-            getResultCollector().addFailure(event,
+            addFailure(event,
                     EventRunner.EXCEPTION,
                     this.getClass().getSimpleName(),
                     EventRunner.UNEXPECTED_ERROR + e,
@@ -99,7 +99,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
 
             @Override
             public void error(SAXParseException exception) throws SAXException {
-                getResultCollector().addFailure(parsingEvent,
+                addFailure(parsingEvent,
                         name+" Schema",
                         XmlSchemaChecker.class.getSimpleName(),
                         name+" error encountered",
@@ -108,7 +108,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
 
             @Override
             public void fatalError(SAXParseException exception) throws SAXException {
-                getResultCollector().addFailure(parsingEvent,
+                addFailure(parsingEvent,
                         EventRunner.EXCEPTION,
                         this.getClass().getSimpleName(),
                         EventRunner.UNEXPECTED_ERROR + exception,

@@ -6,9 +6,12 @@ import dk.kb.kula190.generated.Failures;
 import dk.kb.kula190.generated.ObjectFactory;
 import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.generated.Result;
+import dk.kb.kula190.iterators.common.AttributeParsingEvent;
+import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
 import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -128,13 +131,7 @@ public class ResultCollector {
                                         String description,
                                         String... details) {
         resultCount++; //The count of the current failure, starting at 1.
-        log.info(
-                "Adding failure for " +
-                "resource '{}' " +
-                "of type '{}' " +
-                "from component '{}' " +
-                "with description '{}' " +
-                "and details '{}'", fileReference, type, component, description, String.join("\n", details));
+       
         List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
         
@@ -175,13 +172,18 @@ public class ResultCollector {
     
     private Reference createSpecificReference(ParsingEvent fileReference) {
         Reference reference = new Reference();
-        if (fileReference instanceof DecoratedAttributeParsingEvent decoratedParsingEvent) {
+        if (fileReference instanceof DecoratedParsingEvent decoratedParsingEvent) {
             reference.setAvis(decoratedParsingEvent.getAvis());
             reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
             reference.setUdgave(decoratedParsingEvent.getUdgave());
             reference.setSectionName(decoratedParsingEvent.getSectionName());
             reference.setPageNumber(decoratedParsingEvent.getPageNumber());
-        } else if (fileReference instanceof DecoratedNodeParsingEvent decoratedParsingEvent) {
+        } else {
+            DecoratedParsingEvent decoratedParsingEvent = switch (fileReference.getType()) {
+                case NodeEnd -> new DecoratedNodeParsingEvent((NodeParsingEvent) fileReference);
+                case NodeBegin -> new DecoratedNodeParsingEvent((NodeParsingEvent) fileReference);
+                case Attribute -> new DecoratedAttributeParsingEvent((AttributeParsingEvent) fileReference);
+            };
             reference.setAvis(decoratedParsingEvent.getAvis());
             reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
             reference.setUdgave(decoratedParsingEvent.getUdgave());

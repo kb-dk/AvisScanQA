@@ -27,8 +27,6 @@ class EventRunnerTest {
             specificBatch
             = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
   
-    private TreeIterator iterator;
-    
     
     @Test
     void run() throws Exception {
@@ -67,25 +65,6 @@ class EventRunnerTest {
         System.out.println(resultCollector.toReport());
         
         
-        
-        RunnableComponent databaseComponent = new RunnableComponent() {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
-
-                        new DatabaseRegister(resultCollector,
-                                             new Driver(),
-                                             "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel",
-                                             "avisscqa",
-                                             "",
-                                             resultCollector.getFailures())
-                              );
-            }
-
-        };
-        //ResultCollector dbResultCollector = databaseComponent.doWorkOnItem(batch);
-    
-    
       
     }
 }

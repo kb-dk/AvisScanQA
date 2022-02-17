@@ -6,6 +6,8 @@ import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.activation.DataHandler;
 import java.io.IOException;
@@ -17,6 +19,8 @@ import java.util.stream.IntStream;
  * Abstract tree event handler, with no-op methods
  */
 public abstract class DefaultTreeEventHandler implements TreeEventHandler {
+    
+    protected final Logger log = LoggerFactory.getLogger(this.getClass());
     
     private ResultCollector resultCollector;
     
@@ -50,8 +54,8 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                String description) {
         String actualString = asString(actual);
         String expectedString = asString(expected);
-        if (!actualString.equalsIgnoreCase(actualString)) {
-            getResultCollector().addFailure(event,
+        if (!actualString.equalsIgnoreCase(expectedString)) {
+            addFailure(event,
                                             type,
                                             this.getClass().getSimpleName(),
                                             description.replace("{expected}", expectedString).replace("{actual}", actualString));
@@ -73,7 +77,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 Double required,
                                 String description) {
         if (actual < required) {
-            getResultCollector().addFailure(event,
+            addFailure(event,
                                             type,
                                             this.getClass().getSimpleName(),
                                             description.replace("{required}", required.toString()).replace("{actual}", actual.toString()));
@@ -87,7 +91,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 String description) {
 
         if (actual < requiredMin || actual > requiredMax) {
-            getResultCollector().addFailure(event,
+            addFailure(event,
                     type,
                     this.getClass().getSimpleName(),
                     description.replace("{requiredMin}", requiredMin.toString()).replace("{actual}", actual.toString()).replace("{requiredMax}",requiredMax.toString()));
@@ -95,13 +99,30 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
     
     protected void reportException(ParsingEvent event, Exception e){
-        getResultCollector().addFailure(event,
+        addFailure(event,
                                         EventRunner.EXCEPTION,
                                         this.getClass().getSimpleName(),
                                         EventRunner.UNEXPECTED_ERROR + e,
                                         Arrays.stream(e.getStackTrace())
                                               .map(StackTraceElement::toString)
                                               .collect(Collectors.joining("\n")));
+    }
+    
+    
+    public void addFailure(ParsingEvent fileReference,
+                           String type,
+                           String component,
+                           String description,
+                           String... details){
+        log.warn(
+                "Adding failure for " +
+                "resource '{}' " +
+                "of type '{}' " +
+                "from component '{}' " +
+                "with description '{}' " +
+                "and details '{}'", fileReference, type, component, description, String.join("\n", details));
+        
+        getResultCollector().addFailure(fileReference, type, component, description, details);
     }
     
 }

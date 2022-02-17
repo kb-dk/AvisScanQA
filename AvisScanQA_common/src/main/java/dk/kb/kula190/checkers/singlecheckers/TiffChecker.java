@@ -30,7 +30,7 @@ public class TiffChecker extends DecoratedEventHandler {
         if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)){
             return;
         }
-        log.debug("Checking {}", event.getLocation());
+        log.info("Checking {}", event.getLocation());
     
     
         YAML result;

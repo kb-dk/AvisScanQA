@@ -9,7 +9,7 @@ import java.time.LocalDate;
 
 import static org.apache.commons.io.FilenameUtils.isExtension;
 
-public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
+public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implements DecoratedParsingEvent {
     
     private final AttributeParsingEvent delegate;
     private final String avis;
@@ -88,34 +88,38 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent {
         return delegate.getChecksum();
     }
     
+    @Override
     public String getAvis() {
         return avis;
     }
     
+    @Override
     public String getRoundTrip() {
         return roundTrip;
     }
     
+    @Override
     public LocalDate getStartDate() {
         return startDate;
     }
-    
+    @Override
     public LocalDate getEndDate() {
         return endDate;
     }
-    
+    @Override
     public LocalDate getEditionDate() {
         return editionDate;
     }
-    
+    @Override
     public String getUdgave() {
         return udgave;
     }
-    
+    @Override
     public String getSectionName() {
         return sectionName;
     }
     
+    @Override
     public Integer getPageNumber() {
         return pageNumber;
     }

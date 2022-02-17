@@ -13,11 +13,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PageStructureChecker extends DecoratedEventHandler {
-    private InheritableThreadLocal<Set<String>> types = new InheritableThreadLocal<>();
+    private ThreadLocal<Set<String>> types = new ThreadLocal<>();
     
     public PageStructureChecker(ResultCollector resultCollector) {
         super(resultCollector);
-        types.set(new HashSet<>());
     }
     
     
@@ -29,7 +28,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                            String sectionName,
                            Integer pageNumber) throws IOException {
         //Checkes that each page consists of MIX ALTO TIFF
-        types.get().clear();
+        types.set(new HashSet<>());
     }
     
     @Override
@@ -39,12 +38,13 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        if (!types.get().containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
-            getResultCollector().addFailure(event,
+        final Set<String> strings = types.get();
+        if (!strings.containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
+            addFailure(event,
                                             "Missing files per page",
                                             this.getClass().getSimpleName(),
                                             "Must contain mix, alto and tiff files",
-                                            types.get().stream().map(x -> "" + x).collect(Collectors.joining(",")));
+                                            strings.stream().map(x -> "" + x).collect(Collectors.joining(",")));
         }
     }
     

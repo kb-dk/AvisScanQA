@@ -6,6 +6,8 @@ import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
+import dk.kb.util.json.JSON;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
@@ -30,10 +32,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String jdbcURL;
     private final String jdbcUser;
     private final String jdbcPassword;
-    private final Map<Reference,Failure> registeredFailures;
-    
+    private final List<Failure> registeredFailures;
+
     private BasicDataSource dataSource;
-    
+
     public DatabaseRegister(ResultCollector resultCollector,
                             Driver jdbcDriver,
                             String jdbcURL,
@@ -45,9 +47,9 @@ public class DatabaseRegister extends DecoratedEventHandler {
         this.jdbcURL      = jdbcURL;
         this.jdbcUser     = jdbcUser;
         this.jdbcPassword = jdbcPassword;
-        this.registeredFailures = registeredFailures.stream().collect(Collectors.toMap(Failure::getReference, f->f));
+        this.registeredFailures = registeredFailures;
     }
-    
+
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
@@ -55,26 +57,26 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             LocalDate startDate,
                             LocalDate endDate) {
         dataSource = new BasicDataSource();
-        
+
         if (jdbcUser != null) {
             dataSource.setUsername(jdbcUser);
         }
-        
+
         if (jdbcPassword != null) {
             dataSource.setPassword(jdbcPassword);
         }
         dataSource.setUrl(jdbcURL);
-        
+
         dataSource.setDefaultReadOnly(false);
         dataSource.setDefaultAutoCommit(false);
-        
+
         dataSource.setRemoveAbandonedTimeout(60); // 60 sec
         dataSource.setMaxWaitMillis(60000); // 1 min
         dataSource.setMaxTotal(2); // Change to 10 when running as WAR
-        
+
         dataSource.setDriver(jdbcDriver);
     }
-    
+
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
                           String avis,
@@ -85,26 +87,23 @@ public class DatabaseRegister extends DecoratedEventHandler {
             if (dataSource != null) {
                 dataSource.close();
             }
+
+
         } catch (Exception e) {
             // ignore errors during shutdown, we cant do anything about it anyway
             log.error("shutdown failed", e);
         }
     }
-    
-    private boolean matchThisPage(Reference reference, DecoratedNodeParsingEvent event){
+
+    private boolean matchThisPage(Reference reference, DecoratedParsingEvent event){
         return Objects.equals(event.getAvis(), reference.getAvis()) &&
-               Objects.equals(event.getEditionDate(), reference.getEditionDate()) &&
+               Objects.equals(event.getEditionDate().toString(), reference.getEditionDate()) &&
                Objects.equals(event.getUdgave(), reference.getUdgave()) &&
-               Objects.equals(event.getSectionName(), reference.getSectionName())
-                //TODO
-                ;
-        
+               Objects.equals(event.getSectionName(), reference.getSectionName()) &&
+               Objects.equals(event.getPageNumber(), reference.getPageNumber());
+
     }
-    
-    private boolean matchThisPage(Reference reference, DecoratedAttributeParsingEvent event){
-    return false;
-    }
-    
+
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
@@ -112,13 +111,18 @@ public class DatabaseRegister extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        
-        
+        List<Failure> failuresForThisPage = registeredFailures.stream()
+                                                              .filter(failure -> matchThisPage(failure.getReference(),
+                                                                                               event)).toList();
+
+        String failuresMessage = failuresForThisPage.stream()
+                                                    .map(failure -> JSON.toJson(failure, false))
+                                                    .collect(Collectors.joining("\n"));
         try (Connection connection = dataSource.getConnection()) {
-            
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, fraktur) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) "
-                    + "ON CONFLICT DO NOTHING ")) {
+                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, fraktur, problems) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
                 preparedStatement.setString(param++, event.getLocation().substring(event.getLocation().indexOf(avis)));
@@ -146,11 +150,14 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, "");
                 //fraktur
                 preparedStatement.setBoolean(param++, true);
-                
+
+                //problems
+                preparedStatement.setString(param++, failuresMessage);
+
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-            
+
         } catch (SQLException e) {
             //TODO
             throw new IOException(e);

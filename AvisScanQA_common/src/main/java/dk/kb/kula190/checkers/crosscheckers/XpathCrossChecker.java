@@ -94,8 +94,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
         TifFileNameMix.set(tiffFileName);
 
-        //TODO extract other params from mix file
-        ChecksumMix.set(event.getChecksum());
+        
+        ChecksumMix.set(xpath.selectString(document, "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest"));
         //* height vs width?
     }
 
@@ -123,10 +123,10 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) {
-        checkEquals(event, "TIFF_MIX_ERROR", TifSizeActual.get(), TifSizePerMix.get(), "mix metadata does not match actual tif file"); //TODO values in descriptin
+        checkEquals(event, "TIFF_MIX_ERROR", TifSizeActual.get(), TifSizePerMix.get(), "mix metadata (file size: {expected}) does not match actual tif file size {actual}"); //TODO values in descriptin
 
-        checkEquals(event, "TIFF_MIX_ERROR", TifFileName.get(), TifFileNameMix.get(), "mix metadata does not match actual tif file"); //TODO values in descriptin
+        checkEquals(event, "TIFF_MIX_ERROR", TifFileName.get(), TifFileNameMix.get(), "mix metadata (file name {expected}) does not match actual tif file name {actual}"); //TODO values in descriptin
 
-        checkEquals(event, "TIFF_MIX_ERROR",ChecksumTif.get(),ChecksumMix.get(), "mix metadata does not match actual tif file");
+        checkEquals(event, "TIFF_MIX_ERROR",ChecksumTif.get(),ChecksumMix.get(), "mix metadata (checksum {expected}) does not match actual tif file checksum {actual}");
     }
 }

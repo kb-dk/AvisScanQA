@@ -1,12 +1,14 @@
 package dk.kb.kula190.iterators.eventhandlers.decorating;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.iterators.common.ParsingEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
 
 public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
-    
     
     public DecoratedEventHandler(ResultCollector resultCollector) {
         super(resultCollector);
