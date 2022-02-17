@@ -71,7 +71,15 @@ public class XpathAltoChecker extends DecoratedEventHandlerWithSections {
                 10000,
                 50000,
                 "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
+        //Checks page ID is corresponding with filename.
+        /*
+        checkEquals(event,
+                "INVALID_ALTO",
+                pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
+                );
 
+         */
     }
+
     
 }

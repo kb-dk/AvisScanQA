@@ -67,7 +67,7 @@ public class XpathMixChecker extends DecoratedEventHandlerWithSections {
         checkEquals(event,
                 "INVALID_MIX",
                 colorSpace,
-                "RPG",
+                "RGB",
                 "MIX colorspace should have been {expected} but was {actual}");
         /*
         if(colorSpace.compareTo("RGB") != 0){
