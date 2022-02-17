@@ -79,7 +79,6 @@ public class XpathAltoChecker extends DecoratedEventHandler {
         checkEquals(event,
                 "INVALID_ALTO",
                 pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
-                //"P"+regexOnEventName(Pattern.compile("([1-9]{1,4}).alto"),event.getName()),
                 "P"+pageNumber,
                 "ALTO Page ID is not {required} but was {actual}");
 

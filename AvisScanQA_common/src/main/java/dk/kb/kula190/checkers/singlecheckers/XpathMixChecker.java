@@ -50,40 +50,19 @@ public class XpathMixChecker extends DecoratedEventHandler {
         Integer height = xpath.selectInteger(document,
                                             "/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageHeight");
         //All pages stand up, so height > width.
-        //TODO compare
         checkAtLeast(event,
                 "INVALID_MIX",
                 height.doubleValue(),
                 width.doubleValue(),
                 "MIX image height: {required} was less than width: {actual}"); //`${height}` not supported in this java version?
-        /*
-        if(width.compareTo(height) == -1){
-            resultCollectorAddFailure("Height is greater than width",event);
-        }
-
 
         String colorSpace = xpath.selectString(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:PhotometricInterpretation/mix:colorSpace");
-        //TODO Should always be RGB. Compare
         checkEquals(event,
                 "INVALID_MIX",
                 colorSpace,
                 "RGB",
                 "MIX colorspace should have been {expected} but was {actual}");
-        /*
-        if(colorSpace.compareTo("RGB") != 0){
-            resultCollectorAddFailure("Colorspace is not RGB its: "+colorSpace,event);
-        }
-        */
-        //TODO? Check on fileSize. But the first filesize doesn't match, incorrect?
         
     }
-    /*
-    private void resultCollectorAddFailure(String reason,AttributeParsingEvent e){
-        getResultCollector().addFailure(e.getName(),
-                "Xpath incorrect",
-                XpathMixChecker.class.getSimpleName(),
-                reason,
-                "");
-    }
-    */
+
 }

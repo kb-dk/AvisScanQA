@@ -43,6 +43,9 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     private ThreadLocal<String> TifFileName = new ThreadLocal<>();
     private ThreadLocal<String> TifFileNameMix = new ThreadLocal<>();
 
+    private ThreadLocal<String> ChecksumMix = new ThreadLocal<>();
+    private ThreadLocal<String> ChecksumTif = new ThreadLocal<>();
+
 
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
@@ -57,6 +60,9 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
         TifFileName.set(null);
         TifFileNameMix.set(null);
+
+        ChecksumMix.set(null);
+        ChecksumTif.set(null);
 
     }
 
@@ -89,7 +95,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         TifFileNameMix.set(tiffFileName);
 
         //TODO extract other params from mix file
-        //* checksum
+        ChecksumMix.set(event.getChecksum());
         //* height vs width?
     }
 
@@ -103,10 +109,11 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         //PageStructure checker report error if the file is missing, so we can assume it is not missing here
 
         TifSizeActual.set((int) new File(event.getLocation()).length());
-        //TODO extract properties of the tif file, here, such as checksum and filesize
 
         String tiffFileName = removeExtension(lastName(event.getLocation()));
         TifFileName.set(tiffFileName);
+
+        ChecksumTif.set(event.getChecksum());
     }
 
     @Override
@@ -120,5 +127,6 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
         checkEquals(event, "TIFF_MIX_ERROR", TifFileName.get(), TifFileNameMix.get(), "mix metadata does not match actual tif file"); //TODO values in descriptin
 
+        checkEquals(event, "TIFF_MIX_ERROR",ChecksumTif.get(),ChecksumMix.get(), "mix metadata does not match actual tif file");
     }
 }
