@@ -42,19 +42,19 @@ public class TiffChecker extends DecoratedEventHandler {
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
         
         checkEquals(event,
-                    "INVALID_TIFF", yaml.getString("Image.Format"),
-                    "TIFF (Tagged Image File Format)",
-                    "ImageMagick reports invalid format {actual}. Should have been {expected}");
+                    "INVALID_TIFF", "ImageMagick reports invalid format {actual}. Should have been {expected}", yaml.getString("Image.Format"),
+                    "TIFF (Tagged Image File Format)"
+        );
         
         checkEquals(event,
-                    "INVALID_TIFF", yaml.getString("Image.Colorspace"),
-                    "sRGB",
-                    "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}");
+                    "INVALID_TIFF", "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}", yaml.getString("Image.Colorspace"),
+                    "sRGB"
+        );
         
         checkEquals(event,
-                    "INVALID_TIFF", yaml.getString("Image.Depth"),
-                    "8-bit",
-                    "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}");
+                    "INVALID_TIFF", "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}", yaml.getString("Image.Depth"),
+                    "8-bit"
+        );
         
         //TODO other tests
     }

@@ -2,7 +2,6 @@ package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
-import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
@@ -22,7 +21,11 @@ import java.util.Objects;
 
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
-
+/**
+ * @see XpathAlto
+ * @see XpathMix
+ * @see XpathTiff
+ */
 public class XpathCrossChecker extends DecoratedEventHandler {
     public XpathCrossChecker(ResultCollector resultCollector) {
         super(resultCollector);
@@ -30,7 +33,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
 
     //The design:
-    //A page consist of (at least) a tiff and a mix file
+    //A page consist of
+    //with objects instead (at least) a tiff and a mix file
 
     //On page begin, we clear the state
     //We will then get a mixFileEvent and a tiffFileEvent. We do NOT know the order of these
@@ -38,17 +42,9 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     //On page end, we KNOW we have visited both files
     //It is here we compare values between them
 
-
-    //part of the state. This is the size of the tif file, as reported by mix
-    private ThreadLocal<Integer> TifSizePerMix = new ThreadLocal<>();
-    private ThreadLocal<Integer> TifSizeActual = new ThreadLocal<>();
-
-    private ThreadLocal<String> TifFileName = new ThreadLocal<>();
-    private ThreadLocal<String> TifFileNameMix = new ThreadLocal<>();
-
-    private ThreadLocal<String> ChecksumMix = new ThreadLocal<>();
-    private ThreadLocal<String> ChecksumTif = new ThreadLocal<>();
-
+    private ThreadLocal<XpathAlto> Alto = new ThreadLocal<>();
+    private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
+    private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
 
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
@@ -57,16 +53,11 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                            String udgave,
                            String sectionName,
                            Integer pageNumber) throws IOException {
-        //clear the state
-        TifSizePerMix.set(null);
-        TifSizeActual.set(null);
 
-        TifFileName.set(null);
-        TifFileNameMix.set(null);
-
-        ChecksumMix.set(null);
-        ChecksumTif.set(null);
-
+        //clear state
+        Mix.set(new XpathMix());
+        Alto.set(new XpathAlto());
+        Tiff.set(new XpathTiff());
     }
 
     @Override
@@ -76,30 +67,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
-        Document document;
-        try (InputStream in = event.getData()) {
-            document = XML.fromXML(in, true);
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException e) {
-            throw new IOException(e);
-        }
-        XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
-
-
-        Integer value = xpath.selectInteger(document,
-                "/mix:mix/mix:BasicDigitalObjectInformation/mix:fileSize");
-        TifSizePerMix.set(value);
-
-
-        String tiffIdentifier = xpath.selectString(document, "/mix:mix/mix:BasicDigitalObjectInformation/mix:ObjectIdentifier/mix:objectIdentifierValue");
-        String tiffFileName = removeExtension(lastName(tiffIdentifier));
-
-        TifFileNameMix.set(tiffFileName);
-
-        
-        ChecksumMix.set(xpath.selectString(document, "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest"));
-        //* height vs width?
+        //object
+        Mix.get().setMixXpathData(event,avis,editionDate,udgave,sectionName,pageNumber);
     }
 
     @Override
@@ -109,33 +78,20 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        //PageStructure checker report error if the file is missing, so we can assume it is not missing here
+        //object
+        Tiff.get().setTiffXpathData(event,avis,editionDate,udgave,sectionName,pageNumber);
+    }
 
-        TifSizeActual.set((int) new File(event.getLocation()).length());
-
-        String tiffFileName = removeExtension(lastName(event.getLocation()));
-        TifFileName.set(tiffFileName);
-
-        ChecksumTif.set(event.getChecksum());
+    @Override
+    public void altoFile(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+        //object
+        Alto.get().setAltoXpathData(event,avis,editionDate,udgave,sectionName,pageNumber);
     }
 
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
-        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)){
-            return;
-        }
-        YAML result;
-        try (InputStream in = decoratedEvent.getData()) {
-            result = YAML.parse(in);
-        }
-        YAML yaml = result;
-        //See src/test/resources/sampleImageMagickOutput.yaml for what and how
-
-        String geo = yaml.getString("Image.Geometry").split("\\+", 2)[0];
-        String[] geoSplits = geo.split("x");
-        String width = geoSplits[0];
-        String height = geoSplits[1];
-
+        //object
+        Tiff.get().setTiffInjectedFileData(decoratedEvent,injectedType,avis,editionDate,udgave,sectionName,pageNumber);
 
     }
 
@@ -146,10 +102,15 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) {
-        checkEquals(event, "TIFF_MIX_ERROR", TifSizeActual.get(), TifSizePerMix.get(), "mix metadata (file size: {expected}) does not match actual tif file size {actual}"); //TODO values in descriptin
+        checkEquals(event, "TIFF_MIX_ERROR", "mix metadata (file size: {expected}) does not match actual tif file size {actual}", Tiff.get().getTifSizeActual(), Mix.get().getTifSizePerMix()); //TODO values in descriptin
 
-        checkEquals(event, "TIFF_MIX_ERROR", TifFileName.get(), TifFileNameMix.get(), "mix metadata (file name {expected}) does not match actual tif file name {actual}"); //TODO values in descriptin
+        checkEquals(event, "TIFF_MIX_ERROR", "mix metadata (checksum {expected}) does not match actual tif file checksum {actual}", Tiff.get().getChecksumTif(),Mix.get().getChecksumMix());
 
-        checkEquals(event, "TIFF_MIX_ERROR",ChecksumTif.get(),ChecksumMix.get(), "mix metadata (checksum {expected}) does not match actual tif file checksum {actual}");
+        //checkAllEquals(event,"CROSS_ERROR","mix metadata (file size: {val1}) tif metadata (file size {val2}) alto");
+        checkAllEquals(event,"CROSS_ERROR","mix metadata (filename: {val1}) tif metadata (filename: {val2}) alto metadata (filename: {val3}) one does not match", new String[]{Mix.get().getMixFileName(), Tiff.get().getTifFileName(), Alto.get().getAltoFileName()});
+        checkAllEquals(event,"CROSS_ERROR","mix metadata (image height: {val1}) tif metadata (image height: {val2}) alto metadata (image height: {val3}) one does not match", new Integer[]{Mix.get().getMixImageHeight(), Tiff.get().getImageHeightTif(), Alto.get().getAltoImageHeight()});
+        checkAllEquals(event,"CROSS_ERROR","mix metadata (image width: {val1}) tif metadata (image width: {val2}) alto metadata (image width: {val3}) one does not match", new Integer[]{Mix.get().getMixImageWidth(), Tiff.get().getImageWidthTif(), Alto.get().getAltoImageWidth()});
+
+
     }
 }

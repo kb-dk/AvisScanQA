@@ -11,13 +11,11 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
@@ -133,9 +131,9 @@ public class MixAltoChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) {
-        checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixFileName.get(),AltoFileName.get(),"Filename on mix and alto are not the same Mix: {actual} Alto: {expected}");
-        checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixImageWidth.get(),AltoImageWidth.get(),"Mix image width was {actual} Alto image width was {expected}");
-        checkEquals(event,"MIX_ALTO_CROSS_ERROR",MixImageHeight.get(),AltoImageHeight.get(),"Mix image height was {actual} Alto image height was {expected}");
+        checkEquals(event,"MIX_ALTO_CROSS_ERROR", "Filename on mix and alto are not the same Mix: {actual} Alto: {expected}", MixFileName.get(),AltoFileName.get());
+        checkEquals(event,"MIX_ALTO_CROSS_ERROR", "Mix image width was {actual} Alto image width was {expected}", MixImageWidth.get(),AltoImageWidth.get());
+        checkEquals(event,"MIX_ALTO_CROSS_ERROR", "Mix image height was {actual} Alto image height was {expected}", MixImageHeight.get(),AltoImageHeight.get());
 
 
 

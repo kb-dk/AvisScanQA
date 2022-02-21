@@ -1,7 +1,6 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.xml.XML;
@@ -11,11 +10,9 @@ import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Objects;
 
 public class XpathMixChecker extends DecoratedEventHandler {
     public XpathMixChecker(ResultCollector resultCollector) {
@@ -59,9 +56,9 @@ public class XpathMixChecker extends DecoratedEventHandler {
         String colorSpace = xpath.selectString(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:PhotometricInterpretation/mix:colorSpace");
         checkEquals(event,
                 "INVALID_MIX",
-                colorSpace,
-                "RGB",
-                "MIX colorspace should have been {expected} but was {actual}");
+                "MIX colorspace should have been {expected} but was {actual}", colorSpace,
+                "RGB"
+        );
         
     }
 
