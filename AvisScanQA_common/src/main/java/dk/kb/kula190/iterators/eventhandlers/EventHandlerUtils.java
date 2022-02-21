@@ -1,7 +1,14 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.util.xml.XML;
 import org.apache.commons.io.FilenameUtils;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.temporal.ChronoField;
@@ -40,5 +47,16 @@ public class EventHandlerUtils {
             return FilenameUtils.getExtension(filename);
         }
     }
-    
+
+    public static Document handleDocument(DecoratedAttributeParsingEvent event) throws IOException {
+        Document document;
+        try (InputStream in = event.getData()) {
+            document = XML.fromXML(in, true);
+            return document;
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        } catch (SAXException | IOException e) {
+            throw new IOException(e);
+        }
+    }
 }

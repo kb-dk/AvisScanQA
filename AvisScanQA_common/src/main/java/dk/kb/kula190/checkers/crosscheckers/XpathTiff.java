@@ -24,10 +24,18 @@ public class XpathTiff {
     private String ChecksumTif;
     private Integer TifSizeActual;
 
-    public XpathTiff(){
+    private boolean injectedDataSupplied = false;
+
+    public XpathTiff() {
     }
 
-    public void setTiffXpathData(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
+    public void setTiffXpathData(DecoratedAttributeParsingEvent event,
+                                 String avis,
+                                 LocalDate editionDate,
+                                 String udgave,
+                                 String sectionName,
+                                 Integer pageNumber) throws IOException {
+        //This is called with the actual tiff file
         TifSizeActual = (int) new File(event.getLocation()).length();
 
         String tiffFileName = removeExtension(lastName(event.getLocation()));
@@ -35,23 +43,31 @@ public class XpathTiff {
 
         ChecksumTif = event.getChecksum();
     }
-    public void setTiffInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis, LocalDate editionDate, String udgave, String sectionName, Integer pageNumber) throws IOException {
-        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)){
-            return;
-        }
+
+    public void setTiffInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent,
+                                        String injectedType,
+                                        String avis,
+                                        LocalDate editionDate,
+                                        String udgave,
+                                        String sectionName,
+                                        Integer pageNumber) throws IOException {
+        //This is called with the imagemagick info about the tiff file
         YAML result;
         try (InputStream in = decoratedEvent.getData()) {
             result = YAML.parse(in);
         }
         YAML yaml = result;
+        injectedDataSupplied = true;
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
 
         String geo = yaml.getString("Image.Geometry").split("\\+", 2)[0];
         String[] geoSplits = geo.split("x");
 
-        ImageWidthTif = Integer.getInteger(geoSplits[0]);
-        ImageHeightTif = Integer.getInteger(geoSplits[1]);
+        ImageWidthTif = Integer.parseInt(geoSplits[0]);
+        ImageHeightTif = Integer.parseInt(geoSplits[1]);
+
     }
+
     public Integer getImageHeightTif() {
         return ImageHeightTif;
     }
@@ -73,4 +89,7 @@ public class XpathTiff {
     }
 
 
+    public boolean isInjectedDataSupplied() {
+        return injectedDataSupplied;
+    }
 }

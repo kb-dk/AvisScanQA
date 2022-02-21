@@ -1,5 +1,6 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.util.xml.XML;
 import dk.kb.util.xml.XPathSelector;
@@ -27,7 +28,7 @@ public class XpathAlto {
     }
 
     public void setAltoXpathData(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate,String udgave,String sectionName,Integer pageNumber) throws IOException {
-        Document document = handleDocument(event);
+        Document document = EventHandlerUtils.handleDocument(event);
         XPathSelector xpath = XpathUtils.createXPathSelector("alto", "http://www.loc.gov/standards/alto/ns-v2#");
 
 
@@ -56,17 +57,7 @@ public class XpathAlto {
         //ALTO PAGE HEIGHT / (ALTO MEASUREMENT UNIT / DPI) = TIFF HEIGHT
 
     }
-    private Document handleDocument(DecoratedAttributeParsingEvent event) throws IOException {
-        Document document;
-        try (InputStream in = event.getData()) {
-            document = XML.fromXML(in, true);
-            return document;
-        } catch (ParserConfigurationException e) {
-            throw new RuntimeException(e);
-        } catch (SAXException | IOException e) {
-            throw new IOException(e);
-        }
-    }
+
 
     public String getAltoFileName() {
         return AltoFileName;

@@ -53,9 +53,9 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         String expectedString = asString(expected);
         if (!actualString.equalsIgnoreCase(expectedString)) {
             addFailure(event,
-                    type,
-                    this.getClass().getSimpleName(),
-                    description.replace("{expected}", expectedString).replace("{actual}", actualString));
+                       type,
+                       this.getClass().getSimpleName(),
+                       description.replace("{expected}", expectedString).replace("{actual}", actualString));
         }
     }
 
@@ -63,18 +63,18 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                   String type,
                                   String description,
                                   Object... equals
-    ) {
+                                 ) {
         if (Arrays.stream(equals).distinct().count() != 1) {
 
             String replace = description;
             for (int i = 0; i < equals.length; i++) {
-                replace = replace.replace("{val"+i+"}", equals[i].toString());
+                replace = replace.replace("{val" + i + "}", asString(equals[i]));
             }
 
             addFailure(event,
-                    type,
-                    this.getClass().getSimpleName(),
-                    replace);
+                       type,
+                       this.getClass().getSimpleName(),
+                       replace);
         }
 
     }
@@ -87,6 +87,17 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         }
     }
 
+    protected void checkTrue(ParsingEvent event,
+                             String type,
+                             String description,
+                             boolean bool) {
+        if (!bool) {
+            addFailure(event,
+                       type,
+                       this.getClass().getSimpleName(),
+                       description);
+        }
+    }
 
     protected void checkAtLeast(ParsingEvent event,
                                 String type,
@@ -95,9 +106,9 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 String description) {
         if (actual < required) {
             addFailure(event,
-                    type,
-                    this.getClass().getSimpleName(),
-                    description.replace("{required}", required.toString()).replace("{actual}", actual.toString()));
+                       type,
+                       this.getClass().getSimpleName(),
+                       description.replace("{required}", asString(required)).replace("{actual}", asString(actual)));
         }
     }
 
@@ -110,20 +121,22 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
 
         if (actual < requiredMin || actual > requiredMax) {
             addFailure(event,
-                    type,
-                    this.getClass().getSimpleName(),
-                    description.replace("{requiredMin}", requiredMin.toString()).replace("{actual}", actual.toString()).replace("{requiredMax}", requiredMax.toString()));
+                       type,
+                       this.getClass().getSimpleName(),
+                       description.replace("{requiredMin}", asString(requiredMin))
+                                  .replace("{actual}", asString(actual))
+                                  .replace("{requiredMax}", asString(requiredMax)));
         }
     }
 
     protected void reportException(ParsingEvent event, Exception e) {
         addFailure(event,
-                EventRunner.EXCEPTION,
-                this.getClass().getSimpleName(),
-                EventRunner.UNEXPECTED_ERROR + e,
-                Arrays.stream(e.getStackTrace())
-                        .map(StackTraceElement::toString)
-                        .collect(Collectors.joining("\n")));
+                   EventRunner.EXCEPTION,
+                   this.getClass().getSimpleName(),
+                   EventRunner.UNEXPECTED_ERROR + e,
+                   Arrays.stream(e.getStackTrace())
+                         .map(StackTraceElement::toString)
+                         .collect(Collectors.joining("\n")));
     }
 
 
@@ -134,11 +147,11 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                            String... details) {
         log.warn(
                 "Adding failure for " +
-                        "resource '{}' " +
-                        "of type '{}' " +
-                        "from component '{}' " +
-                        "with description '{}' " +
-                        "and details '{}'", fileReference, type, component, description, String.join("\n", details));
+                "resource '{}' " +
+                "of type '{}' " +
+                "from component '{}' " +
+                "with description '{}' " +
+                "and details '{}'", fileReference, type, component, description, String.join("\n", details));
 
         getResultCollector().addFailure(fileReference, type, component, description, details);
     }

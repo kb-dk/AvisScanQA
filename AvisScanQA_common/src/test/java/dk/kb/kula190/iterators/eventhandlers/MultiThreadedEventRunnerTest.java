@@ -33,7 +33,7 @@ class MultiThreadedEventRunnerTest {
     
     private final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
+            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
     
     @Test
     void run() throws Exception {
