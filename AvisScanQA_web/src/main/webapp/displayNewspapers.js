@@ -32,10 +32,23 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
     });
 }
 
+function determineColor(dayInMonth) {
+    if (!dayInMonth.available) {
+        return " btn-light ";
+    } else if (dayInMonth.problems.length > 0) {
+        return " btn-warning "
+    } else if (dayInMonth.count > 0) {
+        return " btn-success' "
+    } else {
+        return " btn-secondary' "
+    }
+
+}
+
 function buildCalendar(year, month, availableDates, newspaper) {
-	let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
-	let daysInMonth = [];
-	let firstWeekdayOfMonth = firstDayOfThisMonth.weekday();
+    let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
+    let daysInMonth = [];
+    let firstWeekdayOfMonth = firstDayOfThisMonth.weekday();
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
@@ -70,9 +83,9 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         let dayInMonth = daysInMonth[d];
 
-        let date = ("0"+dayInMonth.day.date());
+        let date = ("0" + dayInMonth.day.date());
         //Ensure same width of date numbers
-        date = date.substring(date.length-2);
+        date = date.substring(date.length - 2);
 
         calHtml += "<div class='col-sm-1' >"
 
@@ -86,23 +99,16 @@ function buildCalendar(year, month, availableDates, newspaper) {
         //light = light grey
         //dark = black
         //link = link
-        let btnClass = "class='btn btn-light btn-sm"
+        let btnClass = "class='btn btn-sm " + determineColor(dayInMonth) + "'";
         if (dayInMonth.available) {
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
 
             calHtml += "<a style='padding-left: 0; padding-right: 0'";
-            calHtml += "href='"+link+"' ";
-            calHtml += "title='"+dayInMonth.count+" pages'";
-
-            if (dayInMonth.problems.length > 0){
-                btnClass += " btn-warning' "
-            } else {
-                btnClass += " btn-success' "
-            }
+            calHtml += "href='" + link + "' ";
+            calHtml += "title='" + dayInMonth.count + " pages'";
 
             calHtml += btnClass + " > " + date + " </a>";
         } else {
-            btnClass += " btn-light'"
             calHtml += "<button type='button' style='padding-left: 0; padding-right: 0' " +
                 btnClass + " > " + date + " </button>";
         }
@@ -115,21 +121,20 @@ function buildCalendar(year, month, availableDates, newspaper) {
 }
 
 
-
 function splitDatesIntoMonths(dates) {
-	var months = [];
-	months[0] = {name: "Januar", days: []};
-	months[1] = {name: "Februar", days: []};
-	months[2] = {name: "Marts", days: []};
-	months[3] = {name: "April", days: []};
-	months[4] = {name: "Maj", days: []};
-	months[5] = {name: "Juni", days: []};
-	months[6] = {name: "Juli", days: []};
-	months[7] = {name: "August", days: []};
-	months[8] = {name: "September", days: []};
-	months[9] = {name: "Oktober", days: []};
-	months[10] = {name: "November", days: []};
-	months[11] = {name: "December", days: []};
+    var months = [];
+    months[0] = {name: "Januar", days: []};
+    months[1] = {name: "Februar", days: []};
+    months[2] = {name: "Marts", days: []};
+    months[3] = {name: "April", days: []};
+    months[4] = {name: "Maj", days: []};
+    months[5] = {name: "Juni", days: []};
+    months[6] = {name: "Juli", days: []};
+    months[7] = {name: "August", days: []};
+    months[8] = {name: "September", days: []};
+    months[9] = {name: "Oktober", days: []};
+    months[10] = {name: "November", days: []};
+    months[11] = {name: "December", days: []};
 
     let d;
     for (d in dates) {
@@ -137,7 +142,11 @@ function splitDatesIntoMonths(dates) {
         let date = NewspaperDate.date;
         date[1] -= 1; //javascript uses 0-indexed months, so adapt
         let day = moment(date);
-        months[day.month()].days.push({"day":day,"count":NewspaperDate.pageCount,"problems":NewspaperDate.problems});
+        months[day.month()].days.push({
+            "day": day,
+            "count": NewspaperDate.pageCount,
+            "problems": NewspaperDate.problems
+        });
     }
     return months;
 }
