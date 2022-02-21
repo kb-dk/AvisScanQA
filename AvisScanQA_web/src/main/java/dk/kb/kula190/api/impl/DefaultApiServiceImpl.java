@@ -1,10 +1,11 @@
 package dk.kb.kula190.api.impl;
 
+import dk.kb.avischk.qa.web.ContentLocationResolver;
+import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
 import dk.kb.kula190.dao.NewspaperQADao;
 import dk.kb.kula190.dao.NewspaperQADaoFactory;
-import dk.kb.avischk.qa.web.ContentLocationResolver;
-import dk.kb.kula190.api.DefaultApi;
+import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperEntity;
@@ -28,9 +29,6 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import java.io.FileNotFoundException;
 import java.net.URI;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -88,6 +86,52 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
+    public List<String> getNewspaperIDs() {
+        try {
+            List<String> IDs = dao.getNewspaperIDs();
+            return IDs;
+        } catch (DAOFailureException e) {
+            log.error("Could not get newspaper IDs from backend");
+            throw handleException(e);
+        }
+    }
+    
+    @Override
+    public List<String> getYearsForNewspaper(String newspaperID) {
+        try {
+            List<String> years = dao.getYearsForNewspaperID(newspaperID);
+            return years;
+        } catch (DAOFailureException e) {
+            log.error("Could not get dates for newspaper ID {}", newspaperID);
+            throw handleException(e);
+        }
+    }
+    
+    @Override
+    public List<Batch> getBatchIDs() {
+        try {
+            List<Batch> IDs = dao.getBatchIDs();
+            return IDs;
+        } catch (DAOFailureException e) {
+            log.error("Could not get newspaper IDs from backend");
+            throw handleException(e);
+        }
+    }
+    
+    
+    @Override
+    public Batch getBatchForNewspaper(String batchID) {
+        try {
+            //TODO this is a bad way to get a specific batch...
+            return dao.getBatchIDs().stream().filter(batch -> batch.getBatchid().equals(batchID)).findFirst().orElse(null);
+        } catch (DAOFailureException e) {
+            log.error("Could not get dates for newspaper ID {}", batchID);
+            throw handleException(e);
+        }
+    }
+    
+    
+    @Override
     public Map<String, List<NewspaperEntity>> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
         try {
             Map<String, List<NewspaperEntity>> entities = dao.getMappedEditionsForNewspaperOnDate(newspaperID, date);
@@ -130,7 +174,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         String relPath;
         try {
             relPath = dao.getOrigRelPath(handle);
-        
+            
         } catch (DAOFailureException e) {
             log.error("Could not get relative path for handle {}", handle);
             throw handleException(e);
@@ -143,27 +187,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
     
-    @Override
-    public List<String> getNewspaperIDs() {
-        try {
-            List<String> IDs = dao.getNewspaperIDs();
-            return IDs;
-        } catch (DAOFailureException e) {
-            log.error("Could not get newspaper IDs from backend");
-            throw handleException(e);
-        }
-    }
-    
-    @Override
-    public List<String> getYearsForNewspaper(String newspaperID) {
-        try {
-            List<String> years = dao.getYearsForNewspaperID(newspaperID);
-            return years;
-        } catch (DAOFailureException e) {
-            log.error("Could not get dates for newspaper ID {}", newspaperID);
-            throw handleException(e);
-        }
-    }
+ 
     
     
     /**

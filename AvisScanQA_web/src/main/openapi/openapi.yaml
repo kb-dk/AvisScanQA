@@ -49,6 +49,39 @@ paths:
                 items:
                   type: string
 
+
+  /getNewspaperBatches:
+    get:
+      operationId: getBatchIDs
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Batch"
+
+
+  /batch/{batchID}:
+    get:
+      operationId: getBatchForNewspaper
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+
+
   /dates/{newspaperID}/{year}:
     get:
       #TODO this should return more than just dates. A bit of metadata per date, such as the page count and if any errors occurred
@@ -143,6 +176,30 @@ paths:
 
 components:
   schemas:
+    Batch:
+      type: object
+      properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+        roundtrip:
+          type: integer
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        deliveryDate:
+          type: string
+          format: date
+        problems:
+          type: string
+          nullable: true
+        state:
+          type: string
+
     NewspaperDate:
       type: object
       properties:

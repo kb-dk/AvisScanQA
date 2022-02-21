@@ -4,7 +4,6 @@
     <meta charset="utf-8">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
-    <!--	    <link href="bootstrap-4.1.3/css/bootstrap.min.css" rel="stylesheet">-->
     <link href="dashboard.css" rel="stylesheet">
 </head>
 
@@ -34,33 +33,26 @@
                 </h6>
                 <ul class="nav flex-column mb-2" id="avisIDer">
                 </ul>
+
+
+                <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                    <span>Batches</span>
+                    <a class="d-flex align-items-center text-muted" href="#">
+                        <span data-feather="plus-circle"></span>
+                    </a>
+                </h6>
+                <!-- TODO this should be a table with sorting and so on...-->
+                <ul class="nav flex-column mb-2" id="batches">
+                </ul>
             </div>
         </nav>
 
         <main role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
             <div id="headline-div"></div>
-            <!-- 	          <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                            <h1 class="h2">Dashboard</h1>
-                            <div class="btn-toolbar mb-2 mb-md-0">
-                              <div class="btn-group mr-2">
-                                <button class="btn btn-sm btn-outline-secondary">Share</button>
-                                <button class="btn btn-sm btn-outline-secondary">Export</button>
-                              </div>
-                              <button class="btn btn-sm btn-outline-secondary dropdown-toggle">
-                                <span data-feather="calendar"></span>
-                                This week
-                              </button>
-                            </div>
-                          </div>
-                 -->
-            <!--           <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas> -->
             <div id="primary-show"></div>
         </main>
     </div>
 </div>
-
-
-<!--	    <script src="jquery-3.3.1.min.js"></script>-->
 
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
@@ -70,10 +62,9 @@
         integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
         crossorigin="anonymous"></script>
 
-<!--		<script src="bootstrap-4.1.3/js/bootstrap.min.js"></script>-->
 <script src="jquery.routes.js"></script>
 <script src="moment.locale.js"></script>
-<!--	    <script src="pdfobject.min.js"></script>-->
+
 <script src="openseadragon/openseadragon.min.js"></script>
 <script src="displayEntities.js"></script>
 <script src="displayNewspapers.js"></script>
@@ -93,7 +84,7 @@
             var html = "<h1>Dates for " + id + "</h1>";
             for (var i = 0; i < dates.length; i++) {
                 var day = moment(dates[i]).format('YYYY-MM-DD');
-                html += "<a href=\"#/newspapers/" + id + "/" + day + "/0/\">" + day + "</a><br>";
+                html += "<a href='#/newspapers/" + id + "/" + day + "/0/'>" + day + "</a><br>";
             }
             $("#primary-show").html(html);
         });
@@ -106,7 +97,35 @@
         $.getJSON(url, {}, function (years) {
             newspaperYears = years;
         }).done(function () {
-            if (currentNewspaperYear == 0) {
+            if (currentNewspaperYear === 0) {
+                currentNewspaperYear = newspaperYears[0];
+                var parts = location.hash.split("/");
+                parts[parts.length - 2] = currentNewspaperYear;
+                location.hash = parts.join("/");
+            } else {
+                $("#headline-div").html("<h1>År med " + id + "</h1>");
+                renderNewspaperForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
+            }
+        });
+    }
+
+    function* range(start, end) {
+        for (let i = start; i <= end; i++) {
+            yield i;
+        }
+    }
+
+    function loadBatchForNewspaper(id) {
+        //TODO get this working
+        currentNewspaper = id;
+        var url = 'api/batch/' + id;
+        $.getJSON(url, {}, function (batch) {
+            let fromYEAR = moment(batch.startDate).format("YYYY");
+            let toYEAR = moment(batch.endDate).format("YYYY");
+
+            newspaperYears = range(fromYEAR, toYEAR);
+        }).done(function () {
+            if (currentNewspaperYear === 0) {
                 currentNewspaperYear = newspaperYears[0];
                 var parts = location.hash.split("/");
                 parts[parts.length - 2] = currentNewspaperYear;
@@ -142,29 +161,53 @@
         $.getJSON('api/getNewspaperIDs', {}, function (ids) {
             for (var i = 0; i < ids.length; i++) {
                 $("#avisIDer").append(
-                    "<li class=\"nav-item\"><a class=\"nav-link\" href=\"#/newspaper/" + ids[i] + "/0/\">" + ids[i] + "</a></li>");
+                    "<li class='nav-item'><a class='nav-link' href='#/newspaper/" + ids[i] + "/0/'>" + ids[i] + "</a></li>");
+            }
+        });
+    }
+
+    function loadNewspaperBatches() {
+        $.getJSON('api/getNewspaperBatches', {}, function (ids) {
+            for (var i = 0; i < ids.length; i++) {
+                let batchID = ids[i].batchid;
+                $("#batches").append(
+                    "<li class='nav-item'><a class='nav-link' href='#/batch/" + batchID + "'>" + batchID + "</a></li>");
             }
         });
     }
 
     $.routes.add('/dashboard/', function () {
+        // Dashboard
         $("#primary-show").html("Vælg avis i menuen til venstre");
-    }); // Dashboard
+    });
+
     $.routes.add('/newspaper/{id:string}/{year:int}', function () {
+        // Display all years
         $("#primary-show").html("Indlæser datoer for: " + this.id + " i år: " + this.year);
-        //loadDatesForNewspaper(this.id, this.year);
+
         loadYearsForNewspaper(this.id, this.year);
-    }); // Display all years
+    });
+
+    $.routes.add('/batch/{id:string}', function () {
+        // Display this batch
+        $("#primary-show").html("Indlæser batch: " + this.id);
+        //TODO
+        loadBatchForNewspaper(this.id);
+    });
+
+
     $.routes.add('/newspapers/{id:string}/{day:date}/{entity:int}/{page:int}', function () {
+        // Display all months in a given year
         $("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
         loadEntitiesForNewspaperOnDate(this.id, this.day, this.entity, this.page);
-    }); // Display all months in a given year
+    });
 
 
     $(document).ready(function () {
         moment.locale("da");
         // load newspaper IDs
         loadNewspaperIDs();
+        loadNewspaperBatches();
     });
 </script>
 

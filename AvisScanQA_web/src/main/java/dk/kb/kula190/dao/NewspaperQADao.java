@@ -1,6 +1,7 @@
 package dk.kb.kula190.dao;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperEntity;
@@ -44,6 +45,35 @@ public class NewspaperQADao {
                throw new DAOFailureException("Err looking up newspaper ids", e);
            }
     }
+    
+    public List<Batch> getBatchIDs() throws DAOFailureException {
+        log.debug("Looking up batch ids");
+        String SQL = "SELECT batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state FROM batch";
+    
+        try (Connection conn = connectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL)) {
+            try (ResultSet res = ps.executeQuery()) {
+                List<Batch> list = new ArrayList<>();
+                while(res.next()) {
+                    Batch batch = new Batch();
+                    batch.setBatchid(res.getString("batchid"));
+                    batch.setAvisid(res.getString("avisid"));
+                    batch.setRoundtrip(res.getInt("roundtrip"));
+                    batch.setStartDate(res.getDate("start_date").toLocalDate());
+                    batch.setEndDate(res.getDate("end_date").toLocalDate());
+                    batch.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
+                    batch.setProblems(res.getString("problems"));
+                    batch.setState(res.getString("state"));
+                    list.add(batch);
+                }
+                return list;
+            }
+        } catch (SQLException e) {
+            log.error("Failed to lookup batch ids", e);
+            throw new DAOFailureException("Err looking up batch ids", e);
+        }
+    }
+    
     
     public List<Date> getDatesForNewspaperID(String id) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}'", id);
