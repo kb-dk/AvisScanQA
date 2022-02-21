@@ -4,6 +4,7 @@ import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class DecoratedNodeParsingEvent extends NodeParsingEvent implements DecoratedParsingEvent{
     
@@ -60,7 +61,7 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent implements Decor
         String[] splits2 = batch.split("_", 4);
         LocalDate startDate = LocalDate.parse(splits2[1], EventHandlerUtils.dateFormatter);
         LocalDate endDate = LocalDate.parse(splits2[2], EventHandlerUtils.dateFormatter);
-        String avis2 = splits2[0];
+        avis = Optional.ofNullable(avis).orElse(splits2[0]);
         String roundTrip = splits2[3].replaceFirst("^RT", "");
     
     

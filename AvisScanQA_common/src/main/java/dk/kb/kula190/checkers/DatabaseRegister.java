@@ -22,7 +22,6 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -55,7 +54,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
-                            LocalDate endDate) {
+                            LocalDate endDate) throws IOException {
         dataSource = new BasicDataSource();
 
         if (jdbcUser != null) {
@@ -75,6 +74,43 @@ public class DatabaseRegister extends DecoratedEventHandler {
         dataSource.setMaxTotal(2); // Change to 10 when running as WAR
 
         dataSource.setDriver(jdbcDriver);
+    
+        try (Connection connection = dataSource.getConnection()) {
+    
+            String failuresMessage = registeredFailures.stream()
+                                                        .map(failure -> JSON.toJson(failure, false))
+                                                        .collect(Collectors.joining("\n"));
+            
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state) VALUES (?,?,?,?,?,?,?,?) "
+                    + "ON CONFLICT (batchid) DO UPDATE SET problems = excluded.problems")) {
+                int param = 1;
+                //Batch ID
+                preparedStatement.setString(param++, batchName.get());
+                //Avis ID
+                preparedStatement.setString(param++, avis);
+                // roundtrip
+                preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
+                //start date
+                preparedStatement.setDate(param++, Date.valueOf(startDate));
+                //end date
+                preparedStatement.setDate(param++, Date.valueOf(endDate));
+                //delivery date
+                preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
+                //problems
+                preparedStatement.setString(param++, failuresMessage);
+                //state
+                //TODO fixed vocabulary here. Create an Enum
+                preparedStatement.setString(param++, "CHECKED");
+    
+                boolean result = preparedStatement.execute();
+            }
+            connection.commit();
+    
+        } catch (SQLException e) {
+            //TODO
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -121,7 +157,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
         try (Connection connection = dataSource.getConnection()) {
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, fraktur, problems) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
@@ -153,7 +189,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
 
                 //problems
                 preparedStatement.setString(param++, failuresMessage);
-
+    
+                //Batch-reference
+                preparedStatement.setString(param++, batchName.get());
+                
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
