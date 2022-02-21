@@ -130,6 +130,18 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
     
+    @Override
+    public List<NewspaperDate> getBatchDatesForNewspaper(String batchID, String year) {
+        try {
+            List<NewspaperDate> dates = dao.getDatesForBatchID(batchID, year);
+            return dates;
+        } catch (DAOFailureException e) {
+            log.error("Could not get dates for batch ID {}", batchID);
+            throw handleException(e);
+        }
+
+    }
+    
     
     @Override
     public Map<String, List<NewspaperEntity>> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
@@ -145,8 +157,6 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     @Override
     public List<NewspaperDate> getDatesForNewspaperYear(String newspaperID, String year) {
-        //TODO this should return more than just dates.
-        // A bit of metadata per date, such as the page count and if any errors occurred
         try {
             List<NewspaperDate> dates = dao.getDatesForNewspaperID(newspaperID, year);
             return dates;

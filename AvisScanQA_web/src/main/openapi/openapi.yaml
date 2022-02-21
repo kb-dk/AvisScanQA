@@ -81,10 +81,32 @@ paths:
               schema:
                 $ref: "#/components/schemas/Batch"
 
+  /batch/{batchID}/{year}:
+    get:
+      operationId: getBatchDatesForNewspaper
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewspaperDate'
 
   /dates/{newspaperID}/{year}:
     get:
-      #TODO this should return more than just dates. A bit of metadata per date, such as the page count and if any errors occurred
       operationId: getDatesForNewspaperYear
       parameters:
         - name: newspaperID
@@ -210,6 +232,8 @@ components:
           type: integer
         editionCount:
           type: integer
+        state:
+          type: string
         problems:
           type: string
 

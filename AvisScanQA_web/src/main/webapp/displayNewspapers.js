@@ -7,9 +7,8 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
     $primary.html(nav);
     $primary.append("<div id='year-show'><h1> show me a newspaper</h1></div>");
 
-    for (var i = 0; i < years.length; i++) {
-        var year = years[i];
-        if (year === currentyear) {
+    for (const year of years) {
+        if (year == currentyear) { //== cannot be replaced with === as types differ....
             $("#year-nav").append("<button class='btn btn-sm btn-outline-secondary active'>" + year + "</button>");
         } else {
             var newLocation = editYearIndexInHash(location.hash, year);
@@ -26,6 +25,40 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
                 var calElem = "#month" + i;
                 var html = "<h3>" + datesInYear[i].name + "</h3>";
                 html += buildCalendar(currentyear, (i + 1), datesInYear[i].days, newspaper);
+                $(calElem).html(html);
+            }
+        });
+    });
+}
+
+
+
+function renderBatchForYear(batch, years, currentyear) {
+    var nav = "<div class='btn-toolbar mb-2 mb-md-0'><div class='btn-group mr-2 d-flex justify-content-evenly flex-wrap' id='year-nav'></div></div>";
+
+    let $primary = $("#primary-show");
+    $primary.html(nav);
+    $primary.append("<div id='year-show'><h1> show me a newspaper</h1></div>");
+
+    for (const year of years) {
+        if (year === currentyear) {
+            $("#year-nav").append("<button class='btn btn-sm btn-outline-secondary active'>" + year + "</button>");
+        } else {
+            var newLocation = editYearIndexInHash(location.hash, year);
+            $("#year-nav").append("<a href='" + newLocation + "' class='btn btn-sm btn-outline-secondary'>" + year + "</>");
+        }
+    }
+
+    //TODO
+    //See dk.kb.kula190.api.impl.DefaultApiServiceImpl.getDatesForNewspaperYear
+    var url = 'api/batch/' + batch + '/' + currentyear;
+    $.getJSON(url, {}, function (dates) {
+        datesInYear = splitDatesIntoMonths(dates);
+        $("#year-show").load("calendarDisplay.html", function () {
+            for (var i = 0; i < datesInYear.length; i++) {
+                var calElem = "#month" + i;
+                var html = "<h3>" + datesInYear[i].name + "</h3>";
+                html += buildCalendar(currentyear, (i + 1), datesInYear[i].days, batch);
                 $(calElem).html(html);
             }
         });
@@ -65,8 +98,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
         daysInMonth.push({day: moment(d), available: false, count: 0, problems: ""});
         d.add(1, 'days');
     }
-    for (let i = 0; i < availableDates.length; i++) {
-        let availableDate = availableDates[i];
+    for (let availableDate of availableDates) {
         let element = daysInMonth[availableDate.day.date() - 1];
         element.available = true;
         element.count = availableDate.count;

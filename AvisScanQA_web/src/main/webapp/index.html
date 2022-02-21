@@ -70,31 +70,16 @@
 <script src="displayNewspapers.js"></script>
 <script>
 
-    var currentEntities;
-    var currentEntityIndex;
-    var currentPageIndex;
 
-    var newspaperYears;
-    var currentNewspaperYear;
-    var currentNewspaper;
 
-    function loadDatesForNewspaper(id, year) {
-        var url = 'api/dates/' + id;
-        $.getJSON(url, {}, function (dates) {
-            var html = "<h1>Dates for " + id + "</h1>";
-            for (var i = 0; i < dates.length; i++) {
-                var day = moment(dates[i]).format('YYYY-MM-DD');
-                html += "<a href='#/newspapers/" + id + "/" + day + "/0/'>" + day + "</a><br>";
-            }
-            $("#primary-show").html(html);
-        });
-    }
 
     function loadYearsForNewspaper(id, year) {
-        currentNewspaperYear = year;
-        currentNewspaper = id;
+        let newspaperYears;
+        let currentNewspaperYear = year;
+        let currentNewspaper = id;
         var url = 'api/years/' + id;
         $.getJSON(url, {}, function (years) {
+            currentNewspaperYear = year;
             newspaperYears = years;
         }).done(function () {
             if (currentNewspaperYear === 0) {
@@ -116,23 +101,24 @@
     }
 
     function loadBatchForNewspaper(id) {
-        //TODO get this working
-        currentNewspaper = id;
+        let currentNewspaperYear;
+        let newspaperYears;
+        let currentNewspaper = id;
         var url = 'api/batch/' + id;
         $.getJSON(url, {}, function (batch) {
             let fromYEAR = moment(batch.startDate).format("YYYY");
             let toYEAR = moment(batch.endDate).format("YYYY");
-
+            currentNewspaperYear = fromYEAR;
             newspaperYears = range(fromYEAR, toYEAR);
         }).done(function () {
             if (currentNewspaperYear === 0) {
-                currentNewspaperYear = newspaperYears[0];
-                var parts = location.hash.split("/");
+                currentNewspaperYear = newspaperYears.next();
+                let parts = location.hash.split("/");
                 parts[parts.length - 2] = currentNewspaperYear;
                 location.hash = parts.join("/");
             } else {
-                $("#headline-div").html("<h1>År med " + id + "</h1>");
-                renderNewspaperForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
+                $("#headline-div").html("<h1>Batch " + id + "</h1>");
+                renderBatchForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
             }
         });
     }
@@ -141,12 +127,11 @@
     function loadEntitiesForNewspaperOnDate(id, date, entityIndex, pageIndex) {
         var day = moment(date).format('YYYY-MM-DD');
         var url = 'api/dates/' + id + "/" + day + '/mappedEntities';
-        currentEntityIndex = entityIndex;
-        currentPageIndex = pageIndex;
+        let currentEntityIndex = entityIndex;
+        let currentEntities;
         $.getJSON(url, {}, function (entities) {
             currentEntities = entities;
             $("#headline-div").html("<h1>Entities for " + id + " on " + day + "</h1>");
-
         }).done(function () {
             console.log("Starting rendering of entites.");
             renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex);
@@ -159,19 +144,18 @@
 
     function loadNewspaperIDs() {
         $.getJSON('api/getNewspaperIDs', {}, function (ids) {
-            for (var i = 0; i < ids.length; i++) {
+            for (const item of ids) {
                 $("#avisIDer").append(
-                    "<li class='nav-item'><a class='nav-link' href='#/newspaper/" + ids[i] + "/0/'>" + ids[i] + "</a></li>");
+                    "<li class='nav-item'><a class='nav-link' href='#/newspaper/" + item + "/0/'>" + item + "</a></li>");
             }
         });
     }
 
     function loadNewspaperBatches() {
         $.getJSON('api/getNewspaperBatches', {}, function (ids) {
-            for (var i = 0; i < ids.length; i++) {
-                let batchID = ids[i].batchid;
+            for (const item of ids) {
                 $("#batches").append(
-                    "<li class='nav-item'><a class='nav-link' href='#/batch/" + batchID + "'>" + batchID + "</a></li>");
+                    "<li class='nav-item'><a class='nav-link' href='#/batch/" + item.batchid + "/'>" + item.batchid + "</a></li>");
             }
         });
     }
@@ -191,7 +175,6 @@
     $.routes.add('/batch/{id:string}', function () {
         // Display this batch
         $("#primary-show").html("Indlæser batch: " + this.id);
-        //TODO
         loadBatchForNewspaper(this.id);
     });
 
