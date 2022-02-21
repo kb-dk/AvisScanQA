@@ -1,7 +1,6 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.xml.XML;
@@ -15,8 +14,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class XpathAltoChecker extends DecoratedEventHandler {
     public XpathAltoChecker(ResultCollector resultCollector) {
@@ -56,9 +53,9 @@ public class XpathAltoChecker extends DecoratedEventHandler {
         
         checkEquals(event,
                     "INVALID_ALTO",
-                    pageNode.getAttributes().getNamedItem("QUALITY").getNodeValue(),
-                    "OK",
-                    "ALTO quality should have been {expected} but was {actual}");
+                "ALTO quality should have been {expected} but was {actual}", pageNode.getAttributes().getNamedItem("QUALITY").getNodeValue(),
+                    "OK"
+        );
         //TODO compare against acceptable levels
         //Checks page Height is within range. what was meant with acceptable levels?
         checkWithinRange(event,
@@ -78,9 +75,9 @@ public class XpathAltoChecker extends DecoratedEventHandler {
 
         checkEquals(event,
                 "INVALID_ALTO",
-                pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
-                "P"+pageNumber,
-                "ALTO Page ID is not {required} but was {actual}");
+                "ALTO Page ID is not {required} but was {actual}", pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
+                "P"+pageNumber
+        );
 
 
     }

@@ -23,9 +23,9 @@ public class ChecksumChecker extends DefaultTreeEventHandler {
             String givenMD5 = event.getChecksum();
             checkEquals(event,
                         "ChecksumMismatch",
-                        computedMD5,
-                        givenMD5,
-                        "File have checksum {actual} but should have checksum {expected}");
+                    "File have checksum {actual} but should have checksum {expected}", computedMD5,
+                        givenMD5
+            );
         } catch (IOException e) {
             reportException(event, e);
         }
