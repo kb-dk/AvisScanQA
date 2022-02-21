@@ -208,6 +208,8 @@ components:
           format: date
         pageCount:
           type: integer
+        editionCount:
+          type: integer
         problems:
           type: string
 

@@ -35,8 +35,7 @@ public class NewspaperQADao {
         log.debug("Looking up newspaper ids");
         String SQL = "SELECT distinct(avisid) FROM newspaperarchive";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             try (ResultSet res = ps.executeQuery()) {
                 List<String> list = new ArrayList<>();
                 while (res.next()) {
@@ -56,8 +55,7 @@ public class NewspaperQADao {
                 SQL
                 = "SELECT batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state FROM batch";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             try (ResultSet res = ps.executeQuery()) {
                 List<Batch> list = new ArrayList<>();
                 while (res.next()) {
@@ -87,8 +85,7 @@ public class NewspaperQADao {
                 SQL
                 = "SELECT distinct(EXTRACT(YEAR from edition_date)) AS year FROM newspaperarchive WHERE avisid = ? ORDER BY year ASC";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setString(1, id);
             try (ResultSet res = ps.executeQuery()) {
@@ -114,8 +111,7 @@ public class NewspaperQADao {
                 SQL1
                 = "select start_date, end_date  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL1)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL1)) {
             ps.setString(1, id);
             ps.setInt(2, Integer.parseInt(year));
             ps.setInt(3, Integer.parseInt(year));
@@ -131,6 +127,7 @@ public class NewspaperQADao {
                                   newspaperDate.setDate(date);
                                   newspaperDate.setPageCount(0);
                                   newspaperDate.setProblems("");
+                                  newspaperDate.setEditionCount(0);
                                   resultMap.put(date, newspaperDate);
                               });
                 }
@@ -141,12 +138,12 @@ public class NewspaperQADao {
         }
         
         
-        String
-                SQL
-                = "select edition_date,count(*),string_agg(problems, '\\n')  from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
+        String SQL =
+                "select edition_date, count(DISTINCT(edition_title)) as numEditions, count(*) as numPages, string_agg(problems, '\\n') as allProblems "
+                + " from newspaperarchive "
+                + " where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setString(1, id);
             ps.setInt(2, Integer.parseInt(year));
@@ -155,14 +152,16 @@ public class NewspaperQADao {
                 
                 while (res.next()) {
                     
-                    java.sql.Date date = res.getDate(1);
-                    int count = res.getInt(2);
-                    String problems = res.getString(3).translateEscapes().trim();
+                    java.sql.Date date = res.getDate("edition_date");
+                    int editionCount = res.getInt("numEditions");
+                    int pageCount = res.getInt("numPages");
+                    String problems = res.getString("allProblems").translateEscapes().trim();
                     
                     NewspaperDate result = new NewspaperDate();
                     final LocalDate localDate = date.toLocalDate();
                     result.setDate(localDate);
-                    result.setPageCount(count);
+                    result.setPageCount(pageCount);
+                    result.setEditionCount(editionCount);
                     result.setProblems(problems);
                     
                     resultMap.put(localDate, result);
@@ -183,8 +182,7 @@ public class NewspaperQADao {
         String SQL = "SELECT * FROM newspaperarchive WHERE avisid = ? AND edition_date = ?"
                      + " ORDER BY section_title, page_number ASC";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setString(1, id);
             ps.setDate(2, java.sql.Date.valueOf(date));
@@ -238,8 +236,7 @@ public class NewspaperQADao {
         log.debug("Looking up relpath by handle for handle {}", handle);
         String SQL = "SELECT orig_relpath FROM newspaperarchive WHERE handle = ?";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setLong(1, handle);
             try (ResultSet res = ps.executeQuery()) {
@@ -261,8 +258,7 @@ public class NewspaperQADao {
         String origRelpath = getOrigRelPath(handle);
         String SQL = "SELECT * FROM characterisation_info WHERE orig_relpath = ?";
         
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setString(1, origRelpath);
             try (ResultSet res = ps.executeQuery()) {
