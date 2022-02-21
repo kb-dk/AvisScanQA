@@ -77,6 +77,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
     
         try (Connection connection = dataSource.getConnection()) {
     
+            //TODO only register the failures not related to files below...
             String failuresMessage = registeredFailures.stream()
                                                         .map(failure -> JSON.toJson(failure, false))
                                                         .collect(Collectors.joining("\n"));

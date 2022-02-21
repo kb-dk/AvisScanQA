@@ -38,7 +38,14 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
 }
 
 function renderEntity(entity) {
-    $("#pageDisplay").html("Vis fil: " + entity.origRelpath + "<br> Problems: <pre>" + JSON.stringify(JSON.parse(entity.problems), ['type','filereference','description'], 2) + "</pre>");
+    let value = "Vis fil: " + entity.origRelpath + "<br> "
+    if (entity.problems !== "") {
+        value += "Problems: <pre>" + JSON.stringify(
+            JSON.parse(entity.problems),
+            ['type', 'filereference', 'description'],
+            2) + "</pre>";
+    }
+    $("#pageDisplay").html(value);
 
     let infoHtml = "Edition titel: " + entity.editionTitle + "<br>";
     infoHtml += "Section titel: " + entity.sectionTitle + "<br>";
@@ -50,7 +57,7 @@ function renderEntity(entity) {
 
     $("#medataDisplay").html(infoHtml);
 
-    renderCharacterization(entity)
+    // renderCharacterization(entity)
     renderImageContent(entity);
 }
 
@@ -67,15 +74,6 @@ function renderSinglePagesEntity(entity, page) {
     renderEntity(entity[page]);
 }
 
-function renderCharacterization(entity) {
-    var url = 'api/entity/' + entity.handle + "/characterization";
-    $.get(url, function (content) {
-        $("#medataDisplay").append("<b> Characterisation:</b><br>")
-        for (var i = 0; i < content.length; i++) {
-            $("#medataDisplay").append("Tool: " + content[i].tool + ": " + content[i].status + "<br>");
-        }
-    });
-}
 
 function renderImageContent(entity) {
 
