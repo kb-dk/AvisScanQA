@@ -8,7 +8,7 @@
         </encoder>
     </appender>
 
-<!--    <logger name="dk.kb" level="INFO"/>-->
+    <logger name="dk.kb" level="INFO"/>
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>

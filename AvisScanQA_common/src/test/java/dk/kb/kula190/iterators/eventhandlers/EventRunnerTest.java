@@ -26,7 +26,7 @@ class EventRunnerTest {
     
     private final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
+            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
   
     
     @Test
@@ -51,10 +51,10 @@ class EventRunnerTest {
                        // new XpathMixChecker(resultCollector),
 
                         //CrossCheckers
-                        new XpathCrossChecker(resultCollector),
+                        new XpathCrossChecker(resultCollector)
                        // new NoMissingMiddlePagesChecker(resultCollector),
                         //new PageStructureChecker(resultCollector),
-                        new MixAltoChecker(resultCollector)
+                        //new MixAltoChecker(resultCollector)
                 
                               );
             }
