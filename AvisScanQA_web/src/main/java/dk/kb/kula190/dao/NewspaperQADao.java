@@ -11,7 +11,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -92,6 +91,9 @@ public class NewspaperQADao {
     
     public List<NewspaperDate> getDatesForNewspaperID(String id, String year) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}', in year {}", id, year);
+        
+        
+        
         
         String SQL = "select edition_date,count(*),string_agg(problems, '\\n')  from newspaperarchive where avisid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date";
         

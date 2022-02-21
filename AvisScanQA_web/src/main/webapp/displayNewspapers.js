@@ -1,13 +1,12 @@
 var datesInYear;
 
 function renderNewspaperForYear(newspaper, years, currentyear) {
-    var html;
     var nav = "<div class='btn-toolbar mb-2 mb-md-0'><div class='btn-group mr-2 d-flex justify-content-evenly flex-wrap' id='year-nav'></div></div>";
 
-    $("#primary-show").html(nav);
-    $("#primary-show").append("<div id='year-show'><h1> show me a newspaper</h1></div>");
+    let $primary = $("#primary-show");
+    $primary.html(nav);
+    $primary.append("<div id='year-show'><h1> show me a newspaper</h1></div>");
 
-    var currentLocationHash = location.hash;
     for (var i = 0; i < years.length; i++) {
         var year = years[i];
         if (year === currentyear) {
@@ -77,17 +76,35 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         calHtml += "<div class='col-sm-1' >"
 
+        //Button styles: https://getbootstrap.com/docs/4.0/components/buttons/
+        //primary = blue
+        //secondary = dark grey
+        //success = green
+        //danger = red
+        //warning = yellow
+        //info = light blue
+        //light = light grey
+        //dark = black
+        //link = link
+        let btnClass = "class='btn btn-light btn-sm"
         if (dayInMonth.available) {
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
-            calHtml += "<a title='"+dayInMonth.count+" pages' style='padding-left: 0; padding-right: 0' href='"+link+"' ";
+
+            calHtml += "<a style='padding-left: 0; padding-right: 0'";
+            calHtml += "href='"+link+"' ";
+            calHtml += "title='"+dayInMonth.count+" pages'";
+
             if (dayInMonth.problems.length > 0){
-                calHtml += " class='btn btn-warning btn-sm' "
+                btnClass += " btn-warning' "
             } else {
-                calHtml += " class='btn btn-success btn-sm' "
+                btnClass += " btn-success' "
             }
-            calHtml += " > " + date + " </a>";
+
+            calHtml += btnClass + " > " + date + " </a>";
         } else {
-            calHtml += "<button type='button' class='btn btn-light btn-sm' style='padding-left: 0; padding-right: 0'> " + date + " </button>";
+            btnClass += " btn-light'"
+            calHtml += "<button type='button' style='padding-left: 0; padding-right: 0' " +
+                btnClass + " > " + date + " </button>";
         }
         calHtml += "</div>";
     }
