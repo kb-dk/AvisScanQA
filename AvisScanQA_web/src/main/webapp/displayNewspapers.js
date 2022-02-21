@@ -33,14 +33,24 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
 }
 
 function determineColor(dayInMonth) {
+    //Button styles: https://getbootstrap.com/docs/4.0/components/buttons/
+    //primary = blue
+    //secondary = dark grey
+    //success = green
+    //danger = red
+    //warning = yellow
+    //info = light blue
+    //light = light grey
+    //dark = black
+    //link = link
     if (!dayInMonth.available) {
         return " btn-light ";
     } else if (dayInMonth.problems.length > 0) {
         return " btn-warning "
     } else if (dayInMonth.count > 0) {
-        return " btn-success' "
+        return " btn-success "
     } else {
-        return " btn-secondary' "
+        return " btn-secondary "
     }
 
 }
@@ -89,29 +99,20 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         calHtml += "<div class='col-sm-1' >"
 
-        //Button styles: https://getbootstrap.com/docs/4.0/components/buttons/
-        //primary = blue
-        //secondary = dark grey
-        //success = green
-        //danger = red
-        //warning = yellow
-        //info = light blue
-        //light = light grey
-        //dark = black
-        //link = link
+
         let btnClass = "class='btn btn-sm " + determineColor(dayInMonth) + "'";
+        let button;
         if (dayInMonth.available) {
+            button = "<a style='padding-left: 0; padding-right: 0'";
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
-
-            calHtml += "<a style='padding-left: 0; padding-right: 0'";
-            calHtml += "href='" + link + "' ";
-            calHtml += "title='" + dayInMonth.count + " pages'";
-
-            calHtml += btnClass + " > " + date + " </a>";
+            button += " href='" + link + "' ";
+            button += " title='" + dayInMonth.count + " pages' ";
+            button += btnClass + " > " + date + " </a>";
         } else {
-            calHtml += "<button type='button' style='padding-left: 0; padding-right: 0' " +
+            button = "<button type='button' style='padding-left: 0; padding-right: 0' " +
                 btnClass + " > " + date + " </button>";
         }
+        calHtml += button;
         calHtml += "</div>";
     }
 
