@@ -196,6 +196,36 @@ paths:
                   $ref: '#/components/schemas/CharacterizationInfo'
 
 
+  /editionNotes:
+    post:
+      operationId: setEditionNotes
+      summary: ""
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                editionNotes:
+                  type: string
+                submit:
+                  type: string
+                edition:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                avis:
+                  type: string
+                batch:
+                  type: string
+
+
+      responses:
+        '201':
+          description: Created
 components:
   schemas:
     Batch:

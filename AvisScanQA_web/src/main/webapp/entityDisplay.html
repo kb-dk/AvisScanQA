@@ -1,9 +1,14 @@
-<div class="container-fluid">
-  <div class="btn-toolbar mb-2 mb-md-0">
-    <div class="btn-group mr-2 d-flex justify-content-evenly flex-wrap" id="page-nav"></div>
-  </div>
-  <div class="row">
-    <div class="col-9" id="pageDisplay"></div>
-    <div class="col-3" id="medataDisplay"></div>
-  </div>
+<div class="container-fluid" id="somehitng">
+    <form action="api/editionNotes"  id="editionNotesForm" method="post">
+        <label for="editionNotes">Edition notes</label>
+        <input name="editionNotes" type="text" id="editionNotes" form="editionNotesForm"/>
+        <input type="submit" name="submit" id="submit" value="Submit" form="editionNotesForm"/>
+    </form>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <div class="btn-group mr-2 d-flex justify-content-evenly flex-wrap" id="page-nav"></div>
+    </div>
+    <div class="row">
+        <div class="col-9" id="pageDisplay"></div>
+        <div class="col-3" id="medataDisplay"></div>
+    </div>
 </div>

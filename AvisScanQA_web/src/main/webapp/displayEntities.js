@@ -1,57 +1,67 @@
 function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
-    let curEntities = currentEntities;
-    let curEntityIndex = currentEntityIndex;
-    let curPageIndex = pageIndex;
-
-    let nav = $("<div/>",{class:'btn-toolbar mb-2 mb-md-0'}).append($("<div/>", {class:'btn-group mr-2 d-flex justify-content-evenly flex-wrap', id:'edition-nav'}));
-
     let $primary = $("#primary-show");
+    $primary.empty();
+    $primary.append($("<label/>").text("Day notes").attr("for","dayNotes"));
+    $primary.append($("<input/>", {id: "dayNotes", type: "text"}))
 
-    $primary.empty().append(nav);
+    const $editionNav = $("<div/>", {class: 'btn-toolbar mb-2 mb-md-0'})
+        .append($("<div/>", {
+            class: 'btn-group mr-2 d-flex justify-content-evenly flex-wrap',
+            id: 'edition-nav'
+        }));
+    $primary.append($editionNav);
 
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
-
     $primary.append(editionShow);
 
-    var mapKeys = Object.keys(currentEntities);
-    const $edition = $("#edition-nav");
 
-    for (var i = 0; i < mapKeys.length; i++) {
-        var entity = mapKeys[i];
+    const mapKeys = Object.keys(currentEntities);
+    for (let i = 0; i < mapKeys.length; i++) {
+        const entity = mapKeys[i];
         if (i === currentEntityIndex) {
-            let editionButton = $("<button/>",{
+            let editionButton = $("<button/>", {
                 class: "btn btn-sm btn-outline-secondary active",
-                text: entity});
-            $edition.append(editionButton);
+                text: entity
+            });
+            $editionNav.append(editionButton);
         } else {
             const otherEditionLink = $("<a/>").attr({
                 href: editEntityIndexInHash(location.hash, i),
                 class: 'btn btn-sm btn-outline-secondary',
-                text: entity});
-            $edition.append(otherEditionLink);
+                text: entity
+            });
+            $editionNav.append(otherEditionLink);
         }
     }
 
     $("#edition-show").load("entityDisplay.html", function () {
-        var mapKeys = Object.keys(curEntities);
-        var entity = curEntities[mapKeys[curEntityIndex]];
+        var mapKeys = Object.keys(currentEntities);
+        var entity = currentEntities[mapKeys[currentEntityIndex]];
         if (entity.length === 1) {
             renderEntity(entity[0]);
         } else {
-            renderSinglePagesEntity(entity, curPageIndex);
+            renderSinglePagesEntity(entity, pageIndex);
         }
     });
 }
 
 function renderEntity(entity) {
-    let value = "Vis fil: " + entity.origRelpath + "<br> "
+    let $pageDisplay = $("#pageDisplay");
+    $pageDisplay.append($("<label/>").text("Page notes").attr("for","pageNotes"));
+    $pageDisplay.append($("<input/>", {id: "pageNotes", type: "text"}));
+
+    let value = "<div>Vis fil: " + entity.origRelpath + "<br> "
     if (entity.problems !== "") {
         value += "Problems: <pre>" + JSON.stringify(
             JSON.parse(entity.problems),
             ['type', 'filereference', 'description'],
             2) + "</pre>";
     }
-    $("#pageDisplay").html(value);
+    value += "</div>"
+    $pageDisplay.append($(value));
+
+
+
 
     let infoHtml = "Edition titel: " + entity.editionTitle + "<br>";
     infoHtml += "Section titel: " + entity.sectionTitle + "<br>";
@@ -66,16 +76,17 @@ function renderEntity(entity) {
 }
 
 function renderSinglePagesEntity(entity, page) {
+    const $pageNav = $("#page-nav");
     for (var i = 0; i < entity.length; i++) {
         if (i === page) {
             const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
-            $("#page-nav").append(button);
+            $pageNav.append(button);
         } else {
             const link = $("<a/>").attr({
                 href: editPageIndexInHash(location.hash, i),
                 class: 'btn btn-sm btn-outline-secondary'
             }).text(i + 1);
-            $("#page-nav").append(link);
+            $pageNav.append(link);
         }
     }
 

@@ -179,6 +179,7 @@
 
 
     <build>
+        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/openapi</directory>
@@ -313,7 +314,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
-                    <warName>${project.artifactId}</warName>
                     <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                     <archive>
                         <manifest>
@@ -330,7 +330,9 @@
                 <version>10.0.7</version>
                 <configuration>
                     <useTestScope>true</useTestScope>
+
                     <webApp>
+
                         <contextPath>/${project.artifactId}/</contextPath>
                         <descriptor>${project.build.finalName}/WEB-INF/web.xml</descriptor>
                         <jettyEnvXml>${project.build.directory}/jetty-res/jetty-env.xml</jettyEnvXml>

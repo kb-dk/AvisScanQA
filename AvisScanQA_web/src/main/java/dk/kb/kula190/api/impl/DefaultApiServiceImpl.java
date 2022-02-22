@@ -29,6 +29,7 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -106,7 +107,17 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
+
+    @Override
+    public void setEditionNotes(String editionNotes,
+                                String submit,
+                                String edition,
+                                LocalDate date,
+                                String avis,
+                                String batch) {
+        log.info("{}, {}, {}, {}, {}, {}", editionNotes, submit, edition, date, avis, batch);
+    }
+
     @Override
     public List<Batch> getBatchIDs() {
         try {
