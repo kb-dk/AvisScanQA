@@ -75,7 +75,7 @@ public class MultiThreadedEventRunner extends EventRunner {
                     resultCollector.addFailure(current,
                                                FailureType.EXCEPTION,
                                                this.getClass().getSimpleName(),
-                                               FailureType.UNEXPECTED_ERROR.name() + e.toString(),
+                                               FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString(),
                                                Arrays.stream(e.getStackTrace())
                                                      .map(st -> st.toString())
                                                      .collect(Collectors.joining("\n")));

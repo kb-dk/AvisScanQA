@@ -55,7 +55,7 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
                 }
                 return firstWord(firstLine).trim().toLowerCase();
             } catch (FileNotFoundException e) {
-                return null;
+                throw new IOException(e);
             }
         }
         return null;

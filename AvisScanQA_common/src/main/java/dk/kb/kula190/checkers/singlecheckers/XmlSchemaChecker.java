@@ -43,7 +43,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             addFailure(event,
                     FailureType.EXCEPTION,
                     this.getClass().getSimpleName(),
-                       FailureType.UNEXPECTED_ERROR.name() + e,
+                       FailureType.UNEXPECTED_ERROR.name() +"\n"+ e,
                     Arrays.stream(e.getStackTrace())
                             .map(StackTraceElement::toString)
                             .collect(Collectors.joining("\n")));
@@ -112,7 +112,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
                 addFailure(parsingEvent,
                            FailureType.EXCEPTION,
                            this.getClass().getSimpleName(),
-                           FailureType.UNEXPECTED_ERROR.name() + exception,
+                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ exception,
                            Arrays.stream(exception.getStackTrace())
                                 .map(StackTraceElement::toString)
                                 .collect(Collectors.joining("\n")));

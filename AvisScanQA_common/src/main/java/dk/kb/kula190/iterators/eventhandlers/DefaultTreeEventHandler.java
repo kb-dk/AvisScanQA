@@ -134,7 +134,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         addFailure(event,
                    FailureType.EXCEPTION,
                    this.getClass().getSimpleName(),
-                   FailureType.UNEXPECTED_ERROR.name() + e,
+                   FailureType.UNEXPECTED_ERROR.name() +"\n"+ e,
                    Arrays.stream(e.getStackTrace())
                          .map(StackTraceElement::toString)
                          .collect(Collectors.joining("\n")));

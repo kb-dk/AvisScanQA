@@ -125,7 +125,7 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(new NodeEndParsingEvent("Finished"),
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
             }
         }
     }
@@ -139,7 +139,7 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
             }
         }
     }
@@ -153,7 +153,7 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
             }
         }
     }
@@ -167,7 +167,7 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name()+ e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name()+"\n"+ e.toString());
             }
         }
     }
