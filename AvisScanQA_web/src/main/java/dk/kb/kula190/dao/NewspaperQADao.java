@@ -139,7 +139,6 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up dates for newspaper id", e);
         }
         
-        
         String SQL =
                 "select edition_date, b.state, count(DISTINCT(edition_title)) as numEditions, count(*) as numPages, string_agg(newspaperarchive.problems, '\\n') as allProblems "
                 + " from newspaperarchive join batch b on b.batchid = newspaperarchive.batchid"

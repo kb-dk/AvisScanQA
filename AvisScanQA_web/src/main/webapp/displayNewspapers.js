@@ -89,19 +89,23 @@ function determineColor(dayInMonth) {
 }
 
 function buildCalendar(year, month, availableDates, newspaper) {
+
     let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
     let daysInMonth = [];
     let firstWeekdayOfMonth = firstDayOfThisMonth.weekday();
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
-        daysInMonth.push({day: moment(d), available: false, count: 0, problems: ""});
+        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount:0, problems: ""});
         d.add(1, 'days');
+
     }
     for (let availableDate of availableDates) {
+
         let element = daysInMonth[availableDate.day.date() - 1];
         element.available = true;
         element.count = availableDate.count;
+        element.editionCount = availableDate.editionCount;
         element.problems = availableDate.problems;
     }
 
@@ -131,14 +135,13 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
         calHtml += "<div class='col-sm-1' >"
 
-
         let btnClass = "class='btn btn-sm " + determineColor(dayInMonth) + "'";
         let button;
         if (dayInMonth.available) {
             button = "<a style='padding-left: 0; padding-right: 0'";
             let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
             button += " href='" + link + "' ";
-            button += " title='" + dayInMonth.count + " pages' ";
+            button += " title='" + dayInMonth.count + " page(s) \n"+dayInMonth.editionCount + " edition(s)'";
             button += btnClass + " > " + date + " </a>";
         } else {
             button = "<button type='button' style='padding-left: 0; padding-right: 0' " +
@@ -178,6 +181,7 @@ function splitDatesIntoMonths(dates) {
         months[day.month()].days.push({
             "day": day,
             "count": NewspaperDate.pageCount,
+            "editionCount": NewspaperDate.editionCount,
             "problems": NewspaperDate.problems
         });
     }
