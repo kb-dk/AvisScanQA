@@ -78,7 +78,7 @@ function determineColor(dayInMonth) {
     //link = link
     if (!dayInMonth.available) {
         return " btn-light ";
-    } else if (dayInMonth.state == "APPROVED"){ //TODO enum at some point
+    } else if (dayInMonth.state == "CHECKED"){ //TODO enum at some point
         return " approved ";
     } else if (dayInMonth.problems.length > 0) {
         return " btn-warning ";
@@ -113,8 +113,14 @@ function buildCalendar(year, month, availableDates, newspaper) {
     }
 
     var calHtml = "";
-
+    calHtml += "<div class='row weekDayLetters'>";
+    let weekDayLetters = ['M','T','O','T','F','L','S'];
+    for (let i = 0; i <weekDayLetters.length; i++) {
+        calHtml += "<div class='col-sm-1'>"+weekDayLetters[i]+"</div>";
+    }
+    calHtml += "</div>";
     if (firstWeekdayOfMonth > 0) {
+
         calHtml += "<div class='row'>";
         for (let i = 0; i < firstWeekdayOfMonth; i++) {
             calHtml += "<div class='col-sm-1'>&nbsp;</div>";
