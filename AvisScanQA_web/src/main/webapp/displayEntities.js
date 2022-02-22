@@ -3,11 +3,12 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     let curEntityIndex = currentEntityIndex;
     let curPageIndex = pageIndex;
 
-    var nav = "<div class='btn-toolbar mb-2 mb-md-0'><div class='btn-group mr-2 d-flex justify-content-evenly flex-wrap' id='edition-nav'></div></div>";
+    let nav = $("<div/>",{class:'btn-toolbar mb-2 mb-md-0'}).append($("<div/>", {class:'btn-group mr-2 d-flex justify-content-evenly flex-wrap', id:'edition-nav'}));
 
     let $primary = $("#primary-show");
 
-    $primary.html(nav);
+    $primary.empty().append(nav);
+
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
 
     $primary.append(editionShow);
