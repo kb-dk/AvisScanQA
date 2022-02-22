@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.yaml.YAML;
@@ -42,17 +43,17 @@ public class TiffChecker extends DecoratedEventHandler {
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
         
         checkEquals(event,
-                    "INVALID_TIFF", "ImageMagick reports invalid format {actual}. Should have been {expected}", yaml.getString("Image.Format"),
+                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid format {actual}. Should have been {expected}", yaml.getString("Image.Format"),
                     "TIFF (Tagged Image File Format)"
         );
         
         checkEquals(event,
-                    "INVALID_TIFF", "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}", yaml.getString("Image.Colorspace"),
+                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}", yaml.getString("Image.Colorspace"),
                     "sRGB"
         );
         
         checkEquals(event,
-                    "INVALID_TIFF", "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}", yaml.getString("Image.Depth"),
+                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}", yaml.getString("Image.Depth"),
                     "8-bit"
         );
         

@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.xml.XML;
@@ -19,8 +20,8 @@ public class XpathAltoChecker extends DecoratedEventHandler {
     public XpathAltoChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
-    
-    
+
+
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
@@ -37,50 +38,55 @@ public class XpathAltoChecker extends DecoratedEventHandler {
             throw new IOException(e);
         }
         XPathSelector xpath = XpathUtils.createXPathSelector("alto", "http://www.loc.gov/standards/alto/ns-v2#");
-        
-        
-        //        <Page ID="P1" HEIGHT="13835" WIDTH="11005" PHYSICAL_IMG_NR="1" QUALITY="OK" POSITION="Single" PROCESSING="OCR1"
+
+
+        //        <Page ID="P1" HEIGHT="13835" WIDTH="11005" PHYSICAL_IMG_NR="1" QUALITY="OK" POSITION="Single"
+        //        PROCESSING="OCR1"
         //              ACCURACY="41.00" PC="0.410">
-        
+
         Node pageNode = xpath.selectNode(document, "/alto:alto/alto:Layout/alto:Page");
-        
+
         //TODO should this check actually be there?
         checkAtLeast(event,
-                     "INVALID_ALTO",
+                     FailureType.INVALID_ALTO_ERROR,
                      Double.parseDouble(pageNode.getAttributes().getNamedItem("ACCURACY").getNodeValue()),
                      10.0,
                      "ALTO OCR accurary {actual} is lower than {required}");
-        
+
         checkEquals(event,
-                    "INVALID_ALTO",
-                "ALTO quality should have been {expected} but was {actual}", pageNode.getAttributes().getNamedItem("QUALITY").getNodeValue(),
+                    FailureType.INVALID_ALTO_ERROR,
+                    "ALTO quality should have been {expected} but was {actual}",
+                    pageNode.getAttributes().getNamedItem("QUALITY").getNodeValue(),
                     "OK"
-        );
+                   );
         //TODO compare against acceptable levels
         //Checks page Height is within range. what was meant with acceptable levels?
         checkWithinRange(event,
-                "INVALID_ALTO",
-                Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()), //TODO configurable
-                10000.0,
-                50000.0,
-                "ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: {actual}");
+                         FailureType.INVALID_ALTO_ERROR,
+                         Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()),
+                         //TODO configurable
+                         10000.0,
+                         50000.0,
+                         "ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: " +
+                         "{actual}");
         //Checks page Width is within range
         checkWithinRange(event,
-                "INVALID_ALTO",
-                Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
-                4000.0, //TODO configurable
-                50000.0,
-                "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
+                         FailureType.INVALID_ALTO_ERROR,
+                         Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
+                         4000.0, //TODO configurable
+                         50000.0,
+                         "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
         //Checks page ID is corresponding with filename.
 
         checkEquals(event,
-                "INVALID_ALTO",
-                "ALTO Page ID is not {required} but was {actual}", pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
-                "P"+pageNumber
-        );
+                    FailureType.INVALID_ALTO_ERROR,
+                    "ALTO Page ID is not {required} but was {actual}",
+                    pageNode.getAttributes().getNamedItem("ID").getNodeValue(),
+                    "P" + pageNumber
+                   );
 
 
     }
 
-    
+
 }

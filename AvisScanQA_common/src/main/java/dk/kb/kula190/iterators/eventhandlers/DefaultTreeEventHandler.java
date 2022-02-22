@@ -2,6 +2,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
@@ -45,7 +46,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
 
 
     protected void checkEquals(ParsingEvent event,
-                               String type,
+                               FailureType type,
                                String description,
                                Object actual,
                                Object expected) {
@@ -60,7 +61,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
 
     protected void checkAllEquals(ParsingEvent event,
-                                  String type,
+                                  FailureType type,
                                   String description,
                                   Object... equals
                                  ) {
@@ -88,7 +89,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
 
     protected void checkTrue(ParsingEvent event,
-                             String type,
+                             FailureType type,
                              String description,
                              boolean bool) {
         if (!bool) {
@@ -100,7 +101,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
 
     protected void checkAtLeast(ParsingEvent event,
-                                String type,
+                                FailureType type,
                                 Double actual,
                                 Double required,
                                 String description) {
@@ -113,7 +114,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
 
     protected void checkWithinRange(ParsingEvent event,
-                                    String type,
+                                    FailureType type,
                                     Double actual,
                                     Double requiredMin,
                                     Double requiredMax,
@@ -131,9 +132,9 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
 
     protected void reportException(ParsingEvent event, Exception e) {
         addFailure(event,
-                   EventRunner.EXCEPTION,
+                   FailureType.EXCEPTION,
                    this.getClass().getSimpleName(),
-                   EventRunner.UNEXPECTED_ERROR + e,
+                   FailureType.UNEXPECTED_ERROR.name() + e,
                    Arrays.stream(e.getStackTrace())
                          .map(StackTraceElement::toString)
                          .collect(Collectors.joining("\n")));
@@ -141,7 +142,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
 
 
     public void addFailure(ParsingEvent fileReference,
-                           String type,
+                           FailureType type,
                            String component,
                            String description,
                            String... details) {

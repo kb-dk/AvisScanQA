@@ -1,11 +1,6 @@
 package dk.kb.kula190;
 
-import dk.kb.kula190.generated.Details;
-import dk.kb.kula190.generated.Failure;
-import dk.kb.kula190.generated.Failures;
-import dk.kb.kula190.generated.ObjectFactory;
-import dk.kb.kula190.generated.Reference;
-import dk.kb.kula190.generated.Result;
+import dk.kb.kula190.generated.*;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
@@ -21,7 +16,6 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -105,13 +99,12 @@ public class ResultCollector {
     
     /**
      * Add a specific failure to the result collector. All these parameters must be non-null and non-empty
-     *
-     * @param reference   the reference to the file/object that caused the failure
+     *  @param reference   the reference to the file/object that caused the failure
      * @param type        the type of failure
      * @param component   the component that failed
      * @param description Description of the failure.
      */
-    public void addFailure(ParsingEvent reference, String type, String component, String description) {
+    public void addFailure(ParsingEvent reference, FailureType type, String component, String description) {
         addFailure(reference, type, component, description, new String[]{});
     }
     
@@ -126,7 +119,7 @@ public class ResultCollector {
      * @param details       additional details, can be null
      */
     public synchronized void addFailure(ParsingEvent fileReference,
-                                        String type,
+                                        FailureType type,
                                         String component,
                                         String description,
                                         String... details) {
@@ -141,7 +134,7 @@ public class ResultCollector {
         failure.setReference(reference);
     
         failure.setFilereference(fileReference.getLocation().substring(fileReference.getLocation().indexOf(reference.getAvis()) ));
-        
+
         failure.setType(type);
         failure.setComponent(component);
         failure.setDescription(description);

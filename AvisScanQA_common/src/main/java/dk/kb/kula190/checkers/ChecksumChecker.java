@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -22,8 +23,8 @@ public class ChecksumChecker extends DefaultTreeEventHandler {
             computedMD5 = DigestUtils.md5Hex(data);
             String givenMD5 = event.getChecksum();
             checkEquals(event,
-                        "ChecksumMismatch",
-                    "File have checksum {actual} but should have checksum {expected}", computedMD5,
+                        FailureType.CHECKSUM_MISMATCH_ERROR,
+                        "File have checksum {actual} but should have checksum {expected}", computedMD5,
                         givenMD5
             );
         } catch (IOException e) {

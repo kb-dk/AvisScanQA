@@ -5,7 +5,6 @@ import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.DatabaseRegister;
-import dk.kb.kula190.checkers.crosscheckers.MixAltoChecker;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
@@ -54,7 +53,6 @@ class EventRunnerTest {
                         new XpathCrossChecker(resultCollector)
                        // new NoMissingMiddlePagesChecker(resultCollector),
                         //new PageStructureChecker(resultCollector),
-                        //new MixAltoChecker(resultCollector)
                 
                               );
             }

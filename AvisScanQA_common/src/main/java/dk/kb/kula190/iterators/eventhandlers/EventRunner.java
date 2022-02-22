@@ -2,6 +2,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
@@ -122,9 +123,9 @@ public class EventRunner implements Runnable {
                 log.error("Caught Exception", e);
                 //TODO why can we not get an event for this?
                 resultCollector.addFailure(new NodeEndParsingEvent("Finished"),
-                                           EXCEPTION,
+                                           FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           UNEXPECTED_ERROR + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
             }
         }
     }
@@ -136,9 +137,9 @@ public class EventRunner implements Runnable {
             } catch (Exception e) {
                 log.error("Caught Exception", e);
                 resultCollector.addFailure(current,
-                                           EXCEPTION,
+                                           FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           UNEXPECTED_ERROR + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
             }
         }
     }
@@ -150,9 +151,9 @@ public class EventRunner implements Runnable {
             } catch (Exception e) {
                 log.error("Caught Exception", e);
                 resultCollector.addFailure(current,
-                                           EXCEPTION,
+                                           FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           UNEXPECTED_ERROR + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + e.toString());
             }
         }
     }
@@ -164,9 +165,9 @@ public class EventRunner implements Runnable {
             } catch (Exception e) {
                 log.error("Caught Exception", e);
                 resultCollector.addFailure(current,
-                                           EXCEPTION,
+                                           FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           UNEXPECTED_ERROR + e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name()+ e.toString());
             }
         }
     }

@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.EventRunner;
@@ -40,9 +41,9 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
 
         } catch (IOException | SAXException e) {
             addFailure(event,
-                    EventRunner.EXCEPTION,
+                    FailureType.EXCEPTION,
                     this.getClass().getSimpleName(),
-                    EventRunner.UNEXPECTED_ERROR + e,
+                       FailureType.UNEXPECTED_ERROR.name() + e,
                     Arrays.stream(e.getStackTrace())
                             .map(StackTraceElement::toString)
                             .collect(Collectors.joining("\n")));
@@ -100,7 +101,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             @Override
             public void error(SAXParseException exception) throws SAXException {
                 addFailure(parsingEvent,
-                        name+" Schema",
+                           FailureType.SCHEMA_ERROR,
                         XmlSchemaChecker.class.getSimpleName(),
                         name+" error encountered",
                         exception.getMessage());
@@ -109,10 +110,10 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             @Override
             public void fatalError(SAXParseException exception) throws SAXException {
                 addFailure(parsingEvent,
-                        EventRunner.EXCEPTION,
-                        this.getClass().getSimpleName(),
-                        EventRunner.UNEXPECTED_ERROR + exception,
-                        Arrays.stream(exception.getStackTrace())
+                           FailureType.EXCEPTION,
+                           this.getClass().getSimpleName(),
+                           FailureType.UNEXPECTED_ERROR.name() + exception,
+                           Arrays.stream(exception.getStackTrace())
                                 .map(StackTraceElement::toString)
                                 .collect(Collectors.joining("\n")));
 

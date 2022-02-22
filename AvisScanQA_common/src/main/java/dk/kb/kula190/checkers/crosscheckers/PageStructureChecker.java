@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
@@ -14,12 +15,12 @@ import java.util.stream.Collectors;
 
 public class PageStructureChecker extends DecoratedEventHandler {
     private ThreadLocal<Set<String>> types = new ThreadLocal<>();
-    
+
     public PageStructureChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
-    
-    
+
+
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
@@ -30,7 +31,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
         //Checkes that each page consists of MIX ALTO TIFF
         types.set(new HashSet<>());
     }
-    
+
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
@@ -41,14 +42,14 @@ public class PageStructureChecker extends DecoratedEventHandler {
         final Set<String> strings = types.get();
         if (!strings.containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
             addFailure(event,
-                                            "Missing files per page",
-                                            this.getClass().getSimpleName(),
-                                            "Must contain mix, alto and tiff files",
-                                            strings.stream().map(x -> "" + x).collect(Collectors.joining(",")));
+                       FailureType.MISSING_FILE_ERROR,
+                       this.getClass().getSimpleName(),
+                       "Must contain mix, alto and tiff files",
+                       strings.stream().map(x -> "" + x).collect(Collectors.joining(",")));
         }
     }
-    
-    
+
+
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
@@ -58,7 +59,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                         Integer pageNumber) throws IOException {
         types.get().add("MIX");
     }
-    
+
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
                          String avis,
@@ -68,7 +69,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          Integer pageNumber) throws IOException {
         types.get().add("ALTO");
     }
-    
+
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,

@@ -2,6 +2,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
@@ -72,9 +73,9 @@ public class MultiThreadedEventRunner extends EventRunner {
                     childTask.get();
                 } catch (InterruptedException | ExecutionException e) {
                     resultCollector.addFailure(current,
-                                               EventRunner.EXCEPTION,
+                                               FailureType.EXCEPTION,
                                                this.getClass().getSimpleName(),
-                                               EventRunner.UNEXPECTED_ERROR + e.toString(),
+                                               FailureType.UNEXPECTED_ERROR.name() + e.toString(),
                                                Arrays.stream(e.getStackTrace())
                                                      .map(st -> st.toString())
                                                      .collect(Collectors.joining("\n")));

@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.singlecheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.util.xml.XML;
@@ -48,14 +49,14 @@ public class XpathMixChecker extends DecoratedEventHandler {
                                             "/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageHeight");
         //All pages stand up, so height > width.
         checkAtLeast(event,
-                "INVALID_MIX",
-                height.doubleValue(),
-                width.doubleValue(),
-                "MIX image height: {required} was less than width: {actual}"); //`${height}` not supported in this java version?
+                     FailureType.INVALID_MIX_ERROR,
+                     height.doubleValue(),
+                     width.doubleValue(),
+                     "MIX image height: {required} was less than width: {actual}"); //`${height}` not supported in this java version?
 
         String colorSpace = xpath.selectString(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:PhotometricInterpretation/mix:colorSpace");
         checkEquals(event,
-                "INVALID_MIX",
+                    FailureType.INVALID_MIX_ERROR,
                 "MIX colorspace should have been {expected} but was {actual}", colorSpace,
                 "RGB"
         );

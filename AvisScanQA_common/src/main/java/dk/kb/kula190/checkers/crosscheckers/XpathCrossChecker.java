@@ -2,6 +2,7 @@ package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
@@ -106,33 +107,31 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         XpathTiff xpathTiff = Tiff.get();
         XpathAlto xpathAlto = Alto.get();
 
-
-
         boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
 
         //TODO checkTrue, checkFalse
         checkTrue(event,
-                    "TIFF_ANALYZE_ERROR",
+                    FailureType.TIFF_ANALYZE_ERROR,
                     "Imagemagick metadata for tiff not supplied",
                     injectedDataSupplied);
 
 
         checkEquals(event,
-                    "TIFF_MIX_ERROR",
+                    FailureType.TIFF_MIX_ERROR,
                     "mix metadata (file size: {expected}) does not match actual tif file " +
                     "size {actual}",
                     xpathTiff.getTifSizeActual(),
                     xpathMix.getTifSizePerMix());
 
         checkEquals(event,
-                    "TIFF_MIX_ERROR",
+                    FailureType.TIFF_MIX_ERROR,
                     "mix metadata (checksum {expected}) does not match actual tif file " +
                     "checksum {actual}",
                     xpathTiff.getChecksumTif(),
                     xpathMix.getChecksumMix());
 
         checkAllEquals(event,
-                       "CROSS_ERROR",
+                       FailureType.CROSS_ERROR,
                        "mix metadata (filename: {val1}) tif metadata (filename: {val2}) alto " +
                        "metadata (filename: {val3}) one does not match",
                        xpathMix.getMixFileName(),
@@ -141,7 +140,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
         if (injectedDataSupplied) {
             checkAllEquals(event,
-                           "CROSS_ERROR",
+                           FailureType.CROSS_ERROR,
                            "mix metadata (image height: {val1}) tif metadata (image height: {val2}) alto metadata (image " +
                            "height: {val3}) one does not match",
                            xpathTiff.getImageHeightTif(),
@@ -149,7 +148,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                            xpathAlto.getAltoImageHeight());
 
             checkAllEquals(event,
-                           "CROSS_ERROR",
+                           FailureType.CROSS_ERROR,
                            "mix metadata (image width: {val1}) tif metadata (image width: {val2}) alto metadata (image " +
                            "width: {val3}) one does not match",
                            xpathMix.getMixImageWidth(),

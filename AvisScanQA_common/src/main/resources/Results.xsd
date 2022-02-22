@@ -157,7 +157,25 @@
         </xs:complexType>
     </xs:element>
     <xs:element name="component" type="xs:NCName"/>
-    <xs:element name="type" type="xs:NCName"/>
+    <xs:element name="type" type="failureType"/>
+
+    <xs:simpleType name="failureType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="TIFF_ANALYZE_ERROR" />
+            <xs:enumeration value="TIFF_MIX_ERROR" />
+            <xs:enumeration value="CROSS_ERROR" />
+            <xs:enumeration value="MISSING_FILE_ERROR" />
+            <xs:enumeration value="CHECKSUM_MISMATCH_ERROR" />
+            <xs:enumeration value="INVALID_MIX_ERROR" />
+            <xs:enumeration value="INVALID_ALTO_ERROR" />
+            <xs:enumeration value="INVALID_TIFF_ERROR" />
+            <xs:enumeration value="SCHEMA_ERROR" />
+            <xs:enumeration value="EXCEPTION" />
+            <xs:enumeration value="UNEXPECTED_ERROR" />
+            <xs:enumeration value="UNKNOWN_FILETYPE_ERROR"/>
+        </xs:restriction>
+    </xs:simpleType>
+
     <xs:element name="description" type="xs:string"/>
     <xs:element name="details">
         <xs:complexType mixed="true">

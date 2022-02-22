@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 
@@ -44,7 +45,7 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {
                 resultCollector.addFailure(event,
-                                           "MissingPages",
+                                           FailureType.MISSING_FILE_ERROR,
                                            this.getClass().getSimpleName(),
                                            "Section have gaps in page sequence",
                                            sortedPages.stream().map(x -> "" + x).collect(Collectors.joining(",")));
