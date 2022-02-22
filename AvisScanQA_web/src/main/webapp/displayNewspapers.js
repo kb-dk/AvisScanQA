@@ -78,12 +78,14 @@ function determineColor(dayInMonth) {
     //link = link
     if (!dayInMonth.available) {
         return " btn-light ";
+    } else if (dayInMonth.state == "APPROVED"){ //TODO enum at some point
+        return " approved ";
     } else if (dayInMonth.problems.length > 0) {
-        return " btn-warning "
+        return " btn-warning ";
     } else if (dayInMonth.count > 0) {
-        return " btn-success "
-    } else {
-        return " btn-secondary "
+        return " btn-success ";
+    }  else {
+        return " btn-secondary ";
     }
 
 }
@@ -96,7 +98,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
-        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount:0, problems: ""});
+        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount:0, state: "",problems: ""});
         d.add(1, 'days');
 
     }
@@ -106,6 +108,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
         element.available = true;
         element.count = availableDate.count;
         element.editionCount = availableDate.editionCount;
+        element.state = availableDate.state;
         element.problems = availableDate.problems;
     }
 
@@ -182,6 +185,7 @@ function splitDatesIntoMonths(dates) {
             "day": day,
             "count": NewspaperDate.pageCount,
             "editionCount": NewspaperDate.editionCount,
+            "state": NewspaperDate.state,
             "problems": NewspaperDate.problems
         });
     }
