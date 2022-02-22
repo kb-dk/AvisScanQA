@@ -1,35 +1,40 @@
-var curEntities;
-var curEntityIndex;
-var curPageIndex;
-
 function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
+    let curEntities = currentEntities;
+    let curEntityIndex = currentEntityIndex;
+    let curPageIndex = pageIndex;
 
-    curEntities = currentEntities;
-    curEntityIndex = currentEntityIndex;
-    curPageIndex = pageIndex;
+    var nav = "<div class='btn-toolbar mb-2 mb-md-0'><div class='btn-group mr-2 d-flex justify-content-evenly flex-wrap' id='edition-nav'></div></div>";
 
-    var html;
-    var nav = "<div class=\"btn-toolbar mb-2 mb-md-0\"><div class=\"btn-group mr-2 d-flex justify-content-evenly flex-wrap\" id=\"edition-nav\"></div></div>";
+    let $primary = $("#primary-show");
 
-    $("#primary-show").html(nav);
-    $("#primary-show").append("<div id=\"edition-show\"><h1> show me a newspaper</h1></div>");
+    $primary.html(nav);
+    const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
+
+    $primary.append(editionShow);
 
     var mapKeys = Object.keys(currentEntities);
-    var currentLocationHash = location.hash;
+    const $edition = $("#edition-nav");
+
     for (var i = 0; i < mapKeys.length; i++) {
         var entity = mapKeys[i];
-        if (i == currentEntityIndex) {
-            $("#edition-nav").append("<button class=\"btn btn-sm btn-outline-secondary active\">" + entity + "</button>");
+        if (i === currentEntityIndex) {
+            let editionButton = $("<button/>",{
+                class: "btn btn-sm btn-outline-secondary active",
+                text: entity});
+            $edition.append(editionButton);
         } else {
-            var newLocation = editEntityIndexInHash(location.hash, i);
-            $("#edition-nav").append("<a href=\"" + newLocation + "\" class=\"btn btn-sm btn-outline-secondary\">" + entity + "</>");
+            const otherEditionLink = $("<a/>").attr({
+                href: editEntityIndexInHash(location.hash, i),
+                class: 'btn btn-sm btn-outline-secondary',
+                text: entity});
+            $edition.append(otherEditionLink);
         }
     }
 
     $("#edition-show").load("entityDisplay.html", function () {
         var mapKeys = Object.keys(curEntities);
         var entity = curEntities[mapKeys[curEntityIndex]];
-        if (entity.length == 1) {
+        if (entity.length === 1) {
             renderEntity(entity[0]);
         } else {
             renderSinglePagesEntity(entity, curPageIndex);
@@ -57,90 +62,25 @@ function renderEntity(entity) {
 
     $("#medataDisplay").html(infoHtml);
 
-    // renderCharacterization(entity)
-    renderImageContent(entity);
 }
 
 function renderSinglePagesEntity(entity, page) {
     for (var i = 0; i < entity.length; i++) {
-        if (i == page) {
-            $("#page-nav").append("<button class=\"btn btn-sm btn-outline-secondary active\">" + (i + 1) + "</button>");
+        if (i === page) {
+            const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
+            $("#page-nav").append(button);
         } else {
-            var newLocation = editPageIndexInHash(location.hash, i);
-            $("#page-nav").append("<a href=\"" + newLocation + "\" class=\"btn btn-sm btn-outline-secondary\">" + (i + 1) + "</>");
+            const link = $("<a/>").attr({
+                href: editPageIndexInHash(location.hash, i),
+                class: 'btn btn-sm btn-outline-secondary'
+            }).text(i + 1);
+            $("#page-nav").append(link);
         }
     }
 
     renderEntity(entity[page]);
 }
 
-
-function renderImageContent(entity) {
-
-    var format = entity.formatType.toLowerCase();
-    switch (format) {
-        case "pdf":
-            displayPdf(entity, format);
-            break;
-        case "tiff":
-            displayTiff(entity, format);
-            break;
-        case "jp2":
-            displayJp2(entity, format);
-            break;
-        case "jpg":
-            displayJpeg(entity, format);
-            break;
-        default:
-            alert("Kan på nuværrende tidspunkt ikke viser filer af typen " + entity.formatType.toLowerCase());
-    }
-}
-
-function displayPdf(entity, format) {
-    var url = 'api/entity/' + entity.handle + "/url/" + format;
-    $.get(url, function (contentUrl) {
-        PDFObject.embed(contentUrl, "#pageDisplay");
-    }, 'text');
-}
-
-function displayTiff(entity, format) {
-    var url = 'api/entity/' + entity.handle + "/url/" + format;
-    $.get(url, {}, function (contentUrl) {
-        var viewer = OpenSeadragon({
-            id: "pageDisplay",
-            prefixUrl: "openseadragon/images/",
-            tileSources: {
-                type: 'image',
-                url: contentUrl
-            }
-        });
-    }, 'text');
-}
-
-function displayJp2(entity, format) {
-    var url = 'api/entity/' + entity.handle + "/url/" + format;
-    $.get(url, {}, function (contentUrl) {
-        var viewer = OpenSeadragon({
-            id: "pageDisplay",
-            prefixUrl: "openseadragon/images/",
-            tileSources: contentUrl
-        });
-    }, 'text');
-}
-
-function displayJpeg(entity, format) {
-    var url = 'api/entity/' + entity.handle + "/url/" + format;
-    $.get(url, {}, function (contentUrl) {
-        var viewer = OpenSeadragon({
-            id: "pageDisplay",
-            prefixUrl: "openseadragon/images/",
-            tileSources: {
-                type: 'image',
-                url: contentUrl
-            }
-        });
-    }, 'text');
-}
 
 function editEntityIndexInHash(origHash, newEntityIndex) {
     var hashParts = origHash.split("/");

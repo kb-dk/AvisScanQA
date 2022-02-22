@@ -9,10 +9,18 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
 
     for (const year of years) {
         if (year == currentyear) { //== cannot be replaced with === as types differ....
-            $("#year-nav").append("<button class='btn btn-sm btn-outline-secondary active'>" + year + "</button>");
+            const button = $("<button/>", {
+                class: 'btn btn-sm btn-outline-secondary active',
+                text: year
+            });
+            $("#year-nav").append(button);
         } else {
-            var newLocation = editYearIndexInHash(location.hash, year);
-            $("#year-nav").append("<a href='" + newLocation + "' class='btn btn-sm btn-outline-secondary'>" + year + "</>");
+            const link = $("<a/>", {
+                href: editYearIndexInHash(location.hash, year),
+                class: 'btn btn-sm btn-outline-secondary',
+                text: year
+            });
+            $("#year-nav").append(link);
         }
     }
 
@@ -32,21 +40,40 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
 }
 
 
-
 function renderBatchForYear(batch, years, currentyear) {
-    var nav = "<div class='btn-toolbar mb-2 mb-md-0'><div class='btn-group mr-2 d-flex justify-content-evenly flex-wrap' id='year-nav'></div></div>";
+    const yearNav = $("<div/>", {
+        class: 'btn-group mr-2 d-flex justify-content-evenly flex-wrap',
+        id: 'year-nav'
+    });
+    var nav = $("<div/>", {
+        class: 'btn-toolbar mb-2 mb-md-0'
+    }).append(yearNav);
+
 
     let $primary = $("#primary-show");
     $primary.html(nav);
-    $primary.append("<div id='year-show'><h1> show me a newspaper</h1></div>");
+
+    const yearShow = $("<div/>", {id: 'year-show'})
+    const heading = $("<h1/>", {text: "show me a newspaper"});
+    yearShow.append(heading);
+    $primary.append(yearShow);
+
 
     for (const year of years) {
+        let thing;
         if (year === currentyear) {
-            $("#year-nav").append("<button class='btn btn-sm btn-outline-secondary active'>" + year + "</button>");
+            thing = $("<button/>", {
+                class: 'btn btn-sm btn-outline-secondary active',
+                text: year
+            });
         } else {
-            var newLocation = editYearIndexInHash(location.hash, year);
-            $("#year-nav").append("<a href='" + newLocation + "' class='btn btn-sm btn-outline-secondary'>" + year + "</>");
+            thing = $("<a/>", {
+                href: editYearIndexInHash(location.hash, year),
+                class: 'btn btn-sm btn-outline-secondary',
+                text: year
+            });
         }
+        yearNav.append(thing);
     }
 
     //TODO
@@ -56,10 +83,7 @@ function renderBatchForYear(batch, years, currentyear) {
         datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
-                var calElem = "#month" + i;
-                var html = "<h3>" + datesInYear[i].name + "</h3>";
-                html += buildCalendar(currentyear, (i + 1), datesInYear[i].days, batch);
-                $(calElem).html(html);
+                $("#month" + i).html("<h3>" + datesInYear[i].name + "</h3>" + buildCalendar(currentyear, (i + 1), datesInYear[i].days, batch));
             }
         });
     });
@@ -77,15 +101,15 @@ function determineColor(dayInMonth) {
     //dark = black
     //link = link
     if (!dayInMonth.available) {
-        return " btn-light ";
+        return "btn-light";
     } else if (dayInMonth.state == "CHECKED"){ //TODO enum at some point
-        return " approved ";
+        return "approved";
     } else if (dayInMonth.problems.length > 0) {
-        return " btn-warning ";
+        return "btn-warning";
     } else if (dayInMonth.count > 0) {
-        return " btn-success ";
-    }  else {
-        return " btn-secondary ";
+        return "btn-success";
+    } else {
+        return "btn-secondary";
     }
 
 }
@@ -98,7 +122,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
-        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount:0, state: "",problems: ""});
+        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount: 0, state: "", problems: ""});
         d.add(1, 'days');
 
     }
@@ -112,7 +136,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
         element.problems = availableDate.problems;
     }
 
-    var calHtml = "";
+    let calHtml = "";
     calHtml += "<div class='row weekDayLetters'>";
     let weekDayLetters = ['M','T','O','T','F','L','S'];
     for (let i = 0; i <weekDayLetters.length; i++) {
@@ -142,21 +166,24 @@ function buildCalendar(year, month, availableDates, newspaper) {
         //Ensure same width of date numbers
         date = date.substring(date.length - 2);
 
+
         calHtml += "<div class='col-sm-1' >"
 
-        let btnClass = "class='btn btn-sm " + determineColor(dayInMonth) + "'";
         let button;
         if (dayInMonth.available) {
-            button = "<a style='padding-left: 0; padding-right: 0'";
-            let link = "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/";
-            button += " href='" + link + "' ";
-            button += " title='" + dayInMonth.count + " page(s) \n"+dayInMonth.editionCount + " edition(s)'";
-            button += btnClass + " > " + date + " </a>";
+            button = $("<a/>", {
+                href: "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/",
+                title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)"
+            });
         } else {
-            button = "<button type='button' style='padding-left: 0; padding-right: 0' " +
-                btnClass + " > " + date + " </button>";
+            button = $("<button/>", {
+                type: 'button'
+            });
         }
-        calHtml += button;
+        button.attr("style", 'padding-left: 0; padding-right: 0')
+            .addClass("btn btn-sm " + determineColor(dayInMonth))
+            .text(date);
+        calHtml += button.prop('outerHTML');
         calHtml += "</div>";
     }
 
