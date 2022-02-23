@@ -1,8 +1,9 @@
 <div class="container-fluid">
-    <form action="api/editionNotes"  id="editionNotesForm" method="post">
+    <form action=""  id="editionNotesForm" method="post">
         <label for="editionNotes">Edition notes</label>
-        <textarea class="userNotes" name="editionNotes" type="text" id="editionNotes" form="editionNotesForm"></textarea>
-        <input type="submit" name="submit" id="submit" value="Submit" form="editionNotesForm"/>
+        <textarea class="userNotes" name="notes" type="text" id="editionNotes"
+                  form="editionNotesForm"></textarea>
+        <button type="submit" id="editionNotesFormSubmit" form="editionNotesForm">Submit</button>
     </form>
     <div class="btn-toolbar mb-2 mb-md-0">
         <div class="btn-group mr-2 d-flex justify-content-evenly flex-wrap" id="page-nav"></div>

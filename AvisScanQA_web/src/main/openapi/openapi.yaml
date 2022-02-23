@@ -196,99 +196,58 @@ paths:
                   $ref: '#/components/schemas/CharacterizationInfo'
 
 
-  /editionNotes:
+  /notes/{batchID}:
     post:
-      operationId: setEditionNotes
+      operationId: setNotes
       summary: ""
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: avis
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+#            format: date
+        - name: edition
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: section
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: string
+
       requestBody:
         description: ""
         required: true
         content:
-          application/x-www-form-urlencoded:
+          application/json:
             schema:
-              type: object
-              properties:
-                editionNotes:
-                  type: string
-                submit:
-                  type: string
-                edition:
-                  type: string
-                date:
-                  type: string
-                  format: date
-                avis:
-                  type: string
-                batch:
-                  type: string
-
-
+              type: string
       responses:
-        '201':
-          description: Created
-  /dayNotes:
-    post:
-      operationId: setDayNotes
-      summary: ""
-      requestBody:
-        description: ""
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                dayNotes:
-                  type: string
-                submit:
-                  type: string
-                edition:
-                  type: string
-                date:
-                  type: string
-                  format: date
-                avis:
-                  type: string
-                batch:
-                  type: string
-
-
-      responses:
+#        TODO here
         '201':
           description: Created
 
-  /pageNotes:
-    post:
-      operationId: setPageNotes
-      summary: ""
-      requestBody:
-        description: ""
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              type: object
-              properties:
-                pageNotes:
-                  type: string
-                submit:
-                  type: string
-                edition:
-                  type: string
-                date:
-                  type: string
-                  format: date
-                avis:
-                  type: string
-                batch:
-                  type: string
-
-
-      responses:
-        '201':
-          description: Created
 components:
   schemas:
+
     Batch:
       type: object
       properties:

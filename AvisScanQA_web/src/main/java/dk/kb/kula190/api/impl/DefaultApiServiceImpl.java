@@ -20,6 +20,10 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
@@ -29,7 +33,6 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import java.io.FileNotFoundException;
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -107,33 +110,21 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-
+    
+    
     @Override
-    public void setDayNotes(String dayNotes, String submit, String edition, LocalDate date, String avis, String batch) {
-        log.info("{}, {}, {}, {}, {}, {}", dayNotes, submit, edition, date, avis, batch);
+    public void setNotes(String batchID,
+                           String date,
+                          String body,
+                          String avis,
+                          String edition,
+                          String section,
+                          String page) {
+        //        Note that null values might have the value "null". Regard this as null
+        log.info("{}/{}/{}/{}/{}/{}, {}", batchID, avis, date, edition, section, page, body);
     }
-
-    @Override
-    public void setEditionNotes(String editionNotes,
-                                String submit,
-                                String edition,
-                                LocalDate date,
-                                String avis,
-                                String batch) {
-        log.info("{}, {}, {}, {}, {}, {}", editionNotes, submit, edition, date, avis, batch);
-    }
-
-    @Override
-    public void setPageNotes(String pageNotes,
-                             String submit,
-                             String edition,
-                             LocalDate date,
-                             String avis,
-                             String batch) {
-        log.info("{}, {}, {}, {}, {}, {}", pageNotes, submit, edition, date, avis, batch);
-
-    }
-
+    
+    
     @Override
     public List<Batch> getBatchIDs() {
         try {
@@ -150,7 +141,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     public Batch getBatchForNewspaper(String batchID) {
         try {
             //TODO this is a bad way to get a specific batch...
-            return dao.getBatchIDs().stream().filter(batch -> batch.getBatchid().equals(batchID)).findFirst().orElse(null);
+            return dao.getBatchIDs()
+                      .stream()
+                      .filter(batch -> batch.getBatchid().equals(batchID))
+                      .findFirst()
+                      .orElse(null);
         } catch (DAOFailureException e) {
             log.error("Could not get dates for newspaper ID {}", batchID);
             throw handleException(e);
@@ -166,7 +161,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
             log.error("Could not get dates for batch ID {}", batchID);
             throw handleException(e);
         }
-
+        
     }
     
     
@@ -223,8 +218,6 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
- 
     
     
     /**

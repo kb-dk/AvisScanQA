@@ -3,8 +3,10 @@ package dk.kb.kula190.webservice;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
-import com.fasterxml.jackson.jaxrs.json.JacksonJsonProvider;
 import dk.kb.kula190.api.impl.DefaultApiServiceImpl;
+import org.apache.cxf.jaxrs.provider.FormEncodingProvider;
+import org.apache.cxf.jaxrs.provider.JavaTimeTypesParamConverterProvider;
+import org.apache.cxf.jaxrs.provider.ServerProviderFactory;
 
 import javax.ws.rs.ApplicationPath;
 import java.util.Arrays;
@@ -13,7 +15,7 @@ import java.util.Set;
 
 @ApplicationPath("/")
 public class Application extends javax.ws.rs.core.Application {
-
+    
     public Set<Class<?>> getClasses() {
         return new HashSet<>(Arrays.asList(DefaultApiServiceImpl.class, ServiceExceptionMapper.class));
     }
@@ -21,6 +23,8 @@ public class Application extends javax.ws.rs.core.Application {
     
     @Override
     public Set<Object> getSingletons() {
+    
+    
         return Set.of(getJsonProviderWithDateTimes());
     }
     
