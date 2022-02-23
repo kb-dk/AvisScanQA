@@ -109,12 +109,11 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
         }
     }
     $("#edition-show").load("entityDisplay.html", function () {
-        var mapKeys = Object.keys(currentEntities);
         var entity = currentEntities[mapKeys[currentEntityIndex]];
-        if (entity.length === 1) {
-            renderEntity(entity[0]);
+        if (entity.pages.length === 1) {
+            renderEntity(entity.pages[0]);
         } else {
-            renderSinglePagesEntity(entity, pageIndex);
+            renderSinglePagesEntity(entity.pages, pageIndex);
         }
 
         let $editionNotesForm = $("#editionNotesForm");

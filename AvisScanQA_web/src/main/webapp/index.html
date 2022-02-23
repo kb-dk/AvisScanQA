@@ -144,7 +144,7 @@
 
 
     function loadNewspaperIDs() {
-        $.getJSON('api/getNewspaperIDs', {}, function (ids) {
+        $.getJSON('api/newspaperIDs', {}, function (ids) {
             for (const item of ids) {
                 $("#avisIDer").append(
                     "<li class='nav-item'><a class='nav-link' href='#/newspaper/" + item + "/0/'>" + item + "</a></li>");
@@ -153,7 +153,7 @@
     }
 
     function loadNewspaperBatches() {
-        $.getJSON('api/getNewspaperBatches', {}, function (ids) {
+        $.getJSON('api/batch', {}, function (ids) {
             for (const item of ids) {
                 $("#batches").append(
                     "<li class='nav-item'><a class='nav-link' href='#/batch/" + item.batchid + "/'>" + item.batchid + "</a></li>");

@@ -8,7 +8,7 @@ import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
-import dk.kb.kula190.model.NewspaperEntity;
+import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
@@ -165,19 +165,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     
     @Override
-    public List<Batch> getBatchIDs() {
-        try {
-            List<Batch> IDs = dao.getBatchIDs();
-            return IDs;
-        } catch (DAOFailureException e) {
-            log.error("Could not get newspaper IDs from backend");
-            throw handleException(e);
-        }
-    }
-    
-    
-    @Override
-    public Batch getBatchForNewspaper(String batchID) {
+    public Batch getBatch(String batchID) {
         try {
             //TODO this is a bad way to get a specific batch...
             return dao.getBatchIDs()
@@ -203,11 +191,23 @@ public class DefaultApiServiceImpl implements DefaultApi {
         
     }
     
+    @Override
+    public List<Batch> getBatches() {
+        try {
+            List<Batch> IDs = dao.getBatchIDs();
+            return IDs;
+        } catch (DAOFailureException e) {
+            log.error("Could not get newspaper IDs from backend");
+            throw handleException(e);
+        }
+    }
+    
     
     @Override
-    public Map<String, List<NewspaperEntity>> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
+    public Map<String, NewspaperEdition> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
         try {
-            Map<String, List<NewspaperEntity>> entities = dao.getMappedEditionsForNewspaperOnDate(newspaperID, date);
+            
+            Map<String, NewspaperEdition> entities = dao.getNewspaperEditions(newspaperID, date);
             return entities;
         } catch (DAOFailureException e) {
             log.error("Could not get entities for date {} for newspaper ID {}", date, newspaperID);
