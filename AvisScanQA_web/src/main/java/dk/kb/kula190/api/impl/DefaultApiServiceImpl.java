@@ -109,6 +109,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
 
     @Override
+    public void setDayNotes(String dayNotes, String submit, String edition, LocalDate date, String avis, String batch) {
+        log.info("{}, {}, {}, {}, {}, {}", dayNotes, submit, edition, date, avis, batch);
+    }
+
+    @Override
     public void setEditionNotes(String editionNotes,
                                 String submit,
                                 String edition,
@@ -116,6 +121,17 @@ public class DefaultApiServiceImpl implements DefaultApi {
                                 String avis,
                                 String batch) {
         log.info("{}, {}, {}, {}, {}, {}", editionNotes, submit, edition, date, avis, batch);
+    }
+
+    @Override
+    public void setPageNotes(String pageNotes,
+                             String submit,
+                             String edition,
+                             LocalDate date,
+                             String avis,
+                             String batch) {
+        log.info("{}, {}, {}, {}, {}, {}", pageNotes, submit, edition, date, avis, batch);
+
     }
 
     @Override

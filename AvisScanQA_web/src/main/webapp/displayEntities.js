@@ -1,9 +1,11 @@
 function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     let $primary = $("#primary-show");
     $primary.empty();
-    $primary.append($("<label/>").text("Day notes").attr("for","dayNotes"));
-    $primary.append($("<input/>", {id: "dayNotes", type: "text"}))
-
+    let $dayNotesForm = $("<form>", {id: "dayNotesForm", action:"api/dayNotes",method:"post"});
+    $dayNotesForm.append($("<label/>").text("Day notes").attr("for","dayNotes"));
+    $dayNotesForm.append($("<input/>", {id: "dayNotes", type: "text",name:"dayNotes"}))
+    $dayNotesForm.append($("<input/>", {id: "submit", type: "submit",name:"submit",form:"dayNotesForm"}));
+    $primary.append($dayNotesForm);
     const $editionNav = $("<div/>", {class: 'btn-toolbar mb-2 mb-md-0'})
         .append($("<div/>", {
             class: 'btn-group mr-2 d-flex justify-content-evenly flex-wrap',
@@ -47,9 +49,11 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
 
 function renderEntity(entity) {
     let $pageDisplay = $("#pageDisplay");
-    $pageDisplay.append($("<label/>").text("Page notes").attr("for","pageNotes"));
-    $pageDisplay.append($("<input/>", {id: "pageNotes", type: "text"}));
-
+    let $pageForm = $("<form/>", {id: "pageNotesForm", action:"api/pageNotes",method:"post"});
+    $pageForm.append($("<label/>").text("Page notes").attr("for","pageNotes"));
+    $pageForm.append($("<input/>", {id: "pageNotes", type: "text", name:"pageNotes"}));
+    $pageForm.append($("<input/>", {id: "submit", type: "submit",name:"submit",form:"pageNotesForm"}));
+    $pageDisplay.append($pageForm);
     let value = "<div>Vis fil: " + entity.origRelpath + "<br> "
     if (entity.problems !== "") {
         value += "Problems: <pre>" + JSON.stringify(

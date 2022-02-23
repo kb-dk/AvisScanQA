@@ -226,6 +226,67 @@ paths:
       responses:
         '201':
           description: Created
+  /dayNotes:
+    post:
+      operationId: setDayNotes
+      summary: ""
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                dayNotes:
+                  type: string
+                submit:
+                  type: string
+                edition:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                avis:
+                  type: string
+                batch:
+                  type: string
+
+
+      responses:
+        '201':
+          description: Created
+
+  /pageNotes:
+    post:
+      operationId: setPageNotes
+      summary: ""
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                pageNotes:
+                  type: string
+                submit:
+                  type: string
+                edition:
+                  type: string
+                date:
+                  type: string
+                  format: date
+                avis:
+                  type: string
+                batch:
+                  type: string
+
+
+      responses:
+        '201':
+          description: Created
 components:
   schemas:
     Batch:
