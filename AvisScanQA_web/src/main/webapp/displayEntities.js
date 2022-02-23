@@ -119,10 +119,10 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
         let $editionNotesForm = $("#editionNotesForm");
 
         // alert($editionNotesForm.length) // if is == 0, not found form
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: "batchtemp"}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: "avisTemp"}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: "2022-01-01"}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: "editionTemp"}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
 
         $editionNotesForm.submit(noteSubmitHandler);
 
@@ -140,11 +140,11 @@ function renderSinglePage(page) {
     $pageForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
     $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "notes"}));
     //TODO proper values for all fields
-    $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: "batchtemp"}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: "avisTemp"}));
+    $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
+    $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "date", value: date}));
     $pageForm.append($("<input/>", {type: "hidden", name: "edition", value: page.editionTitle}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "section", value: "SectionTemp"}));
+    $pageForm.append($("<input/>", {type: "hidden", name: "section", value: page.sectionTitle}));
     $pageForm.append($("<input/>", {type: "hidden", name: "page", value: page.pageNumber}));
     $pageForm.append($("<input/>", {id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm"}));
     $pageForm.submit(noteSubmitHandler);
@@ -186,7 +186,7 @@ function renderEdition(entity, pageIndex) {
     console.log("renderSinglePagesEntity");
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
-    for (var i = 0; i < pages; i++) {
+    for (var i = 0; i < pages.length; i++) {
         if (i === pageIndex) {
             const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
             $pageNav.append(button);
