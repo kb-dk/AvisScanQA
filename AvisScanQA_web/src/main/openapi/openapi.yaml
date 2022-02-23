@@ -311,6 +311,13 @@ components:
     NewspaperEdition:
       type: object
       properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+        date:
+          type: string
+          format: date
         edition:
           type: string
         notes:
@@ -323,6 +330,8 @@ components:
     NewspaperEntity:
       type: object
       properties:
+        batchid:
+          type: string
         origRelpath:
           type: string
         formatType:
