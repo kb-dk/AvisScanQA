@@ -4,6 +4,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
+import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.model.NewspaperEntity;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -210,6 +212,7 @@ public class NewspaperQADao {
         
         String SQL =
                 "select edition_date, "
+                + " b.batchid, "
                 + " b.state, "
                 + " count(DISTINCT(edition_title)) as numEditions, "
                 + " count(*) as numPages, "
@@ -233,6 +236,7 @@ public class NewspaperQADao {
                     int pageCount = res.getInt("numPages");
                     String problems = res.getString("allProblems").translateEscapes().trim();
                     String state = res.getString("state");
+                    String batchID = res.getString("batchid");
                     
                     NewspaperDate result = new NewspaperDate();
                     final LocalDate localDate = date.toLocalDate();
@@ -240,7 +244,8 @@ public class NewspaperQADao {
                     result.setPageCount(pageCount);
                     result.setEditionCount(editionCount);
                     result.setProblems(problems);
-                    
+                    result.setBatchid(batchID);
+                    result.setAvisid(avisID);
                     result.setState(state);
                     
                     resultMap.put(localDate, result);
@@ -259,68 +264,72 @@ public class NewspaperQADao {
     public List<NewspaperDate> getDatesForBatchID(String batchID, String yearString) throws DAOFailureException {
         
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
-        String
-                SQL1
-                = "select start_date, end_date, state  from batch where batchid = ?";
         
         final int year = Integer.parseInt(yearString);
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL1)) {
-            ps.setString(1, batchID);
-            
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    LocalDate startDate = res.getDate("start_date").toLocalDate();
-                    LocalDate endDate = res.getDate("end_date").toLocalDate();
-                    String state = res.getString("state");
-                    LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
-                              .mapToObj(startDate::plusDays)
-                              .filter(date -> date.getYear() == year) //We could also make limits on the range...
-                              .forEach(date -> {
-                                  final NewspaperDate newspaperDate = new NewspaperDate();
-                                  newspaperDate.setDate(date);
-                                  newspaperDate.setPageCount(0);
-                                  newspaperDate.setProblems("");
-                                  newspaperDate.setEditionCount(0);
-                                  newspaperDate.setState(state);
-                                  resultMap.put(date, newspaperDate);
-                              });
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "select start_date, end_date, state, avisid from batch where batchid = ?")) {
+                ps.setString(1, batchID);
+                
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        LocalDate startDate = res.getDate("start_date").toLocalDate();
+                        LocalDate endDate = res.getDate("end_date").toLocalDate();
+                        String state = res.getString("state");
+                        String avisID = res.getString("avisid");
+                        LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
+                                  .mapToObj(startDate::plusDays)
+                                  .filter(date -> date.getYear() == year) //We could also make limits on the range...
+                                  .forEach(date -> {
+                                      final NewspaperDate newspaperDate = new NewspaperDate();
+                                      newspaperDate.setDate(date);
+                                      newspaperDate.setPageCount(0);
+                                      newspaperDate.setProblems("");
+                                      newspaperDate.setEditionCount(0);
+                                      newspaperDate.setBatchid(batchID);
+                                      newspaperDate.setAvisid(avisID);
+                                      newspaperDate.setState(state);
+                                      resultMap.put(date, newspaperDate);
+                                  });
+                    }
                 }
             }
-        } catch (SQLException e) {
-            log.error("Failed to lookup edition dates for newspaper id {}", batchID, e);
-            throw new DAOFailureException("Err looking up dates for newspaper id", e);
-        }
-        
-        
-        String SQL =
-                "select edition_date, b.state, count(DISTINCT(edition_title)) as numEditions, count(*) as numPages, string_agg(newspaperarchive.problems, '\\n') as allProblems "
-                + " from newspaperarchive join batch b on b.batchid = newspaperarchive.batchid "
-                + " where newspaperarchive.batchid = ? and EXTRACT(YEAR FROM edition_date) = ? group by edition_date, b.batchid";
-        
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
-            
-            ps.setString(1, batchID);
-            ps.setInt(2, year);
-            //ps.setString(3, year);
-            try (ResultSet res = ps.executeQuery()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "select edition_date, "
+                    + " b.state, "
+                    + " count(DISTINCT(edition_title)) as numEditions, "
+                    + " count(*) as numPages, "
+                    + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
+                    + " from newspaperarchive "
+                    + " join batch b on b.batchid = newspaperarchive.batchid "
+                    + " where newspaperarchive.batchid = ? and "
+                    + " EXTRACT(YEAR FROM edition_date) = ? "
+                    + " group by edition_date, b.batchid ")) {
                 
-                while (res.next()) {
+                ps.setString(1, batchID);
+                ps.setInt(2, year);
+                //ps.setString(3, year);
+                try (ResultSet res = ps.executeQuery()) {
                     
-                    java.sql.Date date = res.getDate("edition_date");
-                    int editionCount = res.getInt("numEditions");
-                    int pageCount = res.getInt("numPages");
-                    String problems = res.getString("allProblems").translateEscapes().trim();
-                    String state = res.getString("state");
-                    
-                    NewspaperDate result = new NewspaperDate();
-                    final LocalDate localDate = date.toLocalDate();
-                    result.setDate(localDate);
-                    result.setPageCount(pageCount);
-                    result.setEditionCount(editionCount);
-                    result.setProblems(problems);
-                    result.setState(state);
-                    
-                    resultMap.put(localDate, result);
+                    while (res.next()) {
+                        
+                        java.sql.Date date = res.getDate("edition_date");
+                        int editionCount = res.getInt("numEditions");
+                        int pageCount = res.getInt("numPages");
+                        String problems = res.getString("allProblems").translateEscapes().trim();
+                        String state = res.getString("state");
+                        
+                        NewspaperDate result = new NewspaperDate();
+                        final LocalDate localDate = date.toLocalDate();
+                        result.setDate(localDate);
+                        result.setPageCount(pageCount);
+                        result.setEditionCount(editionCount);
+                        result.setProblems(problems);
+                        result.setBatchid(batchID);
+                        result.setState(state);
+                        result.setAvisid(resultMap.get(localDate).getAvisid());
+                        resultMap.put(localDate, result);
+                    }
                 }
             }
         } catch (SQLException e) {
@@ -333,96 +342,161 @@ public class NewspaperQADao {
                         .collect(Collectors.toList());
     }
     
-    
-    public Map<String, NewspaperEdition> getNewspaperEditions(String id, String date) throws DAOFailureException {
-        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
+    public NewspaperDay getNewspaperEditions(String batchID, String newspaperID, LocalDate date)
+            throws DAOFailureException {
+        //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
         
-        Map<String, List<NewspaperEntity>> result = new HashMap<>();
+        NewspaperDay result = new NewspaperDay();
+        result.setBatchid(batchID);
+        result.setAvisid(newspaperID);
+        result.setDate(date);
+        
+        
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT orig_relpath, format_type, p.edition_date, single_page, p.page_number, p.avisid, avistitle, shadow_path, p.section_title, p.edition_title, delivery_date, handle, side_label, fraktur, problems, p.batchid, notes "
-                    + " FROM newspaperarchive as p "
-                    + " left join notes as n on "
-                    + " p.batchid = n.batchid and "
-                    + " p.avisid = n.avisid and "
-                    + " p.edition_date = n.edition_date and "
-                    + " p.section_title = n.section_title and "
-                    + " p.edition_title = n.edition_title and "
-                    + " p.edition_date = n.edition_date and "
-                    + " p.page_number = n.page_number "
-                    + " WHERE p.avisid = ? AND p.edition_date = ?"
-                    + " ORDER BY p.section_title, p.page_number ASC")) {
-                
-                ps.setString(1, id);
-                ps.setDate(2, Date.valueOf(date));
-                try (ResultSet res = ps.executeQuery()) {
-                    while (res.next()) {
-                        String edition_title = res.getString("edition_title");
-                        List<NewspaperEntity> list = result.getOrDefault(edition_title, new ArrayList<>());
-                        result.put(edition_title, list);
-                        NewspaperEntity entity = new NewspaperEntity();
-                        entity.setOrigRelpath(res.getString("orig_relpath"));
-                        entity.setFormatType(res.getString("format_type"));
-                        entity.setEditionDate(res.getDate("edition_date").toLocalDate());
-                        entity.setSinglePage(res.getBoolean("single_page"));
-                        entity.setPageNumber(res.getInt("page_number"));
-                        entity.setAvisid(res.getString("avisid"));
-                        entity.setAvistitle(res.getString("avistitle"));
-                        entity.setShadowPath(res.getString("shadow_path"));
-                        entity.setSectionTitle(res.getString("section_title"));
-                        
-                        entity.setEditionTitle(edition_title);
-                        entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
-                        entity.setHandle(res.getLong("handle"));
-                        entity.setFraktur(res.getBoolean("fraktur"));
-                        entity.setProblems(res.getString("problems"));
-                        entity.setNotes(res.getString("notes"));
-                        list.add(entity);
+            
+            
+            String dayNotes = getDayNotes(batchID, newspaperID, date, conn);
+            result.setNotes(dayNotes);
+            
+            Map<String, NewspaperEdition> pages = getPages(batchID,
+                                                           newspaperID,
+                                                           date,
+                                                           conn);
+            
+            Map<String, String> editionNotes = getEditionNotes(batchID, newspaperID, date, conn);
+            pages.forEach((key, value) -> value.setNotes(editionNotes.get(key)));
+            
+            result.setEditions(new ArrayList<>(pages.values()));
+            
+            return result;
+        } catch (SQLException e) {
+            log.error("Failed to lookup edition dates for newspaper id {}", newspaperID, e);
+            throw new DAOFailureException("Err looking up dates for newspaper id", e);
+        }
+    }
+    
+    private Map<String, String> getEditionNotes(String batchID, String newspaperID, LocalDate date, Connection
+            conn)
+            throws SQLException {
+        Map<String, String> editionNotes = new HashMap<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT batchid, avisid, edition_date, edition_title, section_title, page_number, notes "
+                + "from  notes "
+                + "where batchid = ? and avisid = ? and edition_date = ? and section_title is null and page_number is null")) {
+            int param = 1;
+            ps.setString(param++, batchID);
+            ps.setString(param++, newspaperID);
+            ps.setDate(param++, Date.valueOf(date));
+            
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    
+                    String editionNote = res.getString("notes");
+                    
+                    editionNotes.put(res.getString("edition_title"), editionNote);
+                }
+            }
+        }
+        return editionNotes;
+    }
+    
+    private Map<String, NewspaperEdition> getPages(String batchID,
+                                                   String newspaperID,
+                                                   LocalDate date,
+                                                   Connection conn) throws SQLException {
+        Map<String, NewspaperEdition> editions = new HashMap<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT orig_relpath, format_type, p.edition_date, single_page, p.page_number, p.avisid, avistitle, shadow_path, p.section_title, p.edition_title, delivery_date, handle, side_label, fraktur, problems, p.batchid, notes "
+                + " FROM newspaperarchive as p "
+                + " left join notes as n on "
+                + " p.batchid = n.batchid and "
+                + " p.avisid = n.avisid and "
+                + " p.edition_date = n.edition_date and "
+                + " p.section_title = n.section_title and "
+                + " p.edition_title = n.edition_title and "
+                + " p.edition_date = n.edition_date and "
+                + " p.page_number = n.page_number "
+                + " WHERE p.batchid = ? AND p.avisid = ? AND p.edition_date = ?"
+                + " ORDER BY p.section_title, p.page_number ASC")) {
+            
+            ps.setString(1, batchID);
+            ps.setString(2, newspaperID);
+            ps.setDate(3, Date.valueOf(date));
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    String edition_title = res.getString("edition_title");
+                    
+                    NewspaperEdition edition = editions.getOrDefault(edition_title, new NewspaperEdition());
+                    editions.put(edition_title, edition);
+                    edition.setBatchid(batchID);
+                    edition.setEdition(edition_title);
+                    edition.setDate(date);
+                    edition.setAvisid(newspaperID);
+                    if (edition.getPages() == null) {
+                        edition.setPages(new ArrayList<>());
                     }
+                    
+                    NewspaperEntity entity = new NewspaperEntity();
+                    entity.setOrigRelpath(res.getString("orig_relpath"));
+                    entity.setFormatType(res.getString("format_type"));
+                    entity.setEditionDate(res.getDate("edition_date").toLocalDate());
+                    entity.setSinglePage(res.getBoolean("single_page"));
+                    entity.setPageNumber(res.getInt("page_number"));
+                    entity.setBatchid(batchID);
+                    entity.setAvisid(res.getString("avisid"));
+                    entity.setAvistitle(res.getString("avistitle"));
+                    entity.setShadowPath(res.getString("shadow_path"));
+                    entity.setSectionTitle(res.getString("section_title"));
+                    
+                    entity.setEditionTitle(edition_title);
+                    entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
+                    entity.setHandle(res.getLong("handle"));
+                    entity.setFraktur(res.getBoolean("fraktur"));
+                    entity.setProblems(res.getString("problems"));
+                    entity.setNotes(res.getString("notes"));
+                    edition.addPagesItem(entity);
+                    
+                }
+                
+            }
+        }
+        return editions;
+    }
+    
+    private String getDayNotes(String batchID, String newspaperID, LocalDate date, Connection conn)
+            throws SQLException {
+        String dayNotes = null;
+        try (PreparedStatement ps = conn.prepareStatement(
+                "SELECT notes "
+                + "from  notes "
+                + "where "
+                + "batchid = ? and "
+                + "avisid = ? and "
+                + "edition_date = ? and "
+                + " edition_title is null and "
+                + "section_title is null and "
+                + "page_number is null")) {
+            int param = 1;
+            ps.setString(param++, batchID);
+            ps.setString(param++, newspaperID);
+            ps.setDate(param++, Date.valueOf(date));
+            
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    dayNotes = res.getString("notes");
                     
                 }
             }
-            
-            Map<String, String> editionNotes = new HashMap<>();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "SELECT batchid, avisid, edition_date, edition_title, section_title, page_number, notes "
-                    + "from  notes "
-                    + "where avisid = ? and edition_date = ? and section_title is null and page_number is null")) {
-                int param = 1;
-                ps.setString(param++, id);
-                ps.setDate(param++, Date.valueOf(date));
-                
-                try (ResultSet res = ps.executeQuery()) {
-                    while (res.next()) {
-    
-                        String editionNote = res.getString("notes");
-                        String edition = res.getString("edition_title");
-                        editionNotes.put(edition, editionNote);
-                    }
-                }
-            }
-    
-            Map<String, NewspaperEdition> collect = result.entrySet()
-                                                          .stream()
-                                                          .collect(Collectors.toMap(Map.Entry::getKey, (Map.Entry<String, List<NewspaperEntity>> entry) -> {
-                                                              NewspaperEdition ed = new NewspaperEdition();
-                                                              ed.setPages(entry.getValue());
-                                                              ed.setEdition(entry.getKey());
-                                                              ed.setNotes(editionNotes.get(entry.getKey()));
-                                                              return ed;
-                                                          }));
-            return collect;
-        } catch (SQLException e) {
-            log.error("Failed to lookup edition dates for newspaper id {}", id, e);
-            throw new DAOFailureException("Err looking up dates for newspaper id", e);
         }
+        return dayNotes;
     }
     
     public String getOrigRelPath(long handle) throws DAOFailureException {
         log.debug("Looking up relpath by handle for handle {}", handle);
         String SQL = "SELECT orig_relpath FROM newspaperarchive WHERE handle = ?";
         
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setLong(1, handle);
             try (ResultSet res = ps.executeQuery()) {
@@ -444,7 +518,8 @@ public class NewspaperQADao {
         String origRelpath = getOrigRelPath(handle);
         String SQL = "SELECT * FROM characterisation_info WHERE orig_relpath = ?";
         
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
+        try (Connection conn = connectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(SQL)) {
             
             ps.setString(1, origRelpath);
             try (ResultSet res = ps.executeQuery()) {

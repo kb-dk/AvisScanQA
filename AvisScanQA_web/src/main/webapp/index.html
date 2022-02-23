@@ -125,17 +125,16 @@
     }
 
 
-    function loadEntitiesForNewspaperOnDate(id, date, entityIndex, pageIndex) {
+    function loadEntitiesForNewspaperOnDate(batchID, avisID, date, entityIndex, pageIndex) {
         var day = moment(date).format('YYYY-MM-DD');
-        var url = 'api/dates/' + id + "/" + day + '/mappedEntities';
-        let currentEntityIndex = entityIndex;
+        var url = `api/batch/${batchID}/${avisID}/${day}`
         let currentEntities;
         $.getJSON(url, {}, function (entities) {
             currentEntities = entities;
-            $("#headline-div").html("<h1>Entities for " + id + " on " + day + "</h1>");
+            $("#headline-div").html("<h1>Entities for " + avisID + " on " + day + "</h1>");
         }).done(function () {
             console.log("Starting rendering of entites.");
-            renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex);
+            renderEntityDisplay(currentEntities, entityIndex, pageIndex);
         }).fail(function () {
             console.log("Failed to load entites");
             alert("Could not load entities");
@@ -180,10 +179,10 @@
     });
 
 
-    $.routes.add('/newspapers/{id:string}/{day:date}/{entity:int}/{page:int}', function () {
+    $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{page:int}', function () {
         // Display all months in a given year
         $("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
-        loadEntitiesForNewspaperOnDate(this.id, this.day, this.entity, this.page);
+        loadEntitiesForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
     });
 
 

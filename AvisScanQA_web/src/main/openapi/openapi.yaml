@@ -87,6 +87,32 @@ paths:
                 items:
                   $ref: '#/components/schemas/NewspaperDate'
 
+  /batch/{batchID}/{newspaperID}/{date}:
+    get:
+      operationId: getMappedEntititesForNewspaperDate
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: newspaperID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewspaperDay'
 
 
   /years/{newspaperID}:
@@ -134,27 +160,6 @@ paths:
                   $ref: '#/components/schemas/NewspaperDate'
 
 
-  /dates/{newspaperID}/{date}/mappedEntities:
-    get:
-      operationId: getMappedEntititesForNewspaperDate
-      parameters:
-        - name: newspaperID
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: date
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: ""
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/NewspaperEntityMapping'
 
 
 
@@ -223,7 +228,7 @@ paths:
           required: true
           schema:
             type: string
-#            format: date
+        #            format: date
         - name: edition
           in: query
           required: false
@@ -248,7 +253,7 @@ paths:
             schema:
               type: string
       responses:
-#        TODO here
+        #        TODO here
         '201':
           description: Created
 
@@ -303,10 +308,23 @@ components:
         problems:
           type: string
 
-    NewspaperEntityMapping: # <---- dictionary
+    NewspaperDay:
       type: object
-      additionalProperties:
-        $ref: '#/components/schemas/NewspaperEdition'
+      properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+        date:
+          type: string
+          format: date
+        notes:
+          type: string
+          nullable: true
+        editions:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewspaperEdition'
 
     NewspaperEdition:
       type: object

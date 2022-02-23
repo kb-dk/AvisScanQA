@@ -48,7 +48,7 @@ function initComponents(){
     $primary.append($contentRow);
 }
 
-function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
+function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
     let $primary = $("#primary-show");
     $primary.empty();
     initComponents();
@@ -57,7 +57,7 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     const $dayCol = $("#dayCol");
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
     $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
-    $dayNotesForm.append($("<textarea/>", {class: "userNotes", id: "dayNotes", type: "text", name: "notes"}))
+    $dayNotesForm.append($("<textarea/>", {class: "userNotes", id: "dayNotes", type: "text", name: "notes"}).text(newspaperDay.notes))
     $dayNotesForm.append($("<input/>", {
         id: "dayNotesFormSubmit",
         type: "submit",
@@ -65,9 +65,9 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
         form: "dayNotesForm"
     }));
 
-    $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: "batchtemp"}));
-    $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: "avisTemp"}));
-    $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: "2022-01-01"}));
+    $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batchid}));
+    $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.avisid}));
+    $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: newspaperDay.date}));
 
     $dayNotesForm.submit(noteSubmitHandler);
     $dayCol.append($dayNotesForm);
@@ -84,47 +84,45 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
     $editionCol.append(editionShow);
 
-    const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
-    $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
-    $editionForm.append($("<textarea/>", {class: "userNotes", id: "editionNotes", type: "text", name: "editionNotes"}))
-    $editionForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "editionNotesForm"}));
-    $editionCol.append($editionForm);
-
-    const mapKeys = Object.keys(currentEntities);
-    for (let i = 0; i < mapKeys.length; i++) {
-        const entity = mapKeys[i];
+    let editions = newspaperDay.editions;
+    for (let i = 0; i < editions.length; i++) {
+        const edition = editions[i];
         if (i === currentEntityIndex) {
             let editionButton = $("<button/>", {
                 class: "btn btn-sm btn-outline-secondary active",
-                text: entity
+                text: edition.edition
             });
             $editionNav.append(editionButton);
-        } else {primary-show
+        } else {
             const otherEditionLink = $("<a/>").attr({
                 href: editEntityIndexInHash(location.hash, i),
                 class: 'btn btn-sm btn-outline-secondary',
-                text: entity
-            });primary-show
+                text: edition
+            });
             $editionNav.append(otherEditionLink);
         }
     }
     $("#edition-show").load("entityDisplay.html", function () {
-        var edition = currentEntities[mapKeys[currentEntityIndex]];
+        var edition = editions[currentEntityIndex];
         if (edition.pages.length === 1) {
             renderSinglePage(edition.pages[0]);
         } else {
             renderEdition(edition, pageIndex);
         }
 
-        let $editionNotesForm = $("#editionNotesForm");
+        const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
+        $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
+        $editionForm.append($("<textarea/>", {class: "userNotes", id: "editionNotes", type: "text", name: "notes"}).text(edition.notes))
+        $editionForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "editionNotesForm"}));
+        $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
+        $editionForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
+        $editionForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
+        $editionForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
 
+        $editionCol.append($editionForm);
         // alert($editionNotesForm.length) // if is == 0, not found form
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
-        $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
 
-        $editionNotesForm.submit(noteSubmitHandler);
+        $editionForm.submit(noteSubmitHandler);
 
     });
 }
@@ -135,10 +133,10 @@ function renderSinglePage(page) {
     let $contentRow = $("#contentRow");
     const date = moment(page.editionDate).format("YYYY-MM-DD");
     const $pageCol = $("#pageCol");
-    let $pageNav = $("#page-nav");
+
     let $pageForm = $("<form/>", {id: "pageNotesForm", action: "", method: "post"});
     $pageForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
-    $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "notes"}));
+    $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "notes"}).text(page.notes));
     //TODO proper values for all fields
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));

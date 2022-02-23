@@ -31,8 +31,9 @@ function renderNewspaperForYear(newspaper, years, currentyear) {
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
                 var calElem = "#month" + i;
-                var html = "<h3>" + datesInYear[i].name + "</h3>";
-                html += buildCalendar(currentyear, (i + 1), datesInYear[i].days, newspaper);
+                let datesInYearElement = datesInYear[i];
+                var html = "<h3>" + datesInYearElement.name + "</h3>";
+                html += buildCalendar(currentyear, (i + 1), datesInYearElement.days, newspaper);
                 $(calElem).html(html);
             }
         });
@@ -83,7 +84,8 @@ function renderBatchForYear(batch, years, currentyear) {
         datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
-                $("#month" + i).html("<h3>" + datesInYear[i].name + "</h3>" + buildCalendar(currentyear, (i + 1), datesInYear[i].days, batch));
+                let datesInYearElement = datesInYear[i];
+                $("#month" + i).html("<h3>" + datesInYearElement.name + "</h3>" + buildCalendar(currentyear, (i + 1), datesInYearElement.days, batch));
             }
         });
     });
@@ -122,7 +124,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
 
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
-        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount: 0, state: "", problems: ""});
+        daysInMonth.push({day: moment(d), available: false, count: 0, editionCount: 0, state: "", problems: "", batch: ""});
         d.add(1, 'days');
 
     }
@@ -134,6 +136,8 @@ function buildCalendar(year, month, availableDates, newspaper) {
         element.editionCount = availableDate.editionCount;
         element.state = availableDate.state;
         element.problems = availableDate.problems;
+        element.batchid = availableDate.batchid;
+
     }
 
     let calHtml = "";
@@ -172,7 +176,7 @@ function buildCalendar(year, month, availableDates, newspaper) {
         let button;
         if (dayInMonth.available) {
             button = $("<a/>", {
-                href: "#/newspapers/" + newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/",
+                href: "#/newspapers/" + dayInMonth.batchid +"/" +newspaper + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/",
                 title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)"
             });
         } else {
@@ -219,7 +223,8 @@ function splitDatesIntoMonths(dates) {
             "count": NewspaperDate.pageCount,
             "editionCount": NewspaperDate.editionCount,
             "state": NewspaperDate.state,
-            "problems": NewspaperDate.problems
+            "problems": NewspaperDate.problems,
+            "batchid": NewspaperDate.batchid
         });
     }
     return months;

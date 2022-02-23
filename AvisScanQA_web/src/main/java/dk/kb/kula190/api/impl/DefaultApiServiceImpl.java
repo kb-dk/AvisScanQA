@@ -8,6 +8,7 @@ import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
+import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
@@ -204,10 +205,9 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     
     @Override
-    public Map<String, NewspaperEdition> getMappedEntititesForNewspaperDate(String newspaperID, String date) {
+    public NewspaperDay getMappedEntititesForNewspaperDate(String batchID, String newspaperID, String date) {
         try {
-            
-            Map<String, NewspaperEdition> entities = dao.getNewspaperEditions(newspaperID, date);
+            NewspaperDay entities = dao.getNewspaperEditions(batchID, newspaperID, LocalDate.parse(date));
             return entities;
         } catch (DAOFailureException e) {
             log.error("Could not get entities for date {} for newspaper ID {}", date, newspaperID);
