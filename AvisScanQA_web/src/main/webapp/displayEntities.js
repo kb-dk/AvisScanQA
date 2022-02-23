@@ -32,11 +32,29 @@ function noteSubmitHandler(event) {
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
-
+function initComponents(){
+    let $primary = $("#primary-show");
+    const $contentRow = $("<div/>",{class:"row",id:"contentRow"});
+    const $dayCol = $("<div/>",{id:"dayCol",class:"col"});
+    const $editionCol = $("<div/>",{id:"editionCol",class:"col"});
+    const $pageCol = $("<div/>",{id:"pageCol",class:"col"});
+    let $pageNavBtnToolbar = $("<div/>",{class:"btn-toolbar mb-2 mb-md-0"});
+    let $pageNav = $("<div/>",{class:"btn-group mr-2 d-flex justify-content-evenly flex-wrap",id:"page-nav"});
+    $contentRow.append($dayCol);
+    $contentRow.append($editionCol);
+    $pageNavBtnToolbar.append($pageNav);
+    $pageCol.append($pageNavBtnToolbar);
+    $contentRow.append($pageCol);
+    $primary.append($contentRow);
+}
 
 function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     let $primary = $("#primary-show");
     $primary.empty();
+    initComponents();
+    const $contentRow = $("#contentRow");
+
+    const $dayCol = $("#dayCol");
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
     $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
     $dayNotesForm.append($("<textarea/>", {class: "userNotes", id: "dayNotes", type: "text", name: "notes"}))
@@ -52,18 +70,25 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: "2022-01-01"}));
 
     $dayNotesForm.submit(noteSubmitHandler);
+    $dayCol.append($dayNotesForm);
 
-    $primary.append($dayNotesForm);
+    const $editionCol = $("#editionCol");
+
     const $editionNav = $("<div/>", {class: 'btn-toolbar mb-2 mb-md-0'})
         .append($("<div/>", {
             class: 'btn-group mr-2 d-flex justify-content-evenly flex-wrap',
             id: 'edition-nav'
         }));
-    $primary.append($editionNav);
+    $editionCol.append($editionNav);
 
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
-    $primary.append(editionShow);
+    $editionCol.append(editionShow);
 
+    const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
+    $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
+    $editionForm.append($("<textarea/>", {class: "userNotes", id: "editionNotes", type: "text", name: "editionNotes"}))
+    $editionForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "editionNotesForm"}));
+    $editionCol.append($editionForm);
 
     const mapKeys = Object.keys(currentEntities);
     for (let i = 0; i < mapKeys.length; i++) {
@@ -74,16 +99,15 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
                 text: entity
             });
             $editionNav.append(editionButton);
-        } else {
+        } else {primary-show
             const otherEditionLink = $("<a/>").attr({
                 href: editEntityIndexInHash(location.hash, i),
                 class: 'btn btn-sm btn-outline-secondary',
                 text: entity
-            });
+            });primary-show
             $editionNav.append(otherEditionLink);
         }
     }
-
     $("#edition-show").load("entityDisplay.html", function () {
         var mapKeys = Object.keys(currentEntities);
         var entity = currentEntities[mapKeys[currentEntityIndex]];
@@ -104,15 +128,15 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
         $editionNotesForm.submit(noteSubmitHandler);
 
     });
-
-
 }
 
 function renderEntity(entity) {
-    let $pageDisplay = $("#pageDisplay");
-
+    let $pageDisplay = $("#primary-show");
+    let $infoDumpRow = $("<div/>",{class:"row"});
+    let $contentRow = $("#contentRow");
     const date = moment(entity.editionDate).format("YYYY-MM-DD");
-
+    const $pageCol = $("#pageCol");
+    let $pageNav = $("#page-nav");
     let $pageForm = $("<form/>", {id: "pageNotesForm", action: "", method: "post"});
     $pageForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
     $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "notes"}));
@@ -125,8 +149,9 @@ function renderEntity(entity) {
     $pageForm.append($("<input/>", {type: "hidden", name: "page", value: entity.pageNumber}));
     $pageForm.append($("<input/>", {id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm"}));
     $pageForm.submit(noteSubmitHandler);
+    $pageCol.append($pageForm);
 
-    $pageDisplay.append($pageForm);
+    let $fileAndProblemsCol = $("<div/>",{class:"col-8"});
 
     let value = "<div>Vis fil: " + entity.origRelpath + "<br> "
     if (entity.problems !== "") {
@@ -136,9 +161,12 @@ function renderEntity(entity) {
             2) + "</pre>";
     }
     value += "</div>"
-    $pageDisplay.append($(value));
+    $contentRow.append($pageCol);
+    $fileAndProblemsCol.append($(value));
+    $infoDumpRow.append($fileAndProblemsCol);
 
 
+    let $entityInfoCol = $("<div/>",{class:"col-4"});
     let infoHtml = "Edition titel: " + entity.editionTitle + "<br>";
     infoHtml += "Section titel: " + entity.sectionTitle + "<br>";
     infoHtml += "Side nummer: " + entity.pageNumber + "<br>";
@@ -148,12 +176,16 @@ function renderEntity(entity) {
     infoHtml += "Udgivelses dato: " + date + "<br>";
     infoHtml += "Format type: " + entity.formatType + "<br>";
 
-    $("#medataDisplay").html(infoHtml);
+    $entityInfoCol.html(infoHtml);
+    $infoDumpRow.append($entityInfoCol);
+    $pageDisplay.append($infoDumpRow);
+
 
 }
 
 function renderSinglePagesEntity(entity, page) {
-    const $pageNav = $("#page-nav");
+    console.log("renderSinglePagesEntity");
+    let $pageNav = $("#page-nav");
     for (var i = 0; i < entity.length; i++) {
         if (i === page) {
             const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
@@ -184,4 +216,3 @@ function editPageIndexInHash(origHash, newPageIndex) {
     var newHash = hashParts.join("/");
     return newHash;
 }
-
