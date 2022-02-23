@@ -8,10 +8,14 @@ import dk.kb.kula190.model.NewspaperEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -29,6 +33,64 @@ public class NewspaperQADao {
     
     public NewspaperQADao(ComboPooledDataSource connectionPool) {
         this.connectionPool = connectionPool;
+    }
+    
+    
+    public void setNotes(@Nonnull String batchID,
+                         @Nullable LocalDate date,
+                         @Nonnull String notes,
+                         @Nullable String avis,
+                         @Nullable String edition,
+                         @Nullable String section,
+                         @Nullable Integer page) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection();
+             PreparedStatement ps = conn.prepareStatement(
+                     "INSERT INTO notes(batchid, avisid, edition_date, edition_title, section_title, page_number, notes) "
+                     + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (batchid, avisid, edition_date, edition_title, section_title, page_number) DO UPDATE SET notes=excluded.notes")) {
+            int param = 1;
+            ps.setString(param++, batchID);
+            param = setNullable(ps, param, avis);
+            param = setNullable(ps, param, date);
+            param = setNullable(ps, param, edition);
+            param = setNullable(ps, param, section);
+            param = setNullable(ps, param, page);
+            
+            ps.setString(param++, notes);
+            
+            
+            ps.execute();
+//            conn.commit();
+        } catch (SQLException e) {
+            log.error("Failed to lookup newspaper ids", e);
+            throw new DAOFailureException("Err looking up newspaper ids", e);
+        }
+    }
+    
+    private int setNullable(PreparedStatement ps, int param, String value) throws SQLException {
+        if (value == null) {
+            ps.setNull(param++, Types.VARCHAR);
+        } else {
+            ps.setString(param++, value);
+        }
+        return param;
+    }
+    
+    private int setNullable(PreparedStatement ps, int param, Integer value) throws SQLException {
+        if (value == null) {
+            ps.setNull(param++, Types.INTEGER);
+        } else {
+            ps.setInt(param++, value);
+        }
+        return param;
+    }
+    
+    private int setNullable(PreparedStatement ps, int param, LocalDate value) throws SQLException {
+        if (value == null) {
+            ps.setNull(param++, Types.DATE);
+        } else {
+            ps.setDate(param++, Date.valueOf(value));
+        }
+        return param;
     }
     
     public List<String> getNewspaperIDs() throws DAOFailureException {

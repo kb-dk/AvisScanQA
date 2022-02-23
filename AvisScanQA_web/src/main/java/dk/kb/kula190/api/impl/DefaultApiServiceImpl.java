@@ -20,10 +20,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Request;
@@ -33,6 +29,7 @@ import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
 import java.io.FileNotFoundException;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
@@ -114,14 +111,56 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     @Override
     public void setNotes(String batchID,
-                           String date,
-                          String body,
-                          String avis,
-                          String edition,
-                          String section,
-                          String page) {
+                         String date,
+                         String body,
+                         String avis,
+                         String edition,
+                         String section,
+                         String page) {
         //        Note that null values might have the value "null". Regard this as null
         log.info("{}/{}/{}/{}/{}/{}, {}", batchID, avis, date, edition, section, page, body);
+        try {
+            dao.setNotes(batchID,
+                         nullableDate(date),
+                         nullable(body),
+                         nullable(avis),
+                         nullable(edition),
+                         nullable(section),
+                         nullableInteger(page));
+        } catch (DAOFailureException e) {
+            log.error("Could not store notes for {}/{}/{}/{}/{}/{}, '{}'",
+                      batchID,
+                      avis,
+                      date,
+                      edition,
+                      section,
+                      page,
+                      body);
+            throw handleException(e);
+        }
+    }
+    
+    private LocalDate nullableDate(String date) {
+        date = nullable(date);
+        if (date != null) {
+            return LocalDate.parse(date);
+        }
+        return null;
+    }
+    
+    private Integer nullableInteger(String integer) {
+        integer = nullable(integer);
+        if (integer != null) {
+            return Integer.parseInt(integer);
+        }
+        return null;
+    }
+    
+    private String nullable(String value) {
+        if (value == null || value.isBlank() || value.equalsIgnoreCase("null")) {
+            return null;
+        }
+        return value;
     }
     
     
