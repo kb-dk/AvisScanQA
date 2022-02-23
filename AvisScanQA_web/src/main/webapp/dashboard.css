@@ -104,3 +104,8 @@ body {
 .approved{
   background-color: rgba(37,138,37,0.54);
 }
+.userNotes{
+  width: 20em;
+  height: 10em;
+  display: block;
+}

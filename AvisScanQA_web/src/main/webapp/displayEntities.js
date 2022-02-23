@@ -1,10 +1,10 @@
 function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     let $primary = $("#primary-show");
     $primary.empty();
-    let $dayNotesForm = $("<form>", {id: "dayNotesForm", action:"api/dayNotes",method:"post"});
-    $dayNotesForm.append($("<label/>").text("Day notes").attr("for","dayNotes"));
-    $dayNotesForm.append($("<input/>", {id: "dayNotes", type: "text",name:"dayNotes"}))
-    $dayNotesForm.append($("<input/>", {id: "submit", type: "submit",name:"submit",form:"dayNotesForm"}));
+    let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "api/dayNotes", method: "post"});
+    $dayNotesForm.append($("<label/>").text("Day notes").attr("for", "dayNotes"));
+    $dayNotesForm.append($("<textarea/>", {class: "userNotes", id: "dayNotes", type: "text", name: "dayNotes"}))
+    $dayNotesForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "dayNotesForm"}));
     $primary.append($dayNotesForm);
     const $editionNav = $("<div/>", {class: 'btn-toolbar mb-2 mb-md-0'})
         .append($("<div/>", {
@@ -49,10 +49,10 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
 
 function renderEntity(entity) {
     let $pageDisplay = $("#pageDisplay");
-    let $pageForm = $("<form/>", {id: "pageNotesForm", action:"api/pageNotes",method:"post"});
-    $pageForm.append($("<label/>").text("Page notes").attr("for","pageNotes"));
-    $pageForm.append($("<input/>", {id: "pageNotes", type: "text", name:"pageNotes"}));
-    $pageForm.append($("<input/>", {id: "submit", type: "submit",name:"submit",form:"pageNotesForm"}));
+    let $pageForm = $("<form/>", {id: "pageNotesForm", action: "api/pageNotes", method: "post"});
+    $pageForm.append($("<label/>").text("Page notes").attr("for", "pageNotes"));
+    $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "pageNotes"}));
+    $pageForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "pageNotesForm"}));
     $pageDisplay.append($pageForm);
     let value = "<div>Vis fil: " + entity.origRelpath + "<br> "
     if (entity.problems !== "") {
@@ -63,8 +63,6 @@ function renderEntity(entity) {
     }
     value += "</div>"
     $pageDisplay.append($(value));
-
-
 
 
     let infoHtml = "Edition titel: " + entity.editionTitle + "<br>";
