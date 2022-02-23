@@ -109,11 +109,11 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
         }
     }
     $("#edition-show").load("entityDisplay.html", function () {
-        var entity = currentEntities[mapKeys[currentEntityIndex]];
-        if (entity.pages.length === 1) {
-            renderEntity(entity.pages[0]);
+        var edition = currentEntities[mapKeys[currentEntityIndex]];
+        if (edition.pages.length === 1) {
+            renderSinglePage(edition.pages[0]);
         } else {
-            renderSinglePagesEntity(entity.pages, pageIndex);
+            renderEdition(edition, pageIndex);
         }
 
         let $editionNotesForm = $("#editionNotesForm");
@@ -129,11 +129,11 @@ function renderEntityDisplay(currentEntities, currentEntityIndex, pageIndex) {
     });
 }
 
-function renderEntity(entity) {
+function renderSinglePage(page) {
     let $pageDisplay = $("#primary-show");
     let $infoDumpRow = $("<div/>",{class:"row"});
     let $contentRow = $("#contentRow");
-    const date = moment(entity.editionDate).format("YYYY-MM-DD");
+    const date = moment(page.editionDate).format("YYYY-MM-DD");
     const $pageCol = $("#pageCol");
     let $pageNav = $("#page-nav");
     let $pageForm = $("<form/>", {id: "pageNotesForm", action: "", method: "post"});
@@ -143,19 +143,19 @@ function renderEntity(entity) {
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: "batchtemp"}));
     $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: "avisTemp"}));
     $pageForm.append($("<input/>", {type: "hidden", name: "date", value: date}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "edition", value: entity.editionTitle}));
+    $pageForm.append($("<input/>", {type: "hidden", name: "edition", value: page.editionTitle}));
     $pageForm.append($("<input/>", {type: "hidden", name: "section", value: "SectionTemp"}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "page", value: entity.pageNumber}));
+    $pageForm.append($("<input/>", {type: "hidden", name: "page", value: page.pageNumber}));
     $pageForm.append($("<input/>", {id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm"}));
     $pageForm.submit(noteSubmitHandler);
     $pageCol.append($pageForm);
 
     let $fileAndProblemsCol = $("<div/>",{class:"col-8"});
 
-    let value = "<div>Vis fil: " + entity.origRelpath + "<br> "
-    if (entity.problems !== "") {
+    let value = "<div>Vis fil: " + page.origRelpath + "<br> "
+    if (page.problems !== "") {
         value += "Problems: <pre>" + JSON.stringify(
-            JSON.parse(entity.problems),
+            JSON.parse(page.problems),
             ['type', 'filereference', 'description'],
             2) + "</pre>";
     }
@@ -166,14 +166,14 @@ function renderEntity(entity) {
 
 
     let $entityInfoCol = $("<div/>",{class:"col-4"});
-    let infoHtml = "Edition titel: " + entity.editionTitle + "<br>";
-    infoHtml += "Section titel: " + entity.sectionTitle + "<br>";
-    infoHtml += "Side nummer: " + entity.pageNumber + "<br>";
-    infoHtml += "Enkelt side: " + entity.singlePage + "<br>";
-    infoHtml += "Afleverings dato: " + moment(entity.deliveryDate).format("YYYY-MM-DD") + "<br>";
+    let infoHtml = "Edition titel: " + page.editionTitle + "<br>";
+    infoHtml += "Section titel: " + page.sectionTitle + "<br>";
+    infoHtml += "Side nummer: " + page.pageNumber + "<br>";
+    infoHtml += "Enkelt side: " + page.singlePage + "<br>";
+    infoHtml += "Afleverings dato: " + moment(page.deliveryDate).format("YYYY-MM-DD") + "<br>";
 
     infoHtml += "Udgivelses dato: " + date + "<br>";
-    infoHtml += "Format type: " + entity.formatType + "<br>";
+    infoHtml += "Format type: " + page.formatType + "<br>";
 
     $entityInfoCol.html(infoHtml);
     $infoDumpRow.append($entityInfoCol);
@@ -182,11 +182,12 @@ function renderEntity(entity) {
 
 }
 
-function renderSinglePagesEntity(entity, page) {
+function renderEdition(entity, pageIndex) {
     console.log("renderSinglePagesEntity");
     let $pageNav = $("#page-nav");
-    for (var i = 0; i < entity.length; i++) {
-        if (i === page) {
+    let pages = entity.pages;
+    for (var i = 0; i < pages; i++) {
+        if (i === pageIndex) {
             const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
             $pageNav.append(button);
         } else {
@@ -198,7 +199,7 @@ function renderSinglePagesEntity(entity, page) {
         }
     }
 
-    renderEntity(entity[page]);
+    renderSinglePage(pages[pageIndex]);
 }
 
 
