@@ -10,11 +10,11 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class PageStructureChecker extends DecoratedEventHandler {
-    private ThreadLocal<Set<String>> types = new ThreadLocal<>();
 
     public PageStructureChecker(ResultCollector resultCollector) {
         super(resultCollector);
@@ -28,8 +28,14 @@ public class PageStructureChecker extends DecoratedEventHandler {
                            String udgave,
                            String sectionName,
                            Integer pageNumber) throws IOException {
+        Map<String, Object> env = registerEnv(avis,
+                                              editionDate.toString(),
+                                              udgave,
+                                              sectionName,
+                                              pageNumber.toString());
+        
+        env.put("types", new HashSet<String>());
         //Checkes that each page consists of MIX ALTO TIFF
-        types.set(new HashSet<>());
     }
 
     @Override
@@ -39,7 +45,9 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        final Set<String> strings = types.get();
+        Map<String, Object> env = dropEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        final Set<String> strings = (Set<String>) env.get("types");
+        
         if (!strings.containsAll(Set.of("MIX", "ALTO", "TIFF"))) {
             addFailure(event,
                        FailureType.MISSING_FILE_ERROR,
@@ -57,7 +65,9 @@ public class PageStructureChecker extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
-        types.get().add("MIX");
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        final Set<String> strings = (Set<String>) env.get("types");
+        strings.add("MIX");
     }
 
     @Override
@@ -67,7 +77,9 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        types.get().add("ALTO");
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        final Set<String> strings = (Set<String>) env.get("types");
+        strings.add("ALTO");
     }
 
     @Override
@@ -77,6 +89,8 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        types.get().add("TIFF");
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        final Set<String> strings = (Set<String>) env.get("types");
+        strings.add("TIFF");
     }
 }

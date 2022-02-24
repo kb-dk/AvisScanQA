@@ -9,6 +9,7 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -31,10 +32,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     //When we have the relevant file, we extract the interesting properties
     //On page end, we KNOW we have visited both files
     //It is here we compare values between them
-
-    private ThreadLocal<XpathAlto> Alto = new ThreadLocal<>();
-    private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
-    private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
+    
 
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
@@ -43,11 +41,15 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                            String udgave,
                            String sectionName,
                            Integer pageNumber) throws IOException {
-
+        Map<String, Object> env = registerEnv(avis,
+                                              editionDate.toString(),
+                                              udgave,
+                                              sectionName,
+                                              pageNumber.toString());
         //clear state
-        Mix.set(new XpathMix());
-        Alto.set(new XpathAlto());
-        Tiff.set(new XpathTiff());
+        env.put("MIX",new XpathMix());
+        env.put("ALTO",new XpathAlto());
+        env.put("TIFF",new XpathTiff());
     }
 
     @Override
@@ -57,8 +59,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
-        //object
-        XpathMix xpathMix = Mix.get();
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        XpathMix xpathMix = (XpathMix) env.get("MIX");
         xpathMix.setMixXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
 
     }
@@ -70,16 +72,17 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        //object
-        XpathTiff xpathTiff = Tiff.get();
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        XpathTiff xpathTiff = (XpathTiff) env.get("TIFF");
+
         xpathTiff.setTiffXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
     }
 
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate, String udgave,
                          String sectionName, Integer pageNumber) throws IOException {
-
-        XpathAlto xpathAlto = Alto.get();
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        XpathAlto xpathAlto= (XpathAlto) env.get("ALTO");
         xpathAlto.setAltoXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
     }
 
@@ -91,7 +94,9 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)) {
             return;
         }
-        XpathTiff xpathTiff = Tiff.get();
+        Map<String, Object> env = retriveEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        XpathTiff xpathTiff = (XpathTiff) env.get("TIFF");
+    
         xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName,
                                           pageNumber);
     }
@@ -103,9 +108,11 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) {
-        XpathMix xpathMix = Mix.get();
-        XpathTiff xpathTiff = Tiff.get();
-        XpathAlto xpathAlto = Alto.get();
+        Map<String, Object> env = dropEnv(avis, editionDate.toString(), udgave, sectionName, pageNumber.toString());
+        XpathMix xpathMix = (XpathMix) env.get("MIX");
+        XpathTiff xpathTiff = (XpathTiff) env.get("TIFF");
+        XpathAlto xpathAlto= (XpathAlto) env.get("ALTO");
+    
 
         boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
 

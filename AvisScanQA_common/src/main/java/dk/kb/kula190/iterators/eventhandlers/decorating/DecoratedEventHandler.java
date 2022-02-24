@@ -7,11 +7,34 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
     
     public DecoratedEventHandler(ResultCollector resultCollector) {
         super(resultCollector);
+    }
+    
+    protected final Map<String,Map<String, Object>> vars = Collections.synchronizedMap(new HashMap<>());
+    
+    protected String createKey(String... fields){
+        return String.join("_",fields);
+    }
+    
+    protected  Map<String,Object> registerEnv(String... key){
+        HashMap<String, Object> value = new HashMap<>();
+        vars.putIfAbsent(createKey(key), (Map<String, Object>) value);
+        return value;
+    }
+    
+    protected Map<String,Object> retriveEnv(String... key){
+        return vars.get(createKey(key));
+    }
+    
+    protected Map<String,Object> dropEnv(String... key){
+        return vars.remove(createKey(key));
     }
     
     @Override

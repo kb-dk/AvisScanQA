@@ -18,8 +18,8 @@ import java.util.Set;
 
 public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHandler {
 
-    protected final InheritableThreadLocal<String> batchName = new InheritableThreadLocal<>();
-    protected final InheritableThreadLocal<String> batchLocation = new InheritableThreadLocal<>();
+    protected String batchName;
+    protected String batchLocation;
 
     public AbstractDecoratedEventHandler(ResultCollector resultCollector) {
         super(resultCollector);
@@ -27,12 +27,17 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
 
     public final void handleNode(NodeParsingEvent event) throws IOException {
         String lastName = EventHandlerUtils.lastName(event.getName());
-        if (batchName.get() == null) {
-            //modersmaalet_19060701_19061231_RT1
-            batchName.set(lastName);
-            batchLocation.set(event.getLocation());
-            handleBatch(event);
-        } else if (isMETS(event)) {
+    
+        synchronized (this) {
+            if (batchName == null) {
+                //modersmaalet_19060701_19061231_RT1
+                batchName = (lastName);
+                batchLocation = event.getLocation();
+                handleBatch(event);
+                return;
+            }
+        }
+        if (isMETS(event)) {
             this.handleMets(event);
         } else if (isMODS(event)) {
             handleMods(event);
@@ -42,7 +47,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
             handleSection(event);
         } else if (isPage(event)) {
             handlePage(event);
-        } else if (event.getName().equals(batchName.get())) {
+        } else if (event.getName().equals(batchName)) {
             handleBatch(event);
         }
     }

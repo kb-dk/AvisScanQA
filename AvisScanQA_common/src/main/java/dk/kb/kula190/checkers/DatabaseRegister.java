@@ -87,7 +87,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                     + "ON CONFLICT (batchid) DO UPDATE SET state = excluded.state")) {
                 int param = 1;
                 //Batch ID
-                preparedStatement.setString(param++, batchName.get());
+                preparedStatement.setString(param++, batchName);
                 //Avis ID
                 preparedStatement.setString(param++, avis);
                 // roundtrip
@@ -133,7 +133,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                     + "ON CONFLICT (batchid) DO UPDATE SET problems = excluded.problems, num_problems=excluded.num_problems, state = excluded.state")) {
                 int param = 1;
                 //Batch ID
-                preparedStatement.setString(param++, batchName.get());
+                preparedStatement.setString(param++, batchName);
                 //Avis ID
                 preparedStatement.setString(param++, avis);
                 // roundtrip
@@ -234,7 +234,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, failuresMessage);
     
                 //Batch-reference
-                preparedStatement.setString(param++, batchName.get());
+                preparedStatement.setString(param++, batchName);
                 
                 boolean result = preparedStatement.execute();
             }

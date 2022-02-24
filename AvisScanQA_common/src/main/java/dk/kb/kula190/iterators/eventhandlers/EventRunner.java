@@ -116,7 +116,7 @@ public class EventRunner implements Runnable {
     }
     
     public void handleFinish() {
-        for (TreeEventHandler handler : eventHandlers) {
+        eventHandlers.stream().forEach(handler -> {
             try {
                 handler.handleFinish();
             } catch (Exception e) {
@@ -125,13 +125,13 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(new NodeEndParsingEvent("Finished"),
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + "\n" + e.toString());
             }
-        }
+        });
     }
     
     public void handleAttribute(AttributeParsingEvent current) {
-        for (TreeEventHandler handler : eventHandlers) {
+        eventHandlers.stream().parallel().forEach(handler -> {
             try {
                 handler.handleAttribute(current);
             } catch (Exception e) {
@@ -139,13 +139,13 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + "\n" + e.toString());
             }
-        }
+        });
     }
     
     public void handleNodeEnd(NodeEndParsingEvent current) {
-        for (TreeEventHandler handler : eventHandlers) {
+        eventHandlers.stream().parallel().forEach(handler -> {
             try {
                 handler.handleNodeEnd(current);
             } catch (Exception e) {
@@ -153,13 +153,13 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name() +"\n"+ e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + "\n" + e.toString());
             }
-        }
+        });
     }
     
     public void handleNodeBegins(NodeBeginsParsingEvent current) {
-        for (TreeEventHandler handler : eventHandlers) {
+        eventHandlers.stream().parallel().forEach(handler -> {
             try {
                 handler.handleNodeBegin(current);
             } catch (Exception e) {
@@ -167,8 +167,8 @@ public class EventRunner implements Runnable {
                 resultCollector.addFailure(current,
                                            FailureType.EXCEPTION,
                                            handler.getClass().getSimpleName(),
-                                           FailureType.UNEXPECTED_ERROR.name()+"\n"+ e.toString());
+                                           FailureType.UNEXPECTED_ERROR.name() + "\n" + e.toString());
             }
-        }
+        });
     }
 }
