@@ -69,7 +69,7 @@ class DatabaseEventRunnerTest {
         final List<Failure> failures = resultCollector.getFailures();
         File configFolder = new File(Thread.currentThread()
                                    .getContextClassLoader()
-                                   .getResource("dbconfig-public.yaml")
+                                   .getResource("dbconfig-behaviour.yaml")
                                    .toURI()).getParentFile();
         YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
         
