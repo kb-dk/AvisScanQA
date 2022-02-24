@@ -94,7 +94,7 @@ public class NewspaperQADao {
         log.debug("Looking up batch ids");
         String
                 SQL
-                = "SELECT batch.batchid, batch.avisid, roundtrip, start_date, end_date, delivery_date, problems, state, n.notes as notes FROM batch left join notes n on batch.batchid = n.batchid and batch.avisid = n.avisid and n.edition_date is null and n.edition_title is null and n.section_title is null and n.page_number is null";
+                = "SELECT batch.batchid, batch.avisid, roundtrip, start_date, end_date, delivery_date, problems, num_problems, state, n.notes as notes FROM batch left join notes n on batch.batchid = n.batchid and batch.avisid = n.avisid and n.edition_date is null and n.edition_title is null and n.section_title is null and n.page_number is null";
         
         try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
             try (ResultSet res = ps.executeQuery()) {
@@ -110,6 +110,7 @@ public class NewspaperQADao {
                     batch.setProblems(res.getString("problems"));
                     batch.setState(res.getString("state"));
                     batch.setNotes(res.getString("notes"));
+                    batch.setNumProblems(res.getInt("num_problems"));
                     list.add(batch);
                 }
                 return list;
@@ -152,7 +153,7 @@ public class NewspaperQADao {
     
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
-                    "select batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ")) {
+                    "select batchid, roundtrip, start_date, end_date, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ")) {
                 ps.setString(1, avisID);
                 ps.setInt(2, Integer.parseInt(year));
                 ps.setInt(3, Integer.parseInt(year));

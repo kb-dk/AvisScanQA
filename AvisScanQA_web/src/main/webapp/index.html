@@ -49,6 +49,7 @@
 
         <main role="main" class="col-md-12 ml-sm-auto col-lg-10 px-4">
             <div id="headline-div"></div>
+            <div id="notice-div"></div>
             <div id="primary-show"></div>
         </main>
     </div>
@@ -113,25 +114,31 @@
      * @param {string} batchID
      */
     function loadBatchForNewspaper(batchID) {
-        let /*int*/ currentNewspaperYear;
-        let /*Generator<int, void, int>*/ newspaperYears;
-        var url = 'api/batch/' + batchID;
-        $.getJSON(url, {}, function (batch) {
-            let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
-            let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
-            currentNewspaperYear = fromYEAR;
-            newspaperYears = range(fromYEAR, toYEAR);
-        }).done(function () {
-            if (currentNewspaperYear === 0) {
-                currentNewspaperYear = newspaperYears.next();
-                let parts = location.hash.split("/");
-                parts[parts.length - 2] = currentNewspaperYear;
-                location.hash = parts.join("/");
-            } else {
-                $("#headline-div").html("<h1>Batch " + batchID + "</h1>");
-                renderNewspaperForYear(newspaperYears, currentNewspaperYear, 'api/batch/' + batchID + '/' + currentNewspaperYear);
-            }
-        });
+        let url = 'api/batch/' + batchID;
+        $.getJSON(url, {},
+            function (batch) {
+                let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
+                let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
+
+                let currentNewspaperYear = fromYEAR;
+
+                let newspaperYears = range(fromYEAR, toYEAR);
+
+                let $headline = $("#headline-div");
+                $headline.append($("<h1/>").text("Batch " + batch.batchid));
+
+                let $notice = $("#notice-div");
+
+                let problems = "Problems: <pre>" + JSON.stringify(
+                    JSON.parse(batch.problems),
+                    ['type', 'filereference', 'description'],
+                    2) + "</pre>";
+
+                $notice.html(problems);
+
+                renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
+
+            });
     }
 
 

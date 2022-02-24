@@ -279,8 +279,12 @@ components:
           type: string
           format: date
         problems:
+          description: "Problems not associated with any page"
           type: string
           nullable: true
+        numProblems:
+          description: "Number of problems found. Use this to see if the batch completed checks without any errors"
+          type: integer
         notes:
           type: string
           nullable: true
