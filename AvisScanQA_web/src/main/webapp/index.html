@@ -5,6 +5,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
     <link href="dashboard.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
+
 </head>
 
 <body>
@@ -42,7 +44,22 @@
                     </a>
                 </h6>
                 <!-- TODO this should be a table with sorting and so on...-->
-                <ul class="nav flex-column mb-2" id="batches">
+                <body>
+                <table id="batchTable"
+                        data-toggle="table"
+                        data-url="api/batch"
+                        data-row-attributes="rowAttributes"
+                >
+                    <thead>
+                    <tr>
+                        <th data-sortable="true" data-field="batchid">Batch ID</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+                </body>
+                <!--<ul class="nav flex-column mb-2" id="batches"> -->
                 </ul>
             </div>
         </nav>
@@ -63,6 +80,8 @@
         integrity="sha384-fQybjgWLrvvRgtW6bFlB7jaZrFsaBXjsOMm/tB9LTS58ONXgqbR9W8oWht/amnpF"
         crossorigin="anonymous"></script>
 
+<script src="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.js"></script>
+
 <script src="jquery.routes.js"></script>
 <script src="moment.locale.js"></script>
 
@@ -72,6 +91,11 @@
 
 <script>
 
+    function rowAttributes(row, index) {
+        return {
+            'class': 'batches'
+        }
+    }
 
     /**
      * @param {string} avisID
@@ -169,12 +193,9 @@
     }
 
     function loadNewspaperBatches() {
-        $.getJSON('api/batch', {}, function (batches) {
-            for (const batch of batches) {
-                $("#batches").append(
-                    "<li class='nav-batch'><a class='nav-link' href='#/batch/" + batch.batchid + "/'>" + batch.batchid + "</a></li>");
-            }
-        });
+        $("#batchTable").on("click-row.bs.table", function (row,$element,field){
+            location.href = "#/batch/" + $element.batchid+"/";
+        })
     }
 
     $.routes.add('/dashboard/', function () {
@@ -204,6 +225,7 @@
 
 
     $(document).ready(function () {
+
         moment.locale("da");
         // load newspaper IDs
         loadNewspaperIDs();
