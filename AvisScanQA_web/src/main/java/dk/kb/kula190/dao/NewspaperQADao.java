@@ -55,10 +55,10 @@ public class NewspaperQADao {
                 param = DaoUtils.setNullable(ps, param, edition);
                 param = DaoUtils.setNullable(ps, param, section);
                 param = DaoUtils.setNullable(ps, param, page);
-            
+                
                 ps.setString(param++, notes);
-            
-            
+                
+                
                 ps.execute();
                 if (!conn.getAutoCommit()) {
                     conn.commit();
@@ -73,7 +73,7 @@ public class NewspaperQADao {
     public List<String> getNewspaperIDs() throws DAOFailureException {
         log.debug("Looking up newspaper ids");
         String SQL = "SELECT distinct(avisid) FROM newspaperarchive";
-    
+        
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(SQL)) {
                 try (ResultSet res = ps.executeQuery()) {
@@ -124,15 +124,15 @@ public class NewspaperQADao {
     
     public List<String> getYearsForNewspaperID(String id) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}'", id);
-    
+        
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
                     "SELECT distinct(EXTRACT(YEAR from edition_date)) AS year FROM newspaperarchive WHERE avisid = ? ORDER BY year ASC")) {
-            
+                
                 ps.setString(1, id);
                 try (ResultSet res = ps.executeQuery()) {
                     List<String> list = new ArrayList<>();
-                
+                    
                     while (res.next()) {
                         list.add("" + res.getInt(1));
                     }
@@ -150,14 +150,14 @@ public class NewspaperQADao {
         
         
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
-    
+        
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
                     "select batchid, roundtrip, start_date, end_date, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ")) {
                 ps.setString(1, avisID);
                 ps.setInt(2, Integer.parseInt(year));
                 ps.setInt(3, Integer.parseInt(year));
-            
+                
                 try (ResultSet res = ps.executeQuery()) {
                     while (res.next()) {
                         String batchID = res.getString("batchid");
@@ -182,32 +182,36 @@ public class NewspaperQADao {
                     }
                 }
             }
-      
-            try (PreparedStatement ps = conn.prepareStatement("select edition_date, "
-                                                          + " b.batchid, "
-                                                          + " b.state, "
-                                                          + " count(DISTINCT(edition_title)) as numEditions, "
-                                                          + " count(*) as numPages, "
-                                                          + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
-                                                          + " from newspaperarchive "
-                                                          + " join batch b on b.batchid = newspaperarchive.batchid "
-                                                          + " where newspaperarchive.avisid = ? and EXTRACT(YEAR FROM edition_date) = ? "
-                                                          + " group by edition_date, b.batchid")) {
             
+            try (PreparedStatement ps = conn.prepareStatement("select edition_date, "
+                                                              + " b.batchid, "
+                                                              + " b.roundtrip, "
+                                                              + " b.state, "
+                                                              + " count(DISTINCT(edition_title)) as numEditions, "
+                                                              + " count(*) as numPages, "
+                                                              + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
+                                                              + " from newspaperarchive "
+                                                              + " join batch b on b.batchid = newspaperarchive.batchid "
+                                                              + " where newspaperarchive.avisid = ? and EXTRACT(YEAR FROM edition_date) = ? "
+                                                              + " group by edition_date, b.batchid, roundtrip "
+                                                              + " order by roundtrip asc ")) {
+                //ascending sort ensures that the highest roundtrips are last
+                //last entry for a given date wins. So this way, the calender will show the latest roundtrips
+                
                 ps.setString(1, avisID);
                 ps.setInt(2, Integer.parseInt(year));
                 //ps.setString(3, year);
                 try (ResultSet res = ps.executeQuery()) {
-                
-                    while (res.next()) {
                     
+                    while (res.next()) {
+                        
                         Date date = res.getDate("edition_date");
                         int editionCount = res.getInt("numEditions");
                         int pageCount = res.getInt("numPages");
                         String problems = res.getString("allProblems").translateEscapes().trim();
                         String state = res.getString("state");
                         String batchID = res.getString("batchid");
-                    
+                        Integer roundtrip = res.getInt("roundtrip");
                         NewspaperDate result = new NewspaperDate();
                         final LocalDate localDate = date.toLocalDate();
                         result.setDate(localDate);
@@ -217,7 +221,7 @@ public class NewspaperQADao {
                         result.setBatchid(batchID);
                         result.setAvisid(avisID);
                         result.setState(state);
-                    
+                        result.setRoundtrip(roundtrip);
                         resultMap.put(localDate, result);
                     }
                 }
