@@ -166,7 +166,7 @@ function renderSinglePage(page) {
     $contentRow.append($pageCol);
 
     let $fileAndProblemsCol = $("<div/>", {class: "col-8"})
-        .append($("<p>").text("Vis fil: " + page.origRelpath));
+        .append($("<a>").text("Vis fil: " + page.origRelpath));
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
             JSON.parse(page.problems),
@@ -194,7 +194,6 @@ function renderSinglePage(page) {
 }
 
 function renderEdition(entity, pageIndex) {
-    console.log("renderSinglePagesEntity");
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
     for (var i = 0; i < pages.length; i++) {
@@ -226,4 +225,23 @@ function editPageIndexInHash(origHash, newPageIndex) {
     hashParts[hashParts.length - 2] = newPageIndex;
     var newHash = hashParts.join("/");
     return newHash;
+}
+
+function renderBatchTable(filter =""){
+    let $tableDiv = $("#batchOverview-div");
+
+    $tableDiv.load("batchTable.html",function (){
+
+    })
+    let $table = $("#batchTable")
+    console.log($table.data());
+    $table.bootstrapTable('refreshOptions', {
+        filterOptions: {
+            filterAlgorithm: 'or'
+        }
+    })
+    $table.bootstrapTable('filterBy', {
+        state:filter
+    })
+    console.log($table.data());
 }
