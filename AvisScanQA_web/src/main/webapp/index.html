@@ -72,43 +72,53 @@
 <script>
 
 
-
-
-    function loadYearsForNewspaper(id, year) {
-        let newspaperYears;
-        let currentNewspaperYear = year;
-        let currentNewspaper = id;
-        var url = 'api/years/' + id;
+    /**
+     * @param {string} avisID
+     * @param {int} year
+     */
+    function loadYearsForNewspaper(avisID, year) {
+        let /*int[]*/ newspaperYears;
+        let /*int*/ currentNewspaperYear = year;
+        var url = 'api/years/' + avisID;
         $.getJSON(url, {}, function (years) {
             currentNewspaperYear = year;
             newspaperYears = years;
         }).done(function () {
             if (currentNewspaperYear === 0) {
                 currentNewspaperYear = newspaperYears[0];
-                var parts = location.hash.split("/");
+                const parts = location.hash.split("/");
                 parts[parts.length - 2] = currentNewspaperYear;
                 location.hash = parts.join("/");
             } else {
-                $("#headline-div").html("<h1>År med " + id + "</h1>");
-                renderNewspaperForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
+                $("#headline-div").html("<h1>År med " + avisID + "</h1>");
+                renderNewspaperForYear(newspaperYears, currentNewspaperYear, 'api/dates/' + avisID + '/' + currentNewspaperYear);
             }
         });
     }
 
+    /**
+     *
+     * @param {int} start
+     * @param {int} end
+     * @returns {Generator<int, void, int>}
+     */
     function* range(start, end) {
         for (let i = start; i <= end; i++) {
             yield i;
         }
     }
 
-    function loadBatchForNewspaper(id) {
-        let currentNewspaperYear;
-        let newspaperYears;
-        let currentNewspaper = id;
-        var url = 'api/batch/' + id;
+    /**
+     *
+     * @param {string} batchID
+     */
+    function loadBatchForNewspaper(batchID) {
+        let /*int*/ currentNewspaperYear;
+        let /*Generator<int, void, int>*/ newspaperYears;
+        var url = 'api/batch/' + batchID;
         $.getJSON(url, {}, function (batch) {
-            let fromYEAR = moment(batch.startDate).format("YYYY");
-            let toYEAR = moment(batch.endDate).format("YYYY");
+            let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
+            let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
             currentNewspaperYear = fromYEAR;
             newspaperYears = range(fromYEAR, toYEAR);
         }).done(function () {
@@ -118,8 +128,8 @@
                 parts[parts.length - 2] = currentNewspaperYear;
                 location.hash = parts.join("/");
             } else {
-                $("#headline-div").html("<h1>Batch " + id + "</h1>");
-                renderBatchForYear(currentNewspaper, newspaperYears, currentNewspaperYear);
+                $("#headline-div").html("<h1>Batch " + batchID + "</h1>");
+                renderNewspaperForYear(newspaperYears, currentNewspaperYear, 'api/batch/' + batchID + '/' + currentNewspaperYear);
             }
         });
     }
@@ -143,19 +153,19 @@
 
 
     function loadNewspaperIDs() {
-        $.getJSON('api/newspaperIDs', {}, function (ids) {
-            for (const item of ids) {
+        $.getJSON('api/newspaperIDs', {}, function (newspaperIDs) {
+            for (const newspaperID of newspaperIDs) {
                 $("#avisIDer").append(
-                    "<li class='nav-item'><a class='nav-link' href='#/newspaper/" + item + "/0/'>" + item + "</a></li>");
+                    "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
             }
         });
     }
 
     function loadNewspaperBatches() {
-        $.getJSON('api/batch', {}, function (ids) {
-            for (const item of ids) {
+        $.getJSON('api/batch', {}, function (batches) {
+            for (const batch of batches) {
                 $("#batches").append(
-                    "<li class='nav-item'><a class='nav-link' href='#/batch/" + item.batchid + "/'>" + item.batchid + "</a></li>");
+                    "<li class='nav-batch'><a class='nav-link' href='#/batch/" + batch.batchid + "/'>" + batch.batchid + "</a></li>");
             }
         });
     }

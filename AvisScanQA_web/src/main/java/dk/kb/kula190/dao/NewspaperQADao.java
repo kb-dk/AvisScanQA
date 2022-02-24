@@ -17,7 +17,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -25,7 +24,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -46,67 +44,45 @@ public class NewspaperQADao {
                          @Nullable String edition,
                          @Nullable String section,
                          @Nullable Integer page) throws DAOFailureException {
-        try (Connection conn = connectionPool.getConnection();
-             PreparedStatement ps = conn.prepareStatement(
-                     "INSERT INTO notes(batchid, avisid, edition_date, edition_title, section_title, page_number, notes) "
-                     + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (batchid, avisid, edition_date, edition_title, section_title, page_number) DO UPDATE SET notes=excluded.notes")) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            param = setNullable(ps, param, avis);
-            param = setNullable(ps, param, date);
-            param = setNullable(ps, param, edition);
-            param = setNullable(ps, param, section);
-            param = setNullable(ps, param, page);
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO notes(batchid, avisid, edition_date, edition_title, section_title, page_number, notes) "
+                    + "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (batchid, avisid, edition_date, edition_title, section_title, page_number) DO UPDATE SET notes=excluded.notes")) {
+                int param = 1;
+                ps.setString(param++, batchID);
+                param = DaoUtils.setNullable(ps, param, avis);
+                param = DaoUtils.setNullable(ps, param, date);
+                param = DaoUtils.setNullable(ps, param, edition);
+                param = DaoUtils.setNullable(ps, param, section);
+                param = DaoUtils.setNullable(ps, param, page);
             
-            ps.setString(param++, notes);
+                ps.setString(param++, notes);
             
             
-            ps.execute();
-            //            conn.commit();
+                ps.execute();
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            }
         } catch (SQLException e) {
             log.error("Failed to lookup newspaper ids", e);
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
     
-    private int setNullable(PreparedStatement ps, int param, String value) throws SQLException {
-        if (value == null) {
-            ps.setNull(param++, Types.VARCHAR);
-        } else {
-            ps.setString(param++, value);
-        }
-        return param;
-    }
-    
-    private int setNullable(PreparedStatement ps, int param, Integer value) throws SQLException {
-        if (value == null) {
-            ps.setNull(param++, Types.INTEGER);
-        } else {
-            ps.setInt(param++, value);
-        }
-        return param;
-    }
-    
-    private int setNullable(PreparedStatement ps, int param, LocalDate value) throws SQLException {
-        if (value == null) {
-            ps.setNull(param++, Types.DATE);
-        } else {
-            ps.setDate(param++, Date.valueOf(value));
-        }
-        return param;
-    }
-    
     public List<String> getNewspaperIDs() throws DAOFailureException {
         log.debug("Looking up newspaper ids");
         String SQL = "SELECT distinct(avisid) FROM newspaperarchive";
-        
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
-            try (ResultSet res = ps.executeQuery()) {
-                List<String> list = new ArrayList<>();
-                while (res.next()) {
-                    list.add(res.getString(1));
+    
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(SQL)) {
+                try (ResultSet res = ps.executeQuery()) {
+                    List<String> list = new ArrayList<>();
+                    while (res.next()) {
+                        list.add(res.getString(1));
+                    }
+                    return list;
                 }
-                return list;
             }
         } catch (SQLException e) {
             log.error("Failed to lookup newspaper ids", e);
@@ -147,20 +123,20 @@ public class NewspaperQADao {
     
     public List<String> getYearsForNewspaperID(String id) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}'", id);
-        String
-                SQL
-                = "SELECT distinct(EXTRACT(YEAR from edition_date)) AS year FROM newspaperarchive WHERE avisid = ? ORDER BY year ASC";
-        
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
+    
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT distinct(EXTRACT(YEAR from edition_date)) AS year FROM newspaperarchive WHERE avisid = ? ORDER BY year ASC")) {
             
-            ps.setString(1, id);
-            try (ResultSet res = ps.executeQuery()) {
-                List<String> list = new ArrayList<>();
+                ps.setString(1, id);
+                try (ResultSet res = ps.executeQuery()) {
+                    List<String> list = new ArrayList<>();
                 
-                while (res.next()) {
-                    list.add("" + res.getInt(1));
+                    while (res.next()) {
+                        list.add("" + res.getInt(1));
+                    }
+                    return list;
                 }
-                return list;
             }
         } catch (SQLException e) {
             log.error("Failed to lookup edition dates for newspaper id {}", id, e);
@@ -173,82 +149,76 @@ public class NewspaperQADao {
         
         
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
-        String
-                SQL1
-                = "select batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ";
-        
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL1)) {
-            ps.setString(1, avisID);
-            ps.setInt(2, Integer.parseInt(year));
-            ps.setInt(3, Integer.parseInt(year));
+    
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "select batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ")) {
+                ps.setString(1, avisID);
+                ps.setInt(2, Integer.parseInt(year));
+                ps.setInt(3, Integer.parseInt(year));
             
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    String batchID = res.getString("batchid");
-                    Integer roundTrip = res.getInt("roundtrip");
-                    LocalDate startDate = res.getDate("start_date").toLocalDate();
-                    LocalDate endDate = res.getDate("end_date").toLocalDate();
-                    String state = res.getString("state");
-                    LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
-                              .mapToObj(startDate::plusDays)
-                              .forEach(date -> {
-                                  final NewspaperDate newspaperDate = new NewspaperDate();
-                                  newspaperDate.setBatchid(batchID);
-                                  newspaperDate.setAvisid(avisID);
-                                  newspaperDate.setRoundtrip(roundTrip);
-                                  newspaperDate.setDate(date);
-                                  newspaperDate.setPageCount(0);
-                                  newspaperDate.setProblems("");
-                                  newspaperDate.setEditionCount(0);
-                                  newspaperDate.setState(state);
-                                  resultMap.put(date, newspaperDate);
-                              });
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        String batchID = res.getString("batchid");
+                        Integer roundTrip = res.getInt("roundtrip");
+                        LocalDate startDate = res.getDate("start_date").toLocalDate();
+                        LocalDate endDate = res.getDate("end_date").toLocalDate();
+                        String state = res.getString("state");
+                        LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
+                                  .mapToObj(startDate::plusDays)
+                                  .forEach(date -> {
+                                      final NewspaperDate newspaperDate = new NewspaperDate();
+                                      newspaperDate.setBatchid(batchID);
+                                      newspaperDate.setAvisid(avisID);
+                                      newspaperDate.setRoundtrip(roundTrip);
+                                      newspaperDate.setDate(date);
+                                      newspaperDate.setPageCount(0);
+                                      newspaperDate.setProblems("");
+                                      newspaperDate.setEditionCount(0);
+                                      newspaperDate.setState(state);
+                                      resultMap.put(date, newspaperDate);
+                                  });
+                    }
                 }
             }
-        } catch (SQLException e) {
-            log.error("Failed to lookup edition dates for newspaper id {}", avisID, e);
-            throw new DAOFailureException("Err looking up dates for newspaper id", e);
-        }
-        
-        String SQL =
-                "select edition_date, "
-                + " b.batchid, "
-                + " b.state, "
-                + " count(DISTINCT(edition_title)) as numEditions, "
-                + " count(*) as numPages, "
-                + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
-                + " from newspaperarchive "
-                + " join batch b on b.batchid = newspaperarchive.batchid "
-                + " where newspaperarchive.avisid = ? and EXTRACT(YEAR FROM edition_date) = ? "
-                + " group by edition_date, b.batchid";
-        
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
+      
+            try (PreparedStatement ps = conn.prepareStatement("select edition_date, "
+                                                          + " b.batchid, "
+                                                          + " b.state, "
+                                                          + " count(DISTINCT(edition_title)) as numEditions, "
+                                                          + " count(*) as numPages, "
+                                                          + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
+                                                          + " from newspaperarchive "
+                                                          + " join batch b on b.batchid = newspaperarchive.batchid "
+                                                          + " where newspaperarchive.avisid = ? and EXTRACT(YEAR FROM edition_date) = ? "
+                                                          + " group by edition_date, b.batchid")) {
             
-            ps.setString(1, avisID);
-            ps.setInt(2, Integer.parseInt(year));
-            //ps.setString(3, year);
-            try (ResultSet res = ps.executeQuery()) {
+                ps.setString(1, avisID);
+                ps.setInt(2, Integer.parseInt(year));
+                //ps.setString(3, year);
+                try (ResultSet res = ps.executeQuery()) {
                 
-                while (res.next()) {
+                    while (res.next()) {
                     
-                    java.sql.Date date = res.getDate("edition_date");
-                    int editionCount = res.getInt("numEditions");
-                    int pageCount = res.getInt("numPages");
-                    String problems = res.getString("allProblems").translateEscapes().trim();
-                    String state = res.getString("state");
-                    String batchID = res.getString("batchid");
+                        Date date = res.getDate("edition_date");
+                        int editionCount = res.getInt("numEditions");
+                        int pageCount = res.getInt("numPages");
+                        String problems = res.getString("allProblems").translateEscapes().trim();
+                        String state = res.getString("state");
+                        String batchID = res.getString("batchid");
                     
-                    NewspaperDate result = new NewspaperDate();
-                    final LocalDate localDate = date.toLocalDate();
-                    result.setDate(localDate);
-                    result.setPageCount(pageCount);
-                    result.setEditionCount(editionCount);
-                    result.setProblems(problems);
-                    result.setBatchid(batchID);
-                    result.setAvisid(avisID);
-                    result.setState(state);
+                        NewspaperDate result = new NewspaperDate();
+                        final LocalDate localDate = date.toLocalDate();
+                        result.setDate(localDate);
+                        result.setPageCount(pageCount);
+                        result.setEditionCount(editionCount);
+                        result.setProblems(problems);
+                        result.setBatchid(batchID);
+                        result.setAvisid(avisID);
+                        result.setState(state);
                     
-                    resultMap.put(localDate, result);
+                        resultMap.put(localDate, result);
+                    }
                 }
             }
         } catch (SQLException e) {
