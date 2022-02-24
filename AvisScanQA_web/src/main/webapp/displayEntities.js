@@ -158,7 +158,7 @@ function renderSinglePage(page) {
     $pageForm.append($("<input/>", {type: "hidden", name: "edition", value: page.editionTitle}));
     $pageForm.append($("<input/>", {type: "hidden", name: "section", value: page.sectionTitle}));
     $pageForm.append($("<input/>", {type: "hidden", name: "page", value: page.pageNumber}));
-    $pageForm.append($("<input/>", {id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm"}));
+    $pageForm.append($("<input/>", {type: "submit", name: "submit", id: "pageNotesFormSubmit", form: "pageNotesForm"}));
     $pageForm.submit(noteSubmitHandler);
     $pageCol.append($pageForm);
 

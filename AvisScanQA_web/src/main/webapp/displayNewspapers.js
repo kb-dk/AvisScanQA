@@ -68,7 +68,7 @@ function determineColor(dayInMonth) {
     //link = link
     if (!dayInMonth.available) {
         return "btn-light";
-    } else if (dayInMonth.state == "CHECKED") { //TODO enum at some point
+    } else if (dayInMonth.state == "APPROVED") { //TODO enum at some point
         return "approved";
     } else if (dayInMonth.problems.length > 0) {
         return "btn-warning";
