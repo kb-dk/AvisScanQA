@@ -102,22 +102,12 @@
      * @param {int} year
      */
     function loadYearsForNewspaper(avisID, year) {
-        let /*int[]*/ newspaperYears;
-        let /*int*/ currentNewspaperYear = year;
-        var url = 'api/years/' + avisID;
+        const url = `api/years/${avisID}`;
         $.getJSON(url, {}, function (years) {
-            currentNewspaperYear = year;
-            newspaperYears = years;
-        }).done(function () {
-            if (currentNewspaperYear === 0) {
-                currentNewspaperYear = newspaperYears[0];
-                const parts = location.hash.split("/");
-                parts[parts.length - 2] = currentNewspaperYear;
-                location.hash = parts.join("/");
-            } else {
-                $("#headline-div").html("<h1>År med " + avisID + "</h1>");
-                renderNewspaperForYear(newspaperYears, currentNewspaperYear, 'api/dates/' + avisID + '/' + currentNewspaperYear);
-            }
+            $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
+            $("#notice-div").empty();
+            renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
+
         });
     }
 
@@ -138,7 +128,7 @@
      * @param {string} batchID
      */
     function loadBatchForNewspaper(batchID) {
-        let url = 'api/batch/' + batchID;
+        let url = `api/batch/${batchID}`;
         $.getJSON(url, {},
             function (batch) {
                 let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
@@ -148,17 +138,22 @@
 
                 let newspaperYears = range(fromYEAR, toYEAR);
 
-                let $headline = $("#headline-div");
-                $headline.append($("<h1/>").text("Batch " + batch.batchid));
+                $("#headline-div").empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
 
-                let $notice = $("#notice-div");
 
-                let problems = "Problems: <pre>" + JSON.stringify(
-                    JSON.parse(batch.problems),
-                    ['type', 'filereference', 'description'],
-                    2) + "</pre>";
+                if (batch.numProblems > 0) {
+                    let $notice = $("#notice-div").empty();
 
-                $notice.html(problems);
+                    $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
+
+                    if (batch.problems) {
+                        $notice
+                            .append($("<p>").text("Batch Problems:")
+                            .append("<pre/>").text(JSON.stringify(JSON.parse(batch.problems),
+                                ['type', 'filereference', 'description'],
+                                2)));
+                    }
+                }
 
                 renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
 
@@ -166,16 +161,15 @@
     }
 
 
-    function loadEntitiesForNewspaperOnDate(batchID, avisID, date, entityIndex, pageIndex) {
+    function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
         var day = moment(date).format('YYYY-MM-DD');
         var url = `api/batch/${batchID}/${avisID}/${day}`
-        let currentEntities;
-        $.getJSON(url, {}, function (entities) {
-            currentEntities = entities;
-            $("#headline-div").html("<h1>Entities for " + avisID + " on " + day + "</h1>");
-        }).done(function () {
+        $.getJSON(url, {}, function (newspaperDay) {
+            $("#headline-div").empty().append($("<h1>").text(`Editions for ${avisID} on ${day}`));
+            $("#notice-div").empty();
+
             console.log("Starting rendering of entites.");
-            renderEntityDisplay(currentEntities, entityIndex, pageIndex);
+            renderDayDisplay(newspaperDay, editionIndex, pageIndex);
         }).fail(function () {
             console.log("Failed to load entites");
             alert("Could not load entities");
@@ -220,7 +214,7 @@
     $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{page:int}', function () {
         // Display all months in a given year
         $("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
-        loadEntitiesForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
+        loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
     });
 
 

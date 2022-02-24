@@ -32,14 +32,15 @@ function noteSubmitHandler(event) {
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
-function initComponents(){
+
+function initComponents() {
     let $primary = $("#primary-show");
-    const $contentRow = $("<div/>",{class:"row",id:"contentRow"});
-    const $dayCol = $("<div/>",{id:"dayCol",class:"col"});
-    const $editionCol = $("<div/>",{id:"editionCol",class:"col"});
-    const $pageCol = $("<div/>",{id:"pageCol",class:"col"});
-    let $pageNavBtnToolbar = $("<div/>",{class:"btn-toolbar mb-2 mb-md-0"});
-    let $pageNav = $("<div/>",{class:"btn-group mr-2 d-flex justify-content-evenly flex-wrap",id:"page-nav"});
+    const $contentRow = $("<div/>", {class: "row", id: "contentRow"});
+    const $dayCol = $("<div/>", {id: "dayCol", class: "col"});
+    const $editionCol = $("<div/>", {id: "editionCol", class: "col"});
+    const $pageCol = $("<div/>", {id: "pageCol", class: "col"});
+    let $pageNavBtnToolbar = $("<div/>", {class: "btn-toolbar mb-2 mb-md-0"});
+    let $pageNav = $("<div/>", {class: "btn-group mr-2 d-flex justify-content-evenly flex-wrap", id: "page-nav"});
     $contentRow.append($dayCol);
     $contentRow.append($editionCol);
     $pageNavBtnToolbar.append($pageNav);
@@ -48,27 +49,31 @@ function initComponents(){
     $primary.append($contentRow);
 }
 
-function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
-    let $primary = $("#primary-show");
-    $primary.empty();
+function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
+    $("#primary-show").empty();
     initComponents();
-    const $contentRow = $("#contentRow");
+    $("#contentRow");
+
 
     const $dayCol = $("#dayCol");
+
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
     $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
-    $dayNotesForm.append($("<textarea/>", {class: "userNotes", id: "dayNotes", type: "text", name: "notes"}).text(newspaperDay.notes))
+    $dayNotesForm.append($("<textarea/>", {
+        class: "userNotes",
+        id: "dayNotes",
+        type: "text",
+        name: "notes"
+    }).text(newspaperDay.notes))
     $dayNotesForm.append($("<input/>", {
         id: "dayNotesFormSubmit",
         type: "submit",
         name: "submit",
         form: "dayNotesForm"
     }));
-
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batchid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.avisid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: newspaperDay.date}));
-
     $dayNotesForm.submit(noteSubmitHandler);
     $dayCol.append($dayNotesForm);
 
@@ -87,7 +92,7 @@ function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
     let editions = newspaperDay.editions;
     for (let i = 0; i < editions.length; i++) {
         const edition = editions[i];
-        if (i === currentEntityIndex) {
+        if (i === editionIndex) {
             let editionButton = $("<button/>", {
                 class: "btn btn-sm btn-outline-secondary active",
                 text: edition.edition
@@ -103,7 +108,7 @@ function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
         }
     }
     $("#edition-show").load("entityDisplay.html", function () {
-        var edition = editions[currentEntityIndex];
+        var edition = editions[editionIndex];
         if (edition.pages.length === 1) {
             renderSinglePage(edition.pages[0]);
         } else {
@@ -112,7 +117,12 @@ function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
 
         const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
         $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
-        $editionForm.append($("<textarea/>", {class: "userNotes", id: "editionNotes", type: "text", name: "notes"}).text(edition.notes))
+        $editionForm.append($("<textarea/>", {
+            class: "userNotes",
+            id: "editionNotes",
+            type: "text",
+            name: "notes"
+        }).text(edition.notes))
         $editionForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "editionNotesForm"}));
         $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
         $editionForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
@@ -129,14 +139,18 @@ function renderEntityDisplay(newspaperDay, currentEntityIndex, pageIndex) {
 
 function renderSinglePage(page) {
     let $pageDisplay = $("#primary-show");
-    let $infoDumpRow = $("<div/>",{class:"row"});
-    let $contentRow = $("#contentRow");
+
     const date = moment(page.editionDate).format("YYYY-MM-DD");
     const $pageCol = $("#pageCol");
 
     let $pageForm = $("<form/>", {id: "pageNotesForm", action: "", method: "post"});
     $pageForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
-    $pageForm.append($("<textarea/>", {class: "userNotes", id: "pageNotes", type: "text", name: "notes"}).text(page.notes));
+    $pageForm.append($("<textarea/>", {
+        class: "userNotes",
+        id: "pageNotes",
+        type: "text",
+        name: "notes"
+    }).text(page.notes));
     //TODO proper values for all fields
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
@@ -148,30 +162,29 @@ function renderSinglePage(page) {
     $pageForm.submit(noteSubmitHandler);
     $pageCol.append($pageForm);
 
-    let $fileAndProblemsCol = $("<div/>",{class:"col-8"});
+    let $contentRow = $("#contentRow");
+    $contentRow.append($pageCol);
 
-    let value = "<div>Vis fil: " + page.origRelpath + "<br> "
-    if (page.problems !== "") {
-        value += "Problems: <pre>" + JSON.stringify(
+    let $fileAndProblemsCol = $("<div/>", {class: "col-8"})
+        .append($("<p>").text("Vis fil: " + page.origRelpath));
+    if (page.problems) {
+        $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
             JSON.parse(page.problems),
             ['type', 'filereference', 'description'],
-            2) + "</pre>";
+            2))));
     }
-    value += "</div>"
-    $contentRow.append($pageCol);
-    $fileAndProblemsCol.append($(value));
+    let $infoDumpRow = $("<div/>", {class: "row"});
     $infoDumpRow.append($fileAndProblemsCol);
 
 
-    let $entityInfoCol = $("<div/>",{class:"col-4"});
-    let infoHtml = "Edition titel: " + page.editionTitle + "<br>";
-    infoHtml += "Section titel: " + page.sectionTitle + "<br>";
-    infoHtml += "Side nummer: " + page.pageNumber + "<br>";
-    infoHtml += "Enkelt side: " + page.singlePage + "<br>";
-    infoHtml += "Afleverings dato: " + moment(page.deliveryDate).format("YYYY-MM-DD") + "<br>";
-
-    infoHtml += "Udgivelses dato: " + date + "<br>";
-    infoHtml += "Format type: " + page.formatType + "<br>";
+    let $entityInfoCol = $("<div/>", {class: "col-4"});
+    let infoHtml = `Edition titel: ${page.editionTitle}<br>`;
+    infoHtml += `Section titel: ${page.sectionTitle}<br>`;
+    infoHtml += `Side nummer: ${page.pageNumber}<br>`;
+    infoHtml += `Enkelt side: ${page.singlePage}<br>`;
+    infoHtml += `Afleverings dato: ${moment(page.deliveryDate).format("YYYY-MM-DD")}<br>`;
+    infoHtml += `Udgivelses dato: ${date}<br>`;
+    infoHtml += `Format type: ${page.formatType}<br>`;
 
     $entityInfoCol.html(infoHtml);
     $infoDumpRow.append($entityInfoCol);
