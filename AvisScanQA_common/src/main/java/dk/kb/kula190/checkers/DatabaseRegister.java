@@ -79,7 +79,37 @@ public class DatabaseRegister extends DecoratedEventHandler {
 
         dataSource.setDriver(jdbcDriver);
     
-       
+    
+        try (Connection connection = dataSource.getConnection()) {
+      
+            try (PreparedStatement preparedStatement = connection.prepareStatement(
+                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, state) VALUES (?,?,?,?,?,?,?) "
+                    + "ON CONFLICT (batchid) DO UPDATE SET state = excluded.state")) {
+                int param = 1;
+                //Batch ID
+                preparedStatement.setString(param++, batchName.get());
+                //Avis ID
+                preparedStatement.setString(param++, avis);
+                // roundtrip
+                preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
+                //start date
+                preparedStatement.setDate(param++, Date.valueOf(startDate));
+                //end date
+                preparedStatement.setDate(param++, Date.valueOf(endDate));
+                //delivery date
+                preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
+                //state
+                //TODO fixed vocabulary here. Create an Enum
+                preparedStatement.setString(param++, "BEGUN");
+                
+                boolean result = preparedStatement.execute();
+            }
+            connection.commit();
+        
+        } catch (SQLException e) {
+            //TODO
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -100,7 +130,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
         
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, num_problems) VALUES (?,?,?,?,?,?,?,?,?) "
-                    + "ON CONFLICT (batchid) DO UPDATE SET problems = excluded.problems")) {
+                    + "ON CONFLICT (batchid) DO UPDATE SET problems = excluded.problems, num_problems=excluded.num_problems, state = excluded.state")) {
                 int param = 1;
                 //Batch ID
                 preparedStatement.setString(param++, batchName.get());
