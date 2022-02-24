@@ -208,6 +208,12 @@ Image:
         Pattern lineMatch = Pattern.compile("^( *)\\b(.+?):(:? (.+)|\\Z)$");
         result.append("{");
         for (String line : lines) {
+            if (line.startsWith("Image:")){
+                //Image magick version 6.9.10-86 uses this as first line
+                //Image: /avis-scanner-prod/_07-levering-fra-Ninestars/Shipment 2021-07-19/dybboelposten_18860101_18860630_RT1/TIFF/dybboelposten_18860102_udg01_1.sektion_0001.tif
+                //This is fixed in version 6.9.12-37
+                line = "Image:";
+            }
             line = line.stripTrailing();
             if (line.isEmpty()) {
                 continue;
