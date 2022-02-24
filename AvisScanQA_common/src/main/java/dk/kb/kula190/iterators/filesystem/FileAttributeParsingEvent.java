@@ -38,6 +38,7 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
     
     @Override
     public InputStream getData() throws IOException {
+        //TODO perhaps caching so not read multiple times?
         return new FileInputStream(file);
     }
     
@@ -47,6 +48,7 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
     
     @Override
     public String getChecksum() throws IOException {
+        //TODO caching so not read multiple times
         if (checksumFile != null) {
             try (BufferedReader reader = new BufferedReader(new FileReader(checksumFile))) {
                 String firstLine = reader.readLine();
