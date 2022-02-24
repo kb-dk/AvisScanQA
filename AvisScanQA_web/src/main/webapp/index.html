@@ -45,19 +45,7 @@
                 </h6>
                 <!-- TODO this should be a table with sorting and so on...-->
                 <body>
-                <table id="batchTable"
-                        data-toggle="table"
-                        data-url="api/batch"
-                        data-row-attributes="rowAttributes"
-                >
-                    <thead>
-                    <tr>
-                        <th data-sortable="true" data-field="batchid">Batch ID</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+
                 </body>
                 <!--<ul class="nav flex-column mb-2" id="batches"> -->
                 </ul>
@@ -68,6 +56,23 @@
             <div id="headline-div"></div>
             <div id="notice-div"></div>
             <div id="primary-show"></div>
+            <div id="batchOverview-div">
+                <table id="batchTable"
+                       data-toggle="table"
+                       data-url="api/batch"
+                       data-row-attributes="rowAttributes"
+                       data-row-style="rowStyling">
+                    <thead>
+                    <tr>
+                        <th data-sortable="true" data-field="batchid">Batch ID</th>
+                        <th data-sortable="true" data-field="deliveryDate">Delivery date</th>
+                        <th data-sortable="true" data-field="state">State</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
         </main>
     </div>
 </div>
@@ -94,6 +99,15 @@
     function rowAttributes(row, index) {
         return {
             'class': 'batches'
+        }
+    }
+    function rowStyling(row, index) {
+        return {
+            css:{
+                content:"#/batch/" + row.batchid+"/",
+                cursor: "pointer"
+
+            }
         }
     }
 
