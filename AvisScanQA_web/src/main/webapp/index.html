@@ -57,21 +57,7 @@
             <div id="notice-div"></div>
             <div id="primary-show"></div>
             <div id="batchOverview-div">
-                <table id="batchTable"
-                       data-toggle="table"
-                       data-url="api/batch"
-                       data-row-attributes="rowAttributes"
-                       data-row-style="rowStyling">
-                    <thead>
-                    <tr>
-                        <th data-sortable="true" data-field="batchid">Batch ID</th>
-                        <th data-sortable="true" data-field="deliveryDate">Delivery date</th>
-                        <th data-sortable="true" data-field="state">State</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    </tbody>
-                </table>
+
             </div>
         </main>
     </div>
@@ -124,7 +110,7 @@
                 year = parseInt(years.sort()[0]);
             }
             renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
-
+            renderBatchTable(avisID);
         });
     }
 
@@ -173,7 +159,7 @@
                 }
 
                 renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
-
+                renderBatchTable("test");
             });
     }
 
