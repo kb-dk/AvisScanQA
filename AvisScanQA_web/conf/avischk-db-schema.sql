@@ -7,7 +7,8 @@ CREATE TABLE batch
     end_date      DATE         NOT NULL,
     delivery_date DATE         NOT NULL,
     problems      TEXT         NOT NULL,
-    state         TEXT         NOT NULL
+    state         TEXT         NOT NULL,
+    num_problems  INTEGER      NOT NULL DEFAULT 0
 );
 
 

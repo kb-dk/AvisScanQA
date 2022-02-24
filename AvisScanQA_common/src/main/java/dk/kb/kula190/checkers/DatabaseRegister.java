@@ -21,18 +21,21 @@ import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+//Not multithreaded...
 public class DatabaseRegister extends DecoratedEventHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     private final Driver jdbcDriver;
     private final String jdbcURL;
     private final String jdbcUser;
     private final String jdbcPassword;
-    private final List<Failure> registeredFailures;
+    private final List<Failure> checkerFailures;
 
+    private final List<Failure>  registeredFailures;
     private BasicDataSource dataSource;
 
     public DatabaseRegister(ResultCollector resultCollector,
@@ -40,13 +43,14 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             String jdbcURL,
                             String jdbcUser,
                             String jdbcPassword,
-                            List<Failure> registeredFailures) {
+                            List<Failure> checkerFailures) {
         super(resultCollector);
-        this.jdbcDriver   = jdbcDriver;
-        this.jdbcURL      = jdbcURL;
-        this.jdbcUser     = jdbcUser;
-        this.jdbcPassword = jdbcPassword;
-        this.registeredFailures = registeredFailures;
+        this.jdbcDriver      = jdbcDriver;
+        this.jdbcURL         = jdbcURL;
+        this.jdbcUser        = jdbcUser;
+        this.jdbcPassword    = jdbcPassword;
+        this.checkerFailures = checkerFailures;
+        this.registeredFailures = new ArrayList<>();
     }
 
     @Override
@@ -75,15 +79,27 @@ public class DatabaseRegister extends DecoratedEventHandler {
 
         dataSource.setDriver(jdbcDriver);
     
+       
+    }
+
+    @Override
+    public void batchEnds(DecoratedNodeParsingEvent event,
+                          String avis,
+                          String roundTrip,
+                          LocalDate startDate,
+                          LocalDate endDate) throws IOException {
+    
         try (Connection connection = dataSource.getConnection()) {
     
-            //TODO only register the failures not related to files below...
-            String failuresMessage = registeredFailures.stream()
-                                                        .map(failure -> JSON.toJson(failure, false))
-                                                        .collect(Collectors.joining("\n"));
+            List<Failure> batchFailures = new ArrayList<>(checkerFailures);
+            batchFailures.removeAll(registeredFailures);
             
+            String failuresMessage = batchFailures.stream()
+                                                    .map(failure -> JSON.toJson(failure, false))
+                                                    .collect(Collectors.joining("\n"));
+        
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state) VALUES (?,?,?,?,?,?,?,?) "
+                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, num_problems) VALUES (?,?,?,?,?,?,?,?,?) "
                     + "ON CONFLICT (batchid) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //Batch ID
@@ -103,32 +119,27 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //state
                 //TODO fixed vocabulary here. Create an Enum
                 preparedStatement.setString(param++, "CHECKED");
-    
+                
+                preparedStatement.setInt(param++, checkerFailures.size());
+            
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-    
+        
         } catch (SQLException e) {
             //TODO
             throw new IOException(e);
-        }
-    }
-
-    @Override
-    public void batchEnds(DecoratedNodeParsingEvent event,
-                          String avis,
-                          String roundTrip,
-                          LocalDate startDate,
-                          LocalDate endDate) {
-        try {
-            if (dataSource != null) {
-                dataSource.close();
+        } finally {
+            try {
+                if (dataSource != null) {
+                    dataSource.close();
+                }
+        
+        
+            } catch (Exception e) {
+                // ignore errors during shutdown, we cant do anything about it anyway
+                log.error("shutdown failed", e);
             }
-
-
-        } catch (Exception e) {
-            // ignore errors during shutdown, we cant do anything about it anyway
-            log.error("shutdown failed", e);
         }
     }
 
@@ -148,9 +159,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        List<Failure> failuresForThisPage = registeredFailures.stream()
-                                                              .filter(failure -> matchThisPage(failure.getReference(),
+        List<Failure> failuresForThisPage = checkerFailures.stream()
+                                                           .filter(failure -> matchThisPage(failure.getReference(),
                                                                                                event)).toList();
+        registeredFailures.addAll(failuresForThisPage);
 
         String failuresMessage = failuresForThisPage.stream()
                                                     .map(failure -> JSON.toJson(failure, false))
