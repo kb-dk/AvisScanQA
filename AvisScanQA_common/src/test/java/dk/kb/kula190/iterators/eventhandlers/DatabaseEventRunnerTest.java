@@ -15,24 +15,19 @@ import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
 import dk.kb.kula190.generated.Failure;
-import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.common.TreeIterator;
+import dk.kb.util.yaml.YAML;
 import org.junit.jupiter.api.Test;
 import org.postgresql.Driver;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 class DatabaseEventRunnerTest {
     
     private final File
             specificBatch
             = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
-  
-    private TreeIterator iterator;
     
     
     @Test
@@ -72,6 +67,12 @@ class DatabaseEventRunnerTest {
         System.out.println(resultCollector.toReport());
     
         final List<Failure> failures = resultCollector.getFailures();
+        File configFolder = new File(Thread.currentThread()
+                                   .getContextClassLoader()
+                                   .getResource("dbconfig-public.yaml")
+                                   .toURI()).getParentFile();
+        YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
+        
         
         RunnableComponent databaseComponent = new RunnableComponent() {
             @Override
@@ -80,9 +81,9 @@ class DatabaseEventRunnerTest {
 
                         new DatabaseRegister(resultCollector,
                                              new Driver(),
-                                             "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel",
-                                             "avisscqa",
-                                             "",
+                                             dbConfig.getString("jdbc.jdbc-connection-string"),
+                                             dbConfig.getString("jdbc.jdbc-user"),
+                                             dbConfig.getString("jdbc.jdbc-password"),
                                              failures)
                               );
             }
