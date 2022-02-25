@@ -1,3 +1,24 @@
+
+
+
+function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
+    var day = moment(date).format('YYYY-MM-DD');
+    var url = `api/batch/${batchID}/${avisID}/${day}`
+    $.getJSON(url, {}, function (newspaperDay) {
+        $("#headline-div").empty().append($("<h1>").text(`Editions for ${avisID} on ${day}`));
+        $("#notice-div").empty();
+        $("#batchOverview-table").empty();
+        console.log("Starting rendering of entites.");
+        renderDayDisplay(newspaperDay, editionIndex, pageIndex);
+    }).fail(function () {
+        console.log("Failed to load entites");
+        alert("Could not load entities");
+    });
+}
+
+
+
+
 function noteSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 

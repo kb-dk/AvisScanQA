@@ -103,101 +103,6 @@
 
 <script>
 
-
-
-    /**
-     * @param {string} avisID
-     * @param {int} year
-     */
-    function loadYearsForNewspaper(avisID, year) {
-        const url = `api/years/${avisID}`;
-        $.getJSON(url, {}, function (years) {
-            $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
-            $("#notice-div").empty();
-            if (year === 0){
-                year = parseInt(years.sort()[0]);
-            }
-            renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
-            renderBatchTable(avisID);
-        });
-    }
-
-    /**
-     *
-     * @param {int} start
-     * @param {int} end
-     * @returns {Generator<int, void, int>}
-     */
-    function* range(start, end) {
-        for (let i = start; i <= end; i++) {
-            yield i;
-        }
-    }
-
-    /**
-     *
-     * @param {string} batchID
-     */
-    function loadBatchForNewspaper(batchID) {
-        let url = `api/batch/${batchID}`;
-        $.getJSON(url, {},
-            function (batch) {
-                let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
-                let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
-
-                let currentNewspaperYear = fromYEAR;
-
-                let newspaperYears = range(fromYEAR, toYEAR);
-
-                $("#headline-div").empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
-
-
-                if (batch.numProblems > 0) {
-                    let $notice = $("#notice-div").empty();
-
-                    $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
-
-                    if (batch.problems) {
-                        $notice
-                            .append($("<p>").text("Batch Problems:")
-                            .append("<pre/>").text(JSON.stringify(JSON.parse(batch.problems),
-                                ['type', 'filereference', 'description'],
-                                2)));
-                    }
-                }
-
-                renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
-                renderBatchTable(batch.avisid);
-            });
-    }
-
-
-    function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
-        var day = moment(date).format('YYYY-MM-DD');
-        var url = `api/batch/${batchID}/${avisID}/${day}`
-        $.getJSON(url, {}, function (newspaperDay) {
-            $("#headline-div").empty().append($("<h1>").text(`Editions for ${avisID} on ${day}`));
-            $("#notice-div").empty();
-            $("#batchOverview-table").empty();
-            console.log("Starting rendering of entites.");
-            renderDayDisplay(newspaperDay, editionIndex, pageIndex);
-        }).fail(function () {
-            console.log("Failed to load entites");
-            alert("Could not load entities");
-        });
-    }
-
-
-    function loadNewspaperIDs() {
-        $.getJSON('api/newspaperIDs', {}, function (newspaperIDs) {
-            for (const newspaperID of newspaperIDs) {
-                $("#avisIDer").append(
-                    "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
-            }
-        });
-    }
-
-
     $.routes.add('/dashboard/', function () {
         // Dashboard
         $("#headline-div").empty();
@@ -205,14 +110,11 @@
         // $("#batchOverview-table").empty();
         $("#primary-show").html("Vælg avis i menuen til venstre");
         renderBatchTable();
-
-
     });
 
     $.routes.add('/newspaper/{id:string}/{year:int}', function () {
         // Display all years
         $("#primary-show").html("Indlæser datoer for: " + this.id + " i år: " + this.year);
-
         loadYearsForNewspaper(this.id, this.year);
     });
 
@@ -222,18 +124,14 @@
         loadBatchForNewspaper(this.id);
     });
 
-
     $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{page:int}', function () {
         // Display all months in a given year
         $("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
         loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
     });
 
-
     $(document).ready(function () {
-
         moment.locale("da");
-        // load newspaper IDs
         loadNewspaperIDs();
     });
 </script>

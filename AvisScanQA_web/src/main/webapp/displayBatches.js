@@ -1,5 +1,52 @@
 
 
+function loadBatchForNewspaper(batchID) {
+    let url = `api/batch/${batchID}`;
+    $.getJSON(url, {},
+        function (batch) {
+            let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
+            let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
+
+            let currentNewspaperYear = fromYEAR;
+
+            let newspaperYears = range(fromYEAR, toYEAR);
+
+            $("#headline-div").empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
+
+
+            if (batch.numProblems > 0) {
+                let $notice = $("#notice-div").empty();
+
+                $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
+
+                if (batch.problems) {
+                    $notice
+                        .append($("<p>").text("Batch Problems:")
+                            .append("<pre/>").text(JSON.stringify(JSON.parse(batch.problems),
+                                ['type', 'filereference', 'description'],
+                                2)));
+                }
+            }
+
+            renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
+            renderBatchTable(batch.avisid);
+        });
+}
+
+
+/**
+ *
+ * @param {int} start
+ * @param {int} end
+ * @returns {Generator<int, void, int>}
+ */
+function* range(start, end) {
+    for (let i = start; i <= end; i++) {
+        yield i;
+    }
+}
+
+
 function renderBatchTable(filter) {
     let $table = $("#batchOverview-table");
 

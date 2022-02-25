@@ -1,4 +1,25 @@
-var datesInYear;
+function loadNewspaperIDs() {
+    $.getJSON('api/newspaperIDs', {}, function (newspaperIDs) {
+        for (const newspaperID of newspaperIDs) {
+            $("#avisIDer").append(
+                "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
+        }
+    });
+}
+
+
+function loadYearsForNewspaper(avisID, year) {
+    const url = `api/years/${avisID}`;
+    $.getJSON(url, {}, function (years) {
+        $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
+        $("#notice-div").empty();
+        if (year === 0){
+            year = parseInt(years.sort()[0]);
+        }
+        renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
+        renderBatchTable(avisID);
+    });
+}
 
 /**
  * @param {iterable<int>} years array of years to render (either Generator<int, void, int> or int[])
@@ -23,26 +44,17 @@ function renderNewspaperForYear(years, currentyear, url) {
     $primary.append(yearShow);
 
     for (const year of years) {
-        if (year == currentyear) { //== cannot be replaced with === as types differ....
-            const button = $("<button/>", {
-                class: 'btn btn-sm btn-outline-secondary active',
-                text: year
-            });
-            $("#year-nav").append(button);
-        } else {
-            const link = $("<a/>", {
-                href: editYearIndexInHash(location.hash, year),
-                class: 'btn btn-sm btn-outline-secondary',
-                text: year
-            });
-            $("#year-nav").append(link);
-        }
+        const link = $("<a/>").attr({
+            href: editYearIndexInHash(location.hash, year),
+            class: `btn btn-sm btn-outline-secondary ${(year == currentyear ? "active" : "")}`,
+        }).text(year);
+        $("#year-nav").append(link);
     }
 
     //See dk.kb.kula190.api.impl.DefaultApiServiceImpl.getDatesForNewspaperYear
     // var url = 'api/dates/' + newspaper + '/' + currentyear;
     $.getJSON(url, {}, function (dates) {
-        datesInYear = splitDatesIntoMonths(dates);
+        let datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
                 const calElem = "#month" + i;
@@ -207,6 +219,5 @@ function splitDatesIntoMonths(dates) {
 function editYearIndexInHash(origHash, newIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newIndex; // there's an empty place..
-    let newHash = hashParts.join("/");
-    return newHash;
+    return hashParts.join("/");
 }
