@@ -17,8 +17,6 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
 }
 
 
-
-
 function noteSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 

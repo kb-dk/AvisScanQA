@@ -12,7 +12,11 @@ function loadBatchForNewspaper(batchID) {
             let newspaperYears = range(fromYEAR, toYEAR);
 
             $("#headline-div").empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
-
+            let confirmForm = $("<form/>",{id:"confirmForm",action:"",method:"post"});
+            confirmForm.append($("<input/>",{type: "hidden",name:"state",value:"APPROVED"}));
+            confirmForm.append($("<input/>",{type:"submit",name:"submit",form:"confirmForm",class:"btn btn-success"}));
+            confirmForm.submit(stateSubmitHandler);
+            $("#headline-div").append(confirmForm)
 
             if (batch.numProblems > 0) {
                 let $notice = $("#notice-div").empty();
@@ -107,6 +111,36 @@ function renderBatchTable(filter) {
     }console.log($table.data());
 
 
+}
+function stateSubmitHandler(event) {
+    event.preventDefault(); // <- cancel event
+
+    const data = new FormData(event.target);
+    console.log(data)
+    let parts = ["api", "batch",data.get('batch')]
+    var query = new URLSearchParams();
+
+    query.append("avis", data.get('state'));
+
+    // let url = parts.filter(x => x).join("/")
+    let url = parts.join("/") + "?" + query.toString();
+
+    console.log(url)
+    const notes = data.get('state');
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: notes,
+        success: function () {
+            alert("Batch has been accepted")
+        },
+        dataType: "json",
+        contentType: "application/json"
+    });
+
+    // alert('Handler for .submit() called.');
+    return false;  // <- cancel event
 }
 
 
