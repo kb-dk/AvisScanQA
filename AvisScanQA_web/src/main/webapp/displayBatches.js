@@ -56,7 +56,11 @@ function renderBatchTable(filter) {
         columns: [{
             title: 'BatchID',
             field: 'batchid',
-            formatter: linkFormatter,
+            formatter: function (value, row) {
+                // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
+                return "<a href='#/batch/" + value + "/'>" + value + "</a>";
+
+            },
             sortable: true,
             filterControl:"input"
         }, {
@@ -100,16 +104,9 @@ function renderBatchTable(filter) {
         })
     } else {
         $table.bootstrapTable('filterBy', {})
-    }
-    // $table.show();
-    console.log($table.data());
+    }console.log($table.data());
 
 
 }
 
 
-function linkFormatter(value, row) {
-    // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
-    return "<a href='#/batch/" + value + "/'>" + value + "</a>";
-
-}
