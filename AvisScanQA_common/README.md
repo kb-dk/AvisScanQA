@@ -10,21 +10,5 @@ rsync -avL avisscqa@canopus:/home/avisscqa/data/avis-scanner-prod/_07-levering-f
 
 Set the path "/home/abr/Projects/AvisScanQA/data/modersmaalet_19060701_19061231_RT1" in `SimpleIteratorForFilesystemsTest` and run the tests
 
-TODO Patrick checkers:
 
-* impl xml schema-checkers
-* Tiff skal have en tilsvarende MIX og ALTO
-
-
-TODO lokal udgave af schemaer
-
-* DONE: script til at strippe section fra batch og fix løbenummer
-
-
-
-TODO Mix checks
-* filesize correct
-* checksum
-* objectIdentifierValue ref til korrekt tiff
-* height vs width?
 

@@ -10,13 +10,11 @@ import java.util.Properties;
 public class NewspaperQADaoFactory {
     private final static Logger log = LoggerFactory.getLogger(NewspaperQADaoFactory.class);
     
-    private static final String POSTGREQL_DB_DRIVER = "org.postgresql.Driver";
-    private static final String H2_DRIVER = "org.h2.Driver";
     private static boolean initialized = false;
     private static ComboPooledDataSource connectionPool;
     private static NewspaperQADao daoInstance = null;
     
-    public static synchronized void initialize(String jdbcConnectionString, String jdbcUser,
+    public static synchronized NewspaperQADao getDAOInstance(String jdbcConnectionString, String jdbcUser,
             String jdbcPassword, String driver) throws PropertyVetoException {
         if(! initialized) {
             log.info("Initializing NewspaperQADaoFactory");
@@ -33,19 +31,10 @@ public class NewspaperQADaoFactory {
             connectionPool.setUser(jdbcUser);
             connectionPool.setPassword(jdbcPassword);
         }
-    }
-    
-    public static synchronized NewspaperQADao getInstance() {
-        if(! initialized) {
-            throw new RuntimeException("NewspaperQADaoFactory has not been initialized");
-        }
-        
         if(daoInstance == null) {
             daoInstance = new NewspaperQADao(connectionPool);
         }
-        
         return daoInstance;
     }
-    
     
 }

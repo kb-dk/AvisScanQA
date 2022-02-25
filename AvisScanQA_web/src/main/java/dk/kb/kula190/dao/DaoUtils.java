@@ -33,4 +33,27 @@ public class DaoUtils {
         }
         return param;
     }
+    
+    public static LocalDate nullableDate(String date) {
+        date = nullable(date);
+        if (date != null) {
+            return LocalDate.parse(date);
+        }
+        return null;
+    }
+    
+    public static Integer nullableInteger(String integer) {
+        integer = nullable(integer);
+        if (integer != null) {
+            return Integer.parseInt(integer);
+        }
+        return null;
+    }
+    
+    public static String nullable(String value) {
+        if (value == null || value.isBlank() || value.equalsIgnoreCase("null")) {
+            return null;
+        }
+        return value;
+    }
 }

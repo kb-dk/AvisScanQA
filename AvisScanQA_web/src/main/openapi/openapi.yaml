@@ -356,6 +356,8 @@ components:
           type: string
         origRelpath:
           type: string
+        origFullPath:
+          type: string
         formatType:
           type: string
         editionDate:

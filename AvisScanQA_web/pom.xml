@@ -179,7 +179,6 @@
 
 
     <build>
-        <finalName>${project.artifactId}</finalName>
         <resources>
             <resource>
                 <directory>src/main/openapi</directory>
@@ -314,6 +313,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
                 <configuration>
+                    <warName>${project.artifactId}</warName>
                     <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
                     <archive>
                         <manifest>

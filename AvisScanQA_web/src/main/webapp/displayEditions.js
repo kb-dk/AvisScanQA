@@ -1,6 +1,3 @@
-
-
-
 function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
     var day = moment(date).format('YYYY-MM-DD');
     var url = `api/batch/${batchID}/${avisID}/${day}`
@@ -15,8 +12,6 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
         alert("Could not load entities");
     });
 }
-
-
 
 
 function noteSubmitHandler(event) {
@@ -119,7 +114,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         }).text(edition.edition);
         $editionNav.append(link);
     }
-    $("#edition-show").load("entityDisplay.html", function () {
+    $("#edition-show").load("editionDisplay.html", function () {
         var edition = editions[editionIndex];
         if (edition.pages.length === 1) {
             renderSinglePage(edition.pages[0]);
@@ -178,7 +173,15 @@ function renderSinglePage(page) {
     $contentRow.append($pageCol);
 
     let $fileAndProblemsCol = $("<div/>", {class: "col-8"})
-        .append($("<a>").text("Vis fil: " + page.origRelpath));
+        .append(
+            $("<p>")
+                .text("Vis fil: ")
+                .append($("<a>", {
+                    href: page.origFullPath,
+                    target: "_new"
+                }).text(page.origRelpath)));
+
+
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
             JSON.parse(page.problems),

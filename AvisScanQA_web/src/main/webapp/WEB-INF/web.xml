@@ -32,10 +32,6 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
-    <listener>
-        <listener-class>dk.kb.kula190.webservice.ContextListener</listener-class>
-    </listener>
-
 
 </web-app>
 

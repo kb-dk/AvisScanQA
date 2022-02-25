@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.net.URI;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -317,7 +318,10 @@ public class NewspaperQADao {
                         .collect(Collectors.toList());
     }
     
-    public NewspaperDay getNewspaperEditions(String batchID, String newspaperID, LocalDate date)
+    public NewspaperDay getNewspaperEditions(String batchID,
+                                             String newspaperID,
+                                             LocalDate date,
+                                             URI batchesFolder)
             throws DAOFailureException {
         //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
         
@@ -336,7 +340,8 @@ public class NewspaperQADao {
             Map<String, NewspaperEdition> pages = getPages(batchID,
                                                            newspaperID,
                                                            date,
-                                                           conn);
+                                                           conn,
+                                                           batchesFolder);
             
             Map<String, String> editionNotes = getEditionNotes(batchID, newspaperID, date, conn);
             pages.forEach((key, value) -> value.setNotes(editionNotes.get(key)));
@@ -378,10 +383,11 @@ public class NewspaperQADao {
     private Map<String, NewspaperEdition> getPages(String batchID,
                                                    String newspaperID,
                                                    LocalDate date,
-                                                   Connection conn) throws SQLException {
+                                                   Connection conn,
+                                                   URI batchesFolder) throws SQLException {
         Map<String, NewspaperEdition> editions = new HashMap<>();
         try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT orig_relpath, format_type, p.edition_date, single_page, p.page_number, p.avisid, avistitle, shadow_path, p.section_title, p.edition_title, delivery_date, handle, side_label, fraktur, problems, p.batchid, notes "
+                "SELECT orig_relpath, format_type, p.edition_date, single_page, p.page_number, p.avisid, avistitle, shadow_path, p.section_title, p.edition_title, delivery_date, handle, side_label, fraktur, problems, p.batchid, n.notes "
                 + " FROM newspaperarchive as p "
                 + " left join notes as n on "
                 + " p.batchid = n.batchid and "
@@ -412,23 +418,36 @@ public class NewspaperQADao {
                     }
                     
                     NewspaperEntity entity = new NewspaperEntity();
+                    
+                    //Paths
                     entity.setOrigRelpath(res.getString("orig_relpath"));
+                    entity.setShadowPath(res.getString("shadow_path"));
+    
+                    entity.setOrigFullPath(batchesFolder.resolve(entity.getOrigRelpath()).toString());
+                    
                     entity.setFormatType(res.getString("format_type"));
-                    entity.setEditionDate(res.getDate("edition_date").toLocalDate());
-                    entity.setSinglePage(res.getBoolean("single_page"));
-                    entity.setPageNumber(res.getInt("page_number"));
+                    
+                    
+                    // Identification
                     entity.setBatchid(batchID);
                     entity.setAvisid(res.getString("avisid"));
                     entity.setAvistitle(res.getString("avistitle"));
-                    entity.setShadowPath(res.getString("shadow_path"));
-                    entity.setSectionTitle(res.getString("section_title"));
-                    
+                    entity.setEditionDate(res.getDate("edition_date").toLocalDate());
                     entity.setEditionTitle(edition_title);
+                    entity.setSectionTitle(res.getString("section_title"));
+                    entity.setPageNumber(res.getInt("page_number"));
+                    
+                    
                     entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
+                    
                     entity.setHandle(res.getLong("handle"));
+                    
+                    entity.setSinglePage(res.getBoolean("single_page"));
                     entity.setFraktur(res.getBoolean("fraktur"));
+                    
                     entity.setProblems(res.getString("problems"));
                     entity.setNotes(res.getString("notes"));
+                    
                     edition.addPagesItem(entity);
                     
                 }
