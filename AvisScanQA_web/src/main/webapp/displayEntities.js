@@ -227,21 +227,89 @@ function editPageIndexInHash(origHash, newPageIndex) {
     return newHash;
 }
 
-function renderBatchTable(filter =""){
-    let $tableDiv = $("#batchOverview-div");
 
-    $tableDiv.load("batchTable.html",function (){
 
+
+
+function renderBatchTable(filter) {
+    let $table = $("#batchOverview-table");
+
+    // alert($table.length);
+
+    $table.bootstrapTable({
+        url: "api/batch",
+        'data-row-attributes': "rowAttributes",
+        'data-row-style': "rowStyling",
+        filterControl:true,
+        columns: [{
+            title: 'BatchID',
+            field: 'batchid',
+            formatter: linkFormatter,
+            sortable: true,
+            filterControl:"input"
+        }, {
+            title: 'Delivery Date',
+            field: 'deliveryDate',
+            sortable: true,
+            filterControl:"datepicker",
+            "filterDatepickerOptions": {
+                format: 'yyyy-mm-dd',
+                autoclose: 'true',
+                todayHighlight: 'true',
+                "keyboardNavigation": 'true',
+                "clearBtn":true
+            }
+        }, {
+            title: 'State',
+            field: 'state',
+            sortable: true,
+            filterControl:"select"
+        }, {
+            title: 'Problem Count',
+            field: 'numProblems',
+            sortable: true,
+            filterControl:"input"
+        }]
     })
-    let $table = $("#batchTable")
-    console.log($table.data());
+
     $table.bootstrapTable('refreshOptions', {
         filterOptions: {
             filterAlgorithm: 'or'
         }
     })
-    $table.bootstrapTable('filterBy', {
-        state:filter
-    })
+
+    //TODO filter on state.
+    //TODO vocabulary for state
+    if (filter != null) {
+        $table.bootstrapTable('filterBy', {
+            avisid: filter
+        })
+    } else {
+        $table.bootstrapTable('filterBy', {})
+    }
+    // $table.show();
     console.log($table.data());
+
+
+}
+
+function rowAttributes(row, index) {
+    return {
+        'class': 'batches'
+    }
+}
+
+function rowStyling(row, index) {
+    return {
+        css: {
+            content: "#/batch/" + row.batchid + "/",
+            cursor: "pointer"
+        }
+    }
+}
+
+function linkFormatter(value, row) {
+    // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
+    return "<a href='#/batch/" + value + "/'>" + value + "</a>";
+
 }
