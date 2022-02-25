@@ -92,20 +92,11 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     let editions = newspaperDay.editions;
     for (let i = 0; i < editions.length; i++) {
         const edition = editions[i];
-        if (i === editionIndex) {
-            let editionButton = $("<button/>", {
-                class: "btn btn-sm btn-outline-secondary active",
-                text: edition.edition
-            });
-            $editionNav.append(editionButton);
-        } else {
-            const otherEditionLink = $("<a/>").attr({
-                href: editEntityIndexInHash(location.hash, i),
-                class: 'btn btn-sm btn-outline-secondary',
-                text: edition
-            });
-            $editionNav.append(otherEditionLink);
-        }
+        const link = $("<a/>").attr({
+            href: editEntityIndexInHash(location.hash, i),
+            class: `btn btn-sm btn-outline-secondary ${(i === editionIndex ? "active" : "")}`,
+        }).text(edition.edition);
+        $editionNav.append(link);
     }
     $("#edition-show").load("entityDisplay.html", function () {
         var edition = editions[editionIndex];
@@ -197,16 +188,11 @@ function renderEdition(entity, pageIndex) {
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
     for (var i = 0; i < pages.length; i++) {
-        if (i === pageIndex) {
-            const button = $("<button/>").attr({class: 'btn btn-sm btn-outline-secondary active'}).text(i + 1);
-            $pageNav.append(button);
-        } else {
-            const link = $("<a/>").attr({
-                href: editPageIndexInHash(location.hash, i),
-                class: 'btn btn-sm btn-outline-secondary'
-            }).text(i + 1);
-            $pageNav.append(link);
-        }
+        const link = $("<a/>").attr({
+            href: editPageIndexInHash(location.hash, i),
+            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")}`,
+        }).text(i + 1);
+        $pageNav.append(link);
     }
 
     renderSinglePage(pages[pageIndex]);
@@ -216,83 +202,14 @@ function renderEdition(entity, pageIndex) {
 function editEntityIndexInHash(origHash, newEntityIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 3] = newEntityIndex;
-    var newHash = hashParts.join("/");
-    return newHash;
+    return hashParts.join("/");
 }
 
 function editPageIndexInHash(origHash, newPageIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newPageIndex;
-    var newHash = hashParts.join("/");
-    return newHash;
+    return hashParts.join("/");
 }
 
 
 
-
-
-function renderBatchTable(filter) {
-    let $table = $("#batchOverview-table");
-
-    $table.bootstrapTable({
-        url: "api/batch",
-        filterControl:true,
-        columns: [{
-            title: 'BatchID',
-            field: 'batchid',
-            formatter: linkFormatter,
-            sortable: true,
-            filterControl:"input"
-        }, {
-            title: 'Delivery Date',
-            field: 'deliveryDate',
-            sortable: true,
-            filterControl:"datepicker",
-            "filterDatepickerOptions": {
-                //Some of these appears to HAVE to be in " to be picked up...
-                //https://bootstrap-datepicker.readthedocs.io/en/stable/options.html
-                format: 'yyyy-mm-dd',
-                autoclose: 'true',
-                todayHighlight: 'true',
-                "keyboardNavigation": 'true',
-                "clearBtn":true
-            }
-        }, {
-            title: 'State',
-            field: 'state',
-            sortable: true,
-            filterControl:"select"
-        }, {
-            title: 'Problem Count',
-            field: 'numProblems',
-            sortable: true,
-            filterControl:"input"
-        }]
-    })
-
-    $table.bootstrapTable('refreshOptions', {
-        filterOptions: {
-            filterAlgorithm: 'or'
-        }
-    })
-
-    if (filter != null) {
-        //If we view a certain batch or newspaper, we only want batches from the same newspaper
-        $table.bootstrapTable('filterBy', {
-            avisid: filter
-        })
-    } else {
-        $table.bootstrapTable('filterBy', {})
-    }
-    // $table.show();
-    console.log($table.data());
-
-
-}
-
-
-function linkFormatter(value, row) {
-    // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
-    return "<a href='#/batch/" + value + "/'>" + value + "</a>";
-
-}
