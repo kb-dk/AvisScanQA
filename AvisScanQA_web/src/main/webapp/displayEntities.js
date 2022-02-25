@@ -234,12 +234,8 @@ function editPageIndexInHash(origHash, newPageIndex) {
 function renderBatchTable(filter) {
     let $table = $("#batchOverview-table");
 
-    // alert($table.length);
-
     $table.bootstrapTable({
         url: "api/batch",
-        'data-row-attributes': "rowAttributes",
-        'data-row-style': "rowStyling",
         filterControl:true,
         columns: [{
             title: 'BatchID',
@@ -253,6 +249,8 @@ function renderBatchTable(filter) {
             sortable: true,
             filterControl:"datepicker",
             "filterDatepickerOptions": {
+                //Some of these appears to HAVE to be in " to be picked up...
+                //https://bootstrap-datepicker.readthedocs.io/en/stable/options.html
                 format: 'yyyy-mm-dd',
                 autoclose: 'true',
                 todayHighlight: 'true',
@@ -278,9 +276,8 @@ function renderBatchTable(filter) {
         }
     })
 
-    //TODO filter on state.
-    //TODO vocabulary for state
     if (filter != null) {
+        //If we view a certain batch or newspaper, we only want batches from the same newspaper
         $table.bootstrapTable('filterBy', {
             avisid: filter
         })
@@ -293,20 +290,6 @@ function renderBatchTable(filter) {
 
 }
 
-function rowAttributes(row, index) {
-    return {
-        'class': 'batches'
-    }
-}
-
-function rowStyling(row, index) {
-    return {
-        css: {
-            content: "#/batch/" + row.batchid + "/",
-            cursor: "pointer"
-        }
-    }
-}
 
 function linkFormatter(value, row) {
     // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
