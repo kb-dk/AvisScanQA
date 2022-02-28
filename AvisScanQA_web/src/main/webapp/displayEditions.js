@@ -179,8 +179,7 @@ function renderSinglePage(page) {
                 .append($("<a>", {
                     href: page.origFullPath,
                     target: "_new"
-                }).text(page.origRelpath)));
-
+                }).append($("<img/>",{ src:page.origFullPath, alt: page.origRelpath}))));
 
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
