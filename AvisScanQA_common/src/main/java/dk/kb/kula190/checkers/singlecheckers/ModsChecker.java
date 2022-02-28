@@ -30,14 +30,16 @@ public class ModsChecker extends DecoratedEventHandler {
                          LocalDate endDate) throws IOException {
         Document document = EventHandlerUtils.handleDocument(event);
         XPathSelector xpath = XpathUtils.createXPathSelector("mix", "https://www.loc.gov/standards/mods/v3");
-        String digitalOrigin = xpath.selectString(document, "/mods/physicalDescription/digitalOrigin");
-        String internetMediaType1 = xpath.selectString(document, "/mods/physicalDescription/internetMediaType[1]");
-        String internetMediaType2 = xpath.selectString(document, "/mods/physicalDescription/internetMediaType[2]");
-        String form = xpath.selectString(document, "/mods/physicalDescription/form");
+        String digitalOrigin = xpath.selectString(document, "/mods/physicalDescription/digitalOrigin/text()");
+        String internetMediaType1 = xpath.selectString(document, "/mods/physicalDescription/internetMediaType[1]/text()");
+        String internetMediaType2 = xpath.selectString(document, "/mods/physicalDescription/internetMediaType[2]/text()");
+        String form = xpath.selectString(document, "/mods/physicalDescription/form/text()");
         String dateIssuedStart = xpath.selectString(document,"/mods/originInfo/dateIssued[1]/text()");
         String temporalStart = xpath.selectString(document,"/mods/subject/temporal[1]/text()");
         String dateIssuedEnd = xpath.selectString(document,"/mods/originInfo/dateIssued[2]/text()");
         String temporalEnd = xpath.selectString(document,"/mods/subject/temporal[2]/text()");
+        String titleFamily = xpath.selectString(document,"/mods/identifier[3]/text()");
+        String title = event.getName().split("_")[0];
 
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
@@ -73,6 +75,12 @@ public class ModsChecker extends DecoratedEventHandler {
                     "Mods end dates do not match date issued: {actual}, temporal: {expected}",
                     dateIssuedEnd,
                     temporalEnd);
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods file family was incorrect should have been {expected} but was {actual}",
+                    titleFamily,
+                    title);
+
     }
 
 }

@@ -9,11 +9,7 @@ import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
-import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
-import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
-import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
+import dk.kb.kula190.checkers.singlecheckers.*;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.common.TreeIterator;
 import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
@@ -55,7 +51,7 @@ class MultiThreadedEventRunnerTest {
                         new TiffChecker(resultCollector),
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
-                        
+                        new ModsChecker(resultCollector),
                         //CrossCheckers
                         new XpathCrossChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
