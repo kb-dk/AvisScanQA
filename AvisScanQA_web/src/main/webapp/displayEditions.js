@@ -180,7 +180,14 @@ function renderSinglePage(page) {
                 .append($("<a>", {
                     href: page.origFullPath,
                     target: "_new"
-                }).append($("<img/>",{ src:page.origFullPath, alt: page.origRelpath}))));
+                }).append($("<embed/>", {
+                    width: 400,
+                    height: 400,
+                    src: page.origFullPath,
+                    alt: page.origRelpath,
+                    type: "image/tiff",
+                    negative: "yes"
+                }))));
 
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
