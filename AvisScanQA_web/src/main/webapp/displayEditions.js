@@ -174,20 +174,6 @@ function renderSinglePage(page) {
     $contentRow.append($pageCol);
 
     let $fileAndProblemsCol = $("<div/>", {class: "col-8"})
-        .append(
-            $("<p>")
-                .text("Vis fil: ")
-                .append($("<a>", {
-                    href: page.origFullPath,
-                    target: "_new"
-                }).append($("<embed/>", {
-                    width: 400,
-                    height: 400,
-                    src: page.origFullPath,
-                    alt: page.origRelpath,
-                    type: "image/tiff",
-                    negative: "yes"
-                }))));
 
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(
@@ -195,6 +181,9 @@ function renderSinglePage(page) {
             ['type', 'filereference', 'description'],
             2))));
     }
+
+    loadImage(page.origRelpath, $fileAndProblemsCol);
+
     let $infoDumpRow = $("<div/>", {class: "row"});
     $infoDumpRow.append($fileAndProblemsCol);
 
@@ -212,6 +201,39 @@ function renderSinglePage(page) {
     $infoDumpRow.append($entityInfoCol);
     $pageDisplay.append($infoDumpRow);
 
+
+}
+
+
+function loadImage(filename, element) {
+    let result = $("<div>");
+    element.append(result);
+    const url = "api/file/?file="+filename;
+    return $.ajax({
+        type: "GET",
+        url: url,
+        xhrFields: { responseType: 'arraybuffer'},
+        beforeSend: function(){
+            result.text(`Loading Page`);
+        },
+        success: function (data) {
+            var tiff = new Tiff({buffer: data});
+            var width = tiff.width();
+            var height = tiff.height();
+            var canvas = tiff.toCanvas();
+            if (canvas) {
+                canvas.setAttribute('style', `width:100%;` );
+                canvas.download = filename;
+                canvas.title = filename;
+                canvas.filename = filename;
+                result.empty().append($("<a>", {href: url}).text(filename)).append(canvas);
+            }
+        },
+        error: function (jqXHR, errorType, exception) {
+            result.empty().text(`Failed to read file ${filename}`);
+        }
+
+    });
 
 }
 

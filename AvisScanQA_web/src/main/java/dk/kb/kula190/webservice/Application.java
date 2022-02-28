@@ -1,6 +1,5 @@
 package dk.kb.kula190.webservice;
 
-import com.ctc.wstx.shaded.msv_core.util.Uri;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.jaxrs.json.JacksonJaxbJsonProvider;
@@ -9,23 +8,15 @@ import dk.kb.kula190.dao.NewspaperQADao;
 import dk.kb.kula190.dao.NewspaperQADaoFactory;
 import dk.kb.util.yaml.NotFoundException;
 import dk.kb.util.yaml.YAML;
+import org.apache.commons.text.StringSubstitutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.util.UriEncoder;
 
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.UriBuilder;
 import java.beans.PropertyVetoException;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +35,7 @@ public class Application extends javax.ws.rs.core.Application {
         
         try {
             InitialContext ctx = new InitialContext();
-            configFile = (String) ctx.lookup("java:/comp/env/application-config");
+            configFile    = (String) ctx.lookup("java:/comp/env/application-config");
             serviceConfig = YAML.resolveLayeredConfigs(configFile);
         } catch (IOException | NamingException e) {
             throw new RuntimeException("Failed to lookup settings", e);
@@ -57,17 +48,16 @@ public class Application extends javax.ws.rs.core.Application {
         } catch (PropertyVetoException e) {
             throw new RuntimeException("Database connection driver issue", e);
         }
-    
-            batchesFolder = getConfigString("avischk-web-qa.batchesFolder");
-       
+        batchesFolder = StringSubstitutor.replace(getConfigString("avischk-web-qa.batchesFolder"), System.getenv());
+        
     }
     
     
     private String getConfigString(String path) {
         try {
             return serviceConfig.getString(path);
-        } catch (NotFoundException e){
-            throw new NotFoundException("Failed to get value from configs "+configFile, path, e );
+        } catch (NotFoundException e) {
+            throw new NotFoundException("Failed to get value from configs " + configFile, path, e);
         }
     }
     
@@ -101,6 +91,5 @@ public class Application extends javax.ws.rs.core.Application {
     }
     
     
-
 }
 

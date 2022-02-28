@@ -17,6 +17,27 @@ servers:
     description: "Current server"
 
 paths:
+  /file/:
+    get:
+      operationId: getTiffFile
+      x-streamingOutput: true # If enabled the method will return StreamingOutput.
+      parameters:
+        - name: file
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A pdf with attached page
+          content:
+            image/tif:
+              schema:
+                type: string
+                format: binary
+
+
+
   /newspaperIDs:
     get:
       operationId: getNewspaperIDs

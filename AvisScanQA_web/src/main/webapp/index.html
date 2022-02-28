@@ -98,10 +98,12 @@
 <script src="jquery.routes.js"></script>
 <script src="moment.locale.js"></script>
 
-<script src="openseadragon/openseadragon.min.js"></script>
 <script src="displayBatches.js"></script>
 <script src="displayEditions.js"></script>
 <script src="displayNewspapers.js"></script>
+
+<script src="libs/tiff.min.js"></script>
+
 
 <script>
 
@@ -139,6 +141,7 @@
 
     $(document).ready(function () {
         moment.locale("da");
+        Tiff.initialize({TOTAL_MEMORY: 19777216 * 10});
         loadNewspaperIDs();
     });
 </script>
