@@ -200,7 +200,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
                            .stream()
                            .filter(batch -> batch.getBatchid().equals(batchID))
                            .findFirst()
-                           .orElse(null);
+                           .orElseThrow(() -> new NotFoundServiceException("Batch " + batchID + " not found"));
         } catch (DAOFailureException e) {
             log.error("Could not get dates for newspaper ID {}", batchID);
             throw handleException(e);
