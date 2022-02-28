@@ -4,6 +4,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
     $.getJSON(url, {}, function (newspaperDay) {
         $("#headline-div").empty().append($("<h1>").text(`Editions for ${avisID} on ${day}`));
         $("#notice-div").empty();
+        $("#state-div").empty();
         $("#batchOverview-table").empty();
         console.log("Starting rendering of entites.");
         renderDayDisplay(newspaperDay, editionIndex, pageIndex);
