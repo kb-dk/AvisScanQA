@@ -35,7 +35,7 @@ public class Application extends javax.ws.rs.core.Application {
     private final Logger log = LoggerFactory.getLogger(getClass());
     
     private final YAML serviceConfig;
-    private final URI batchesFolder;
+    private final String batchesFolder;
     private final NewspaperQADao dao;
     private final String configFile;
     
@@ -58,7 +58,7 @@ public class Application extends javax.ws.rs.core.Application {
             throw new RuntimeException("Database connection driver issue", e);
         }
     
-            batchesFolder = URI.create(UriEncoder.encode(getConfigString("avischk-web-qa.batchesFolder")));
+            batchesFolder = getConfigString("avischk-web-qa.batchesFolder");
        
     }
     
@@ -75,7 +75,7 @@ public class Application extends javax.ws.rs.core.Application {
         return dao;
     }
     
-    public URI getBatchesFolder() {
+    public String getBatchesFolder() {
         return batchesFolder;
     }
     

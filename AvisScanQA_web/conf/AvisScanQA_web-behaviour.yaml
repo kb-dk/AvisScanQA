@@ -14,7 +14,7 @@ avischk-web-qa:
   jdbc-password: "DO NOT SET HERE"
   jdbc-driver: "org.postgresql.Driver"
 
-  batchesFolder: "file://thiele.statsbiblioteket.dk/avis-scanner-prod/_07-levering-fra-Ninestars/Shipment 2021-07-19/"
+  batchesFolder: "file:\\\\thiele\\avis-scanner-prod\\_07-levering-fra-Ninestars\\Shipment_2021-07-19\\"
 
   http-content-base-string: ""
   image-content-base-string: ""

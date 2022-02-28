@@ -90,7 +90,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
         return (dk.kb.kula190.webservice.Application) application;
     }
     
-    private URI getBatchesFolder() {
+    private String getBatchesFolder() {
         return getApplication().getBatchesFolder();
     }
     

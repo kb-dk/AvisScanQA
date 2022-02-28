@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -321,7 +320,7 @@ public class NewspaperQADao {
     public NewspaperDay getNewspaperEditions(String batchID,
                                              String newspaperID,
                                              LocalDate date,
-                                             URI batchesFolder)
+                                             String batchesFolder)
             throws DAOFailureException {
         //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
         
@@ -384,7 +383,7 @@ public class NewspaperQADao {
                                                    String newspaperID,
                                                    LocalDate date,
                                                    Connection conn,
-                                                   URI batchesFolder) throws SQLException {
+                                                   String batchesFolder) throws SQLException {
         Map<String, NewspaperEdition> editions = new HashMap<>();
         try (PreparedStatement ps = conn.prepareStatement(
                 "SELECT orig_relpath, format_type, p.edition_date, single_page, p.page_number, p.avisid, avistitle, shadow_path, p.section_title, p.edition_title, delivery_date, handle, side_label, fraktur, problems, p.batchid, n.notes "
@@ -423,7 +422,9 @@ public class NewspaperQADao {
                     entity.setOrigRelpath(res.getString("orig_relpath"));
                     entity.setShadowPath(res.getString("shadow_path"));
     
-                    entity.setOrigFullPath(batchesFolder.resolve(entity.getOrigRelpath()).toString());
+                    final String s = batchesFolder + entity.getOrigRelpath();
+                    final String origFullPath = s.replaceAll(Pattern.quote("/"), "\\\\");
+                    entity.setOrigFullPath(origFullPath);
                     
                     entity.setFormatType(res.getString("format_type"));
                     
