@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.util.Optional;
 
 public class DaoUtils {
     static int setNullable(PreparedStatement ps, int param, String value) throws SQLException {
@@ -55,5 +56,13 @@ public class DaoUtils {
             return null;
         }
         return value;
+    }
+    
+    static Optional<Integer> nullableInt(int integer) {
+        if (integer == 0){
+            return Optional.empty();
+        } else {
+            return Optional.of(integer);
+        }
     }
 }

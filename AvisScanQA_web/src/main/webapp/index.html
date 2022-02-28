@@ -131,6 +131,11 @@
         loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
     });
 
+
+    $.routes.add('/batch/{batchid:string}/notes',function(){
+        handleNotesDownload(this.batchid);
+    })
+
     $(document).ready(function () {
         moment.locale("da");
         loadNewspaperIDs();

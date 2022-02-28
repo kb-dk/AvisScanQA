@@ -209,6 +209,24 @@ paths:
 
 
   /notes/{batchID}:
+    get:
+      operationId: getNotes
+      summary: ""
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
     post:
       operationId: setNotes
       summary: ""
@@ -259,6 +277,29 @@ paths:
 
 components:
   schemas:
+    Note:
+      type: object
+      properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+          nullable: true
+        editionDate:
+          type: string
+          format: date
+          nullable: true
+        editionTitle:
+          type: string
+          nullable: true
+        sectionTitle:
+          type: string
+          nullable: true
+        pageNumber:
+          type: integer
+          nullable: true
+        note:
+          type: string
 
     Batch:
       type: object
@@ -288,6 +329,8 @@ components:
         notes:
           type: string
           nullable: true
+        numNotes:
+          type: integer
         state:
           type: string
 

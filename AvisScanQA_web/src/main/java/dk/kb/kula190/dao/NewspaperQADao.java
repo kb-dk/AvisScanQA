@@ -7,6 +7,7 @@ import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.model.NewspaperEntity;
+import dk.kb.kula190.model.Note;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,6 +25,8 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -36,6 +39,38 @@ public class NewspaperQADao {
         this.connectionPool = connectionPool;
     }
     
+    
+    public List<Note> getNotes(@Nonnull String batchID) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "SELECT batchid, avisid, edition_date, edition_title, section_title, page_number, notes from notes where batchid = ?")) {
+                int param = 1;
+                ps.setString(param++, batchID);
+                try (ResultSet res = ps.executeQuery()) {
+                    List<Note> notes = new ArrayList<>();
+                    while (res.next()) {
+                        Note note = new Note();
+                        notes.add(note);
+                        
+                        note.setBatchid(res.getString("batchid"));
+                        note.setAvisid(res.getString("avisid"));
+                        note.setEditionDate(Optional.ofNullable(res.getDate("edition_date"))
+                                                    .map(Date::toLocalDate)
+                                                    .orElse(null));
+                        note.setEditionTitle(res.getString("edition_title"));
+                        note.setSectionTitle(res.getString("section_title"));
+                        note.setPageNumber(DaoUtils.nullableInt(res.getInt("page_number")).orElse(null));
+                        note.setNote(res.getString("notes"));
+                    }
+                    return notes;
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed to retrieve notes from {}", batchID, e);
+            throw new DAOFailureException("Failed to retrieve notes from " + batchID, e);
+        }
+        
+    }
     
     public void setNotes(@Nonnull String batchID,
                          @Nullable LocalDate date,
@@ -97,8 +132,9 @@ public class NewspaperQADao {
                 = "SELECT batch.batchid, batch.avisid, roundtrip, start_date, end_date, delivery_date, problems, num_problems, state, n.notes as notes FROM batch left join notes n on batch.batchid = n.batchid and batch.avisid = n.avisid and n.edition_date is null and n.edition_title is null and n.section_title is null and n.page_number is null";
         
         try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
+            List<Batch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
-                List<Batch> list = new ArrayList<>();
+                
                 while (res.next()) {
                     Batch batch = new Batch();
                     batch.setBatchid(res.getString("batchid"));
@@ -113,8 +149,13 @@ public class NewspaperQADao {
                     batch.setNumProblems(res.getInt("num_problems"));
                     list.add(batch);
                 }
-                return list;
+                
             }
+            for (Batch batch : list) {
+//                TODO really bad way to do this. Include this in the SQL above
+                batch.setNumNotes(getNotes(batch.getBatchid()).size());
+            }
+            return list;
         } catch (SQLException e) {
             log.error("Failed to lookup batch ids", e);
             throw new DAOFailureException("Err looking up batch ids", e);
@@ -421,7 +462,7 @@ public class NewspaperQADao {
                     //Paths
                     entity.setOrigRelpath(res.getString("orig_relpath"));
                     entity.setShadowPath(res.getString("shadow_path"));
-    
+                    
                     final String s = batchesFolder + entity.getOrigRelpath();
                     final String origFullPath = s.replaceAll(Pattern.quote("/"), "\\\\");
                     entity.setOrigFullPath(origFullPath);

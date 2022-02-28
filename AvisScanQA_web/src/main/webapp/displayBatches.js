@@ -11,12 +11,17 @@ function loadBatchForNewspaper(batchID) {
 
             let newspaperYears = range(fromYEAR, toYEAR);
 
-            $("#headline-div").empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
+            const $headline = $("#headline-div");
+            $headline.empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
             let confirmForm = $("<form/>",{id:"confirmForm",action:"",method:"post"});
             confirmForm.append($("<input/>",{type: "hidden",name:"state",value:"APPROVED"}));
             confirmForm.append($("<input/>",{type:"submit",name:"submit",form:"confirmForm",class:"btn btn-success"}));
             confirmForm.submit(stateSubmitHandler);
-            $("#headline-div").append(confirmForm)
+            $headline.append(confirmForm)
+
+            if (batch.numNotes > 0) {
+                $headline.append($("<a>", {href: `#/batch/${batch.batchid}/notes`, target: "_blank"}).text(`Get Notes (${batch.numNotes})`))
+            }
 
             if (batch.numProblems > 0) {
                 let $notice = $("#notice-div").empty();
@@ -144,3 +149,28 @@ function stateSubmitHandler(event) {
 }
 
 
+function handleNotesDownload(batchId) {
+    $.getJSON(`api/notes/${batchId}`, {}, function (notes) {
+        const items = notes;
+        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+        if (items.length > 0) {
+            const header = Object.keys(items[0])
+            const csv = [
+                header.join(','), // header row first
+                ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+            ].join('\r\n')
+
+
+            console.log(csv)
+            let link = document.createElement("a");
+            link.download = `${batchId}.csv`;
+            link.href = `data:text/csv,${csv}`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            link.remove();
+        }
+        //Close the window, but wait 100 ms to ensure that the download have started
+        setTimeout("window.close()", 100)
+    })
+}

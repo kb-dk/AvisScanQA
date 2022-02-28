@@ -9,6 +9,7 @@ import dk.kb.kula190.model.Batch;
 import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperDay;
+import dk.kb.kula190.model.Note;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
@@ -120,6 +121,18 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
     
+    @Override
+    public List<Note> getNotes(String batchID) {
+        try {
+            return getDAO().getNotes(batchID);
+        } catch (DAOFailureException e) {
+            log.error("Could not retrieve notes for '{}'",
+                      batchID, e);
+            throw handleException(e);
+        }
+        
+    }
+    
     
     @Override
     public void setNotes(String batchID,
@@ -190,7 +203,6 @@ public class DefaultApiServiceImpl implements DefaultApi {
         
     }
     
-  
     
     @Override
     public NewspaperDay getMappedEntititesForNewspaperDate(String batchID, String newspaperID, String date) {
