@@ -12,6 +12,7 @@ function loadYearsForNewspaper(avisID, year) {
     const url = `api/years/${avisID}`;
     $.getJSON(url, {}, function (years) {
         $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
+        $("#state-div").empty();
         $("#notice-div").empty();
         if (year === 0){
             year = parseInt(years.sort()[0]);

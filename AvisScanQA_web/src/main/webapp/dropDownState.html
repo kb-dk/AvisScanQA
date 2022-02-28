@@ -1,0 +1,18 @@
+<form id="stateForm" action="" method="post">
+    <input type="hidden" name="batch" id="stateFormBatchID"/>
+    <div class="dropdown show form-group">
+
+        <a class="btn btn-success dropdown-toggle" href="#" role="button" id="dropDownState" data-toggle="dropdown"
+           aria-haspopup="true" aria-expanded="false">
+            Change state
+        </a>
+
+        <div class="dropdown-menu form-control" aria-labelledby="dropDownState">
+            <input type="submit" class="btn" form="stateForm" value="APPROVED"/>
+            <input type="submit" class="btn" form="stateForm" value="CHECKED"/>
+            <input type="submit" class="btn" form="stateForm" value="REJECTED"/>
+            <!-- TODO perhaps make the server return possible states and add these inputs with jquery  -->
+            <!--TODO make more states, and or make them able to add their own -->
+        </div>
+    </div>
+</form>

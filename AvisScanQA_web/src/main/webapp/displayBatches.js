@@ -3,6 +3,7 @@
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
     $.getJSON(url, {},
+        //TODO when parsing fails. Try it with non-existing batch like
         function (batch) {
             let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
             let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
@@ -13,18 +14,28 @@ function loadBatchForNewspaper(batchID) {
 
             const $headline = $("#headline-div");
             $headline.empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
-            let confirmForm = $("<form/>",{id:"confirmForm",action:"",method:"post"});
-            confirmForm.append($("<input/>",{type: "hidden",name:"state",value:"APPROVED"}));
-            confirmForm.append($("<input/>",{type:"submit",name:"submit",form:"confirmForm",class:"btn btn-success"}));
-            confirmForm.submit(stateSubmitHandler);
-            $headline.append(confirmForm)
+
+
+            let $state = $("#state-div").empty();
+            $state.load("dropDownState.html",function (){
+                $("#stateFormBatchID").val(batch.batchid);
+                const $stateForm = $("#stateForm");
+                $("#dropDownState").text(batch.state)
+                //TODO colors of dropDownState...
+
+                $(`[value=${batch.state}]`).css("font-weight","Bold");
+
+                $stateForm.submit(stateSubmitHandler);
+                $state.append($stateForm);
+            })
+
+            let $notice = $("#notice-div").empty();
 
             if (batch.numNotes > 0) {
-                $headline.append($("<a>", {href: `#/batch/${batch.batchid}/notes`, target: "_blank"}).text(`Get Notes (${batch.numNotes})`))
+                $notice.append($("<a>", {href: `#/batch/${batch.batchid}/notes`, target: "_blank"}).text(`Get Notes (${batch.numNotes})`))
             }
 
             if (batch.numProblems > 0) {
-                let $notice = $("#notice-div").empty();
 
                 $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
 
@@ -121,28 +132,30 @@ function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
-    console.log(data)
+    const state = event.originalEvent.submitter.value;
+
+
     let parts = ["api", "batch",data.get('batch')]
     var query = new URLSearchParams();
 
-    query.append("avis", data.get('state'));
+    query.append("state", state);
 
-    // let url = parts.filter(x => x).join("/")
+    console.log(event.target);
     let url = parts.join("/") + "?" + query.toString();
 
-    console.log(url)
-    const notes = data.get('state');
 
     $.ajax({
         type: "POST",
         url: url,
-        data: notes,
+        data: state,
         success: function () {
             alert("Batch has been accepted")
         },
         dataType: "json",
         contentType: "application/json"
     });
+
+    location.reload(false);
 
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event

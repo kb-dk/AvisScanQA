@@ -12,6 +12,7 @@ import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.Note;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
+import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.slf4j.Logger;
@@ -161,6 +162,21 @@ public class DefaultApiServiceImpl implements DefaultApi {
                       section,
                       page,
                       body);
+            throw handleException(e);
+        }
+    }
+
+    @Override public void setState(String batchID, String state) {
+        //        Note that null values might have the value "null". Regard this as null
+        log.info("{}/{}", batchID, state);
+        try {
+            getDAO().setState(batchID,
+                              DaoUtils.nullable(state));
+        } catch (DAOFailureException e) {
+            log.error("Could not store notes for {}/{}",
+                      batchID,
+                      state
+                      );
             throw handleException(e);
         }
     }

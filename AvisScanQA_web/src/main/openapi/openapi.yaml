@@ -61,6 +61,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Batch"
+    post:
+      operationId: setState
+      summary: ""
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: state
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Batch updated
+
 
 
   /batch/{batchID}/{year}:

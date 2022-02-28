@@ -104,6 +104,25 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
+
+    public void setState(@Nonnull String batchID,
+                         @Nullable String state) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "UPDATE batch SET state = ? WHERE batchid = ?")) {
+                int param = 1;
+                ps.setString(param++, state);
+                ps.setString(param++,batchID);
+                ps.execute();
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed to lookup batch ID", e);
+            throw new DAOFailureException("Err looking up batch ID", e);
+        }
+    }
     
     public List<String> getNewspaperIDs() throws DAOFailureException {
         log.debug("Looking up newspaper ids");
