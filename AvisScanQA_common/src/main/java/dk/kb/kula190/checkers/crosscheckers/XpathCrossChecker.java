@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
 import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
@@ -87,13 +88,19 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis,
                              LocalDate editionDate, String udgave, String sectionName, Integer pageNumber)
             throws IOException {
-        //Only the Tiff Analyzer Injected events
-        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)) {
-            return;
+   
+        switch (injectedType) {
+            case TiffAnalyzer.INJECTED_TYPE -> { // ImageMagick Output
+                XpathTiff xpathTiff = Tiff.get();
+                xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName,
+                                                  pageNumber);
+            }
+            case MetsSplitter.INJECTED_TYPE_MIX -> { //MIX FROM METS FILE
+                //        This is the mix extracted from METS for a specific page
+                log.debug("Injected MIX event for {},{},{},{},{}", avis, editionDate, udgave, sectionName, pageNumber);
+                //TODO checks ala MixChecker
+            }
         }
-        XpathTiff xpathTiff = Tiff.get();
-        xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName,
-                                          pageNumber);
     }
 
     @Override

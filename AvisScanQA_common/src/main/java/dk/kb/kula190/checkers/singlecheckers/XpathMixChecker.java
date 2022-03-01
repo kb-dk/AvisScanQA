@@ -31,6 +31,8 @@ public class XpathMixChecker extends DecoratedEventHandler {
                         String udgave,
                         String sectionName,
                         Integer pageNumber) throws IOException {
+        //TODO this should probably be folded into XpathCrossChecker..
+        
         Document document;
         try (InputStream in = event.getData()) {
             document = XML.fromXML(in, true);

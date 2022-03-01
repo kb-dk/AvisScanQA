@@ -51,7 +51,6 @@ class MultiThreadedEventRunnerTest {
                         new TiffChecker(resultCollector),
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
-                        new ModsChecker(resultCollector),
                         //CrossCheckers
                         new XpathCrossChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
