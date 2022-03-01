@@ -2,7 +2,10 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
     var day = moment(date).format('YYYY-MM-DD');
     var url = `api/batch/${batchID}/${avisID}/${day}`
     $.getJSON(url, {}, function (newspaperDay) {
-        $("#headline-div").empty().append($("<h1>").text(`Editions for ${avisID} on ${day}`));
+        const $headlineDiv = $("#headline-div");
+        $headlineDiv.empty().append($("<a/>",{class:"btn btn-secondary",text: "Back to newspaper year", href:`#/newspaper/${avisID}/${day.split('-')[0]}/`}))
+        $headlineDiv.append($("<a/>",{class:"btn btn-secondary",text: "Back to batch", href:`#/batch/${batchID}/`}))
+        $headlineDiv.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
         $("#notice-div").empty();
         $("#state-div").empty();
         $("#batchOverview-table").empty();
