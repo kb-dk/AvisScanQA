@@ -6,6 +6,7 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.apache.commons.io.FilenameUtils.isExtension;
 
@@ -66,9 +67,9 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
         LocalDate endDate = LocalDate.parse(splits2[2], EventHandlerUtils.dateFormatter);
         String avis2 = splits2[0];
         String roundTrip = splits2[3].replaceFirst("^RT", "");
-        
+    
         this.delegate    = delegate;
-        this.avis        = avis;
+        this.avis        = Optional.ofNullable(avis).orElse(avis2);
         this.roundTrip   = roundTrip;
         this.startDate   = startDate;
         this.endDate     = endDate;

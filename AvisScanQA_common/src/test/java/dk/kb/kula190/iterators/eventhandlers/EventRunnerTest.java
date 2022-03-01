@@ -35,6 +35,11 @@ class EventRunnerTest {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
+                        //                        new TiffAnalyzer(resultCollector),
+                        new MetsSplitter(resultCollector),
+                        new MetsChecker(resultCollector)
+        
+        
                         //Simple Checkers
                         new ChecksumChecker(resultCollector),
                         
