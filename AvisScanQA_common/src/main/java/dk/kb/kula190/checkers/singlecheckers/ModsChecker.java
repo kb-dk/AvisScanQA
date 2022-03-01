@@ -11,6 +11,9 @@ import org.w3c.dom.Document;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class ModsChecker extends DecoratedEventHandler {
     public ModsChecker(ResultCollector resultCollector) {
@@ -35,23 +38,16 @@ public class ModsChecker extends DecoratedEventHandler {
                     "digitized newspaper"
                    );
         
-        String internetMediaType1 = xpath.selectString(document,
-                                                       "/mods:mods/mods:physicalDescription/mods:internetMediaType[1]/text()");
+        Set<String> internetMediaType = new HashSet<>(xpath.selectStringList(document,
+                                                                            "/mods:mods/mods:physicalDescription/mods:internetMediaType/text()"));
+        Set<String> expectedInternetMediaTypes = Set.of("text", "image/tif");
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods internet media type should have been {expected} but was {actual}",
-                    internetMediaType1,
-                    "text"
+                    internetMediaType,
+                    expectedInternetMediaTypes
                    );
         
-        String internetMediaType2 = xpath.selectString(document,
-                                                       "/mods:mods/mods:physicalDescription/mods:internetMediaType[2]/text()");
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods internet media type should have been {expected} but was {actual}",
-                    internetMediaType2,
-                    "image/tif"
-                   );
         
         String form = xpath.selectString(document, "/mods:mods/mods:physicalDescription/mods:form/text()");
         checkEquals(event,

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -52,7 +53,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                Object expected) {
         String actualString = asString(actual);
         String expectedString = asString(expected);
-        if (!actualString.equalsIgnoreCase(expectedString)) {
+        if (!Objects.equals(actual, expected) && !actualString.equalsIgnoreCase(expectedString)) {
             addFailure(event,
                        type,
                        this.getClass().getSimpleName(),

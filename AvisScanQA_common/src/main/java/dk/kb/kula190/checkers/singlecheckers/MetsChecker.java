@@ -64,7 +64,7 @@ public class MetsChecker extends DecoratedEventHandler {
             
             //This is the  METS file, without the humongous ADMSEC part
             String x = XML.domToString(metsDoc);
-            System.out.println(x);
+//            System.out.println(x);
     
             Node metadataDC = xpath.selectNode(metsDoc,
                                                "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*");
