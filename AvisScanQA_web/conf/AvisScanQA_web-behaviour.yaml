@@ -16,6 +16,14 @@ avischk-web-qa:
 
   batchesFolder: "/avis-scanner-prod/_07-levering-fra-Ninestars/Shipment_2021-07-19/"
 
+  predefinedNotes:
+    dayNotes:
+      - "Udkom ikke pga. strejke"
+    editionNotes:
+      - "Edition dropdown note"
+    pageNotes:
+      - "Siden er ikke god?"
+
   http-content-base-string: ""
   image-content-base-string: ""
   iipsrv-base-string: ""

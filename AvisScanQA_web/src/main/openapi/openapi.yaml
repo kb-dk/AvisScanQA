@@ -285,7 +285,7 @@ paths:
           required: true
           schema:
             type: string
-        #            format: date
+            #format: date
         - name: edition
           in: query
           required: false
@@ -310,7 +310,6 @@ paths:
             schema:
               type: string
       responses:
-        #        TODO here
         '201':
           description: Created
 

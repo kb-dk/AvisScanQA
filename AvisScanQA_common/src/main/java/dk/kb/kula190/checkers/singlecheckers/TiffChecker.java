@@ -66,8 +66,8 @@ public class TiffChecker extends DecoratedEventHandler {
                     "8-bit"
                    );
 
-        //TODO other tests
-        //TODO test uncompressed
+        //TODO other tests https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-32
+        //TODO test uncompressed https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-32
     }
 
 }

@@ -16,7 +16,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
-//TODO injecting in multithreaded...
+//TODO injecting in multithreaded. Current limitations explained:
+// Injection works INSIDE one EventRunner
+// MultiThreadedEventRunner gets an EventCondition object, which determines when to fork off a new eventrunner and when to join
+// The condition we use, forks on each page and joins everything afterwards
+// So an InjectingTreeEventHandler's injected event will only be used by other checkers IN THE SAME EventRunner
+// Meaning either outside any pages, or inside one specific page.
 public class MultiThreadedEventRunner extends EventRunner {
     
     

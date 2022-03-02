@@ -49,6 +49,7 @@ public class XpathAltoChecker extends DecoratedEventHandler {
 
         Node pageNode = xpath.selectNode(document, "/alto:alto/alto:Layout/alto:Page");
 
+        //TODO configurable https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
         //TODO should this check actually be there?
         checkAtLeast(event,
                      FailureType.INVALID_ALTO_ERROR,
@@ -67,7 +68,6 @@ public class XpathAltoChecker extends DecoratedEventHandler {
         checkWithinRange(event,
                          FailureType.INVALID_ALTO_ERROR,
                          Double.parseDouble(pageNode.getAttributes().getNamedItem("HEIGHT").getNodeValue()),
-                         //TODO configurable
                          10000.0,
                          50000.0,
                          "ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: " +
@@ -76,7 +76,7 @@ public class XpathAltoChecker extends DecoratedEventHandler {
         checkWithinRange(event,
                          FailureType.INVALID_ALTO_ERROR,
                          Double.parseDouble(pageNode.getAttributes().getNamedItem("WIDTH").getNodeValue()),
-                         4000.0, //TODO configurable
+                         4000.0,
                          50000.0,
                          "ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
         //Checks page ID is corresponding with filename.

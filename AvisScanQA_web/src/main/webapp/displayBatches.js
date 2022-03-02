@@ -3,7 +3,7 @@
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
     $.getJSON(url, {},
-        //TODO when parsing fails. Try it with non-existing batch like
+        //TODO when parsing fails. Try it with non-existing batch. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-27
         function (batch) {
             let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
             let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
@@ -21,7 +21,7 @@ function loadBatchForNewspaper(batchID) {
                 $("#stateFormBatchID").val(batch.batchid);
                 const $stateForm = $("#stateForm");
                 $("#dropDownState").text(batch.state)
-                //TODO colors of dropDownState...
+                //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
                 $(`[value=${batch.state}]`).css("font-weight","Bold");
 

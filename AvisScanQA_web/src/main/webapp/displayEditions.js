@@ -162,7 +162,7 @@ function renderSinglePage(page) {
         type: "text",
         name: "notes"
     }).text(page.notes));
-    //TODO proper values for all fields
+
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "date", value: date}));

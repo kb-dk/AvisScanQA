@@ -99,7 +99,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //delivery date
                 preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
                 //state
-                //TODO fixed vocabulary here. Create an Enum
+                //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
                 preparedStatement.setString(param++, "BEGUN");
                 
                 boolean result = preparedStatement.execute();
@@ -147,7 +147,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //problems
                 preparedStatement.setString(param++, failuresMessage);
                 //state
-                //TODO fixed vocabulary here. Create an Enum
+                //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
                 preparedStatement.setString(param++, "CHECKED");
                 
                 preparedStatement.setInt(param++, checkerFailures.size());
