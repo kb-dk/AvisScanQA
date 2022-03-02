@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
@@ -130,13 +131,16 @@ public class MetsChecker extends DecoratedEventHandler {
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
         log.debug("injected METS event for {},{},{},{}", avis, roundTrip, startDate, endDate);
-        
+
         XPathSelector xpath = XpathUtils.createXPathSelector("mets", "http://www.loc.gov/METS/",
                                                              "dc", "http://purl.org/dc/elements/1.1/",
                                                              "mix", "http://purl.org/dc/elements/1.1/mix",
                                                              "premis", "http://purl.org/dc/elements/1.1/premis",
                                                              "xlink", "http://www.w3.org/1999/xlink",
-                                                             "mods", "http://www.loc.gov/mods/v3");
+                                                             "mods", "http://www.loc.gov/mods/v3",
+                                                             "oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/",
+                                                             "marc", "http://www.loc.gov/MARC21/slim");
+        
         try (InputStream data = decoratedEvent.getData()) {
             Document metsDoc = XML.fromXML(data, true);
             
@@ -238,7 +242,7 @@ public class MetsChecker extends DecoratedEventHandler {
                                                   .newDocumentBuilder()
                                                   .newDocument();
         Node mods = document.appendChild(document.adoptNode(metadataMods));
-        return mods;
+        return document.getDocumentElement();
     }
     
     @Override
