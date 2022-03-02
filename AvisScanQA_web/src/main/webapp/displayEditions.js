@@ -243,10 +243,14 @@ function loadImage(filename, element) {
 function renderEdition(entity, pageIndex) {
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
-    for (var i = 0; i < pages.length; i++) {
+
+    for (let i = 0; i < pages.length; i++) {
+        let nrOfProblems = pages[i].problems.length;
         const link = $("<a/>").attr({
             href: editPageIndexInHash(location.hash, i),
-            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")}`,
+
+            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-warning":"")}`,
+            title: `${(nrOfProblems > 0 ? "problems: "+nrOfProblems:"")}`,
         }).text(i + 1);
         $pageNav.append(link);
     }
