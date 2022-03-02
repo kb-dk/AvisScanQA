@@ -20,4 +20,19 @@
         <Arg type="boolean">true</Arg>
     </New>
 
+    <Call name="setInitParameter">
+        <Arg>casServerLoginUrl</Arg>
+        <Arg>https://intern-samlstage.statsbiblioteket.dk/module.php/sbcasserver/cas.php/login</Arg>
+    </Call>
+
+    <Call name="setInitParameter">
+        <Arg>casServerUrlPrefix</Arg>
+        <Arg>https://intern-samlstage.statsbiblioteket.dk/module.php/sbcasserver/cas.php/</Arg>
+    </Call>
+
+    <Call name="setInitParameter">
+        <Arg>serverName</Arg>
+        <Arg>localhost:8080</Arg>
+    </Call>
+
 </Configure>

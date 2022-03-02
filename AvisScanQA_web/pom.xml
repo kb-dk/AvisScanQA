@@ -24,6 +24,15 @@
             <artifactId>kb-util</artifactId>
         </dependency>
 
+        <!--Auth-->
+        <dependency>
+            <!-- https://mvnrepository.com/artifact/org.jasig.cas.client/cas-client-integration-tomcat-v90 -->
+            <groupId>org.jasig.cas.client</groupId>
+            <artifactId>cas-client-integration-tomcat-v90</artifactId>
+            <version>3.6.4</version>
+        </dependency>
+
+
         <!-- Apache CXF and servlet stuff -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
