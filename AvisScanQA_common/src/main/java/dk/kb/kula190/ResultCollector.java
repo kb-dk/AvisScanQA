@@ -16,10 +16,12 @@ import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.StringWriter;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 
 public class ResultCollector {
     
@@ -169,10 +171,10 @@ public class ResultCollector {
         Reference reference = new Reference();
         if (fileReference instanceof DecoratedParsingEvent decoratedParsingEvent) {
             reference.setAvis(decoratedParsingEvent.getAvis());
-            reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
+            reference.setEditionDate(Optional.ofNullable(decoratedParsingEvent.getEditionDate()).map(LocalDate::toString).orElse(null));
             reference.setUdgave(decoratedParsingEvent.getUdgave());
             reference.setSectionName(decoratedParsingEvent.getSectionName());
-            reference.setPageNumber(decoratedParsingEvent.getPageNumber());
+            reference.setPageNumber(Optional.ofNullable(decoratedParsingEvent.getPageNumber()).orElse(-1));
         } else {
             DecoratedParsingEvent decoratedParsingEvent = switch (fileReference.getType()) {
                 case NodeEnd -> new DecoratedNodeParsingEvent((NodeParsingEvent) fileReference);
@@ -180,10 +182,10 @@ public class ResultCollector {
                 case Attribute -> new DecoratedAttributeParsingEvent((AttributeParsingEvent) fileReference);
             };
             reference.setAvis(decoratedParsingEvent.getAvis());
-            reference.setEditionDate(decoratedParsingEvent.getEditionDate().toString());
+            reference.setEditionDate(Optional.ofNullable(decoratedParsingEvent.getEditionDate()).map(LocalDate::toString).orElse(null));
             reference.setUdgave(decoratedParsingEvent.getUdgave());
             reference.setSectionName(decoratedParsingEvent.getSectionName());
-            reference.setPageNumber(decoratedParsingEvent.getPageNumber());
+            reference.setPageNumber(Optional.ofNullable(decoratedParsingEvent.getPageNumber()).orElse(-1));
         }
         return reference;
     }

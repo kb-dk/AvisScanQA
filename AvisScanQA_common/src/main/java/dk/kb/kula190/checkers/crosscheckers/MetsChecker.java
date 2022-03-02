@@ -16,14 +16,23 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 public class MetsChecker extends DecoratedEventHandler {
     
+    
+    private Set<String> tiffFilesVisited = Collections.synchronizedSet(new HashSet<>());
+    private Set<String> altoFilesVisited = Collections.synchronizedSet(new HashSet<>());
+    
+    private Set<String> tiffFilesFromMets = Collections.synchronizedSet(new HashSet<>());
+    private Set<String> altoFilesFromMets = Collections.synchronizedSet(new HashSet<>());
     
     public MetsChecker(ResultCollector resultCollector) {
         super(resultCollector);
@@ -55,10 +64,10 @@ public class MetsChecker extends DecoratedEventHandler {
                          LocalDate endDate) throws IOException {
         
         //        TODO check that this mods is in agreement with the mods from METS
-    
+        
         Document document = EventHandlerUtils.handleDocument(event);
         XPathSelector xpath = XpathUtils.createXPathSelector("mods", "http://www.loc.gov/mods/v3");
-    
+        
         String digitalOrigin = xpath.selectString(document, "/mods:mods/mods:physicalDescription/mods:digitalOrigin");
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
@@ -66,7 +75,7 @@ public class MetsChecker extends DecoratedEventHandler {
                     digitalOrigin,
                     "digitized newspaper"
                    );
-    
+        
         Set<String> internetMediaType = new HashSet<>(xpath.selectStringList(document,
                                                                              "/mods:mods/mods:physicalDescription/mods:internetMediaType/text()"));
         Set<String> expectedInternetMediaTypes = Set.of("text", "image/tif");
@@ -76,8 +85,8 @@ public class MetsChecker extends DecoratedEventHandler {
                     internetMediaType,
                     expectedInternetMediaTypes
                    );
-    
-    
+        
+        
         String form = xpath.selectString(document, "/mods:mods/mods:physicalDescription/mods:form/text()");
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
@@ -85,8 +94,8 @@ public class MetsChecker extends DecoratedEventHandler {
                     form,
                     "electronic"
                    );
-    
-    
+        
+        
         String dateIssuedStart = xpath.selectString(document,
                                                     "/mods:mods/mods:originInfo/mods:dateIssued[@point='start']");
         String temporalStart = xpath.selectString(document, "/mods:mods/mods:subject/mods:temporal[@point='start']");
@@ -95,8 +104,8 @@ public class MetsChecker extends DecoratedEventHandler {
                     "Mods start dates do not match date issued: {actual}, temporal: {expected}",
                     dateIssuedStart,
                     temporalStart);
-    
-    
+        
+        
         String dateIssuedEnd = xpath.selectString(document, "/mods:mods/mods:originInfo/mods:dateIssued[@point='end']");
         String temporalEnd = xpath.selectString(document, "/mods:mods/mods:subject/mods:temporal[@point='end']");
         checkEquals(event,
@@ -104,7 +113,7 @@ public class MetsChecker extends DecoratedEventHandler {
                     "Mods end dates do not match date issued: {actual}, temporal: {expected}",
                     dateIssuedEnd,
                     temporalEnd);
-    
+        
         String titleFamily = xpath.selectString(document, "/mods:mods/mods:identifier[@type='title_family']");
         String title = event.getName().split("_")[0];
         checkEquals(event,
@@ -147,7 +156,22 @@ public class MetsChecker extends DecoratedEventHandler {
                                                  "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*");
             
             
-            // TODO extract file list from fileSec for checks below
+            // Save the filelists for later
+            xpath.selectStringList(metsDoc,
+                                   "/mets:mets/mets:fileSec/mets:fileGrp[@ID='TIFF']/mets:file/mets:FLocat/@xlink:href")
+                 .stream()
+                 .map(ref -> ref.replaceAll(Pattern.quote("\\"), File.separator))
+                 .map(ref -> new File(ref).getName())
+                 .forEach(ref -> tiffFilesFromMets.add(ref));
+            
+            
+            xpath.selectStringList(metsDoc,
+                                   "/mets:mets/mets:fileSec/mets:fileGrp[@ID='ALTO']/mets:file/mets:FLocat/@xlink:href")
+                 .stream()
+                 .map(ref -> ref.replaceAll(Pattern.quote("\\"), File.separator))
+                 .map(ref -> new File(ref).getName())
+                 .forEach(ref -> altoFilesFromMets.add(ref));
+            
             
         } catch (ParserConfigurationException | SAXException | TransformerException e) {
             throw new IOException("Failed to parse METS data from " + decoratedEvent.getLocation(), e);
@@ -161,7 +185,7 @@ public class MetsChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        //TODO register that this tiff file have been found
+        tiffFilesVisited.add(EventHandlerUtils.lastName(event.getLocation()));
     }
     
     @Override
@@ -171,7 +195,7 @@ public class MetsChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        //TODO register that this alto file have been found
+        altoFilesVisited.add(EventHandlerUtils.lastName(event.getLocation()));
     }
     
     @Override
@@ -180,8 +204,25 @@ public class MetsChecker extends DecoratedEventHandler {
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-        //TODO check that all found tif files are in METS fileSec
-        //TODO check that all files in fileSec have been found
+    
+        checkEquals(event, FailureType.MISSING_FILE_ERROR, "METS reference missing files not in batch: \n{actual}",
+                    fromAnotInB(altoFilesFromMets, altoFilesVisited), Set.of());
+        checkEquals(event, FailureType.MISSING_FILE_ERROR, "Batch contains files not referenced in METS: \n{actual}",
+                    fromAnotInB(altoFilesVisited, altoFilesFromMets), Set.of());
+    
+        checkEquals(event, FailureType.MISSING_FILE_ERROR, "METS reference missing files: \n{actual}",
+                    fromAnotInB(tiffFilesFromMets, tiffFilesVisited), Set.of());
+        checkEquals(event, FailureType.MISSING_FILE_ERROR, "Batch contains files not referenced in METS: \n{actual}",
+                    fromAnotInB(tiffFilesVisited, tiffFilesFromMets), Set.of());
+    
+    
+    }
+    
+    private Set<String> fromAnotInB(Set<String> altoFilesFromMets, Set<String> altoFilesVisited) {
+        HashSet<String> diff = new HashSet<>(altoFilesFromMets);
+        diff.removeAll(
+                altoFilesVisited);
+        return diff;
     }
     
 }
