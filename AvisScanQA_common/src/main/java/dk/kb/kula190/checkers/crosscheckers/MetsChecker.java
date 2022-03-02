@@ -14,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 import java.io.File;
@@ -134,7 +135,8 @@ public class MetsChecker extends DecoratedEventHandler {
                                                              "dc", "http://purl.org/dc/elements/1.1/",
                                                              "mix", "http://purl.org/dc/elements/1.1/mix",
                                                              "premis", "http://purl.org/dc/elements/1.1/premis",
-                                                             "xlink", "http://www.w3.org/1999/xlink");
+                                                             "xlink", "http://www.w3.org/1999/xlink",
+                                                             "mods", "http://www.loc.gov/mods/v3");
         try (InputStream data = decoratedEvent.getData()) {
             Document metsDoc = XML.fromXML(data, true);
             
@@ -143,17 +145,21 @@ public class MetsChecker extends DecoratedEventHandler {
             
             //            TODO check that DC, MARC and MODS are in agreement
             
-            Node metadataMods = xpath.selectNode(metsDoc,
-                                                 "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*");
+            Node metadataMods = asSeparateXML(xpath.selectNode(metsDoc,
+                                                 "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*"));
+
+            String x1 = xpath.selectString(metadataMods, "/mods:mods/mods:titleInfo/mods:title");
+            System.out.println(x1);
             //TODO check this with same checks as in ModsChecker
             
             
-            Node metadataDC = xpath.selectNode(metsDoc,
-                                               "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*");
+            Node metadataDC = asSeparateXML(xpath.selectNode(metsDoc,
+                                               "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*"));
             //            log.debug("DC metadata\n{}",XML.domToString(metadataDC));
             
-            Node metadataMarc = xpath.selectNode(metsDoc,
-                                                 "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*");
+    
+            Node metadataMarc = asSeparateXML(xpath.selectNode(metsDoc,
+                                                 "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*"));
             
             
             // Save the filelists for later
@@ -176,6 +182,14 @@ public class MetsChecker extends DecoratedEventHandler {
         } catch (ParserConfigurationException | SAXException | TransformerException e) {
             throw new IOException("Failed to parse METS data from " + decoratedEvent.getLocation(), e);
         }
+    }
+    
+    private Node asSeparateXML(Node metadataMods) throws ParserConfigurationException {
+        Document document = DocumentBuilderFactory.newInstance()
+                                                  .newDocumentBuilder()
+                                                  .newDocument();
+        Node mods = document.appendChild(document.adoptNode(metadataMods));
+        return mods;
     }
     
     @Override
@@ -204,18 +218,18 @@ public class MetsChecker extends DecoratedEventHandler {
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-    
+        
         checkEquals(event, FailureType.MISSING_FILE_ERROR, "METS reference missing files not in batch: \n{actual}",
                     fromAnotInB(altoFilesFromMets, altoFilesVisited), Set.of());
         checkEquals(event, FailureType.MISSING_FILE_ERROR, "Batch contains files not referenced in METS: \n{actual}",
                     fromAnotInB(altoFilesVisited, altoFilesFromMets), Set.of());
-    
+        
         checkEquals(event, FailureType.MISSING_FILE_ERROR, "METS reference missing files: \n{actual}",
                     fromAnotInB(tiffFilesFromMets, tiffFilesVisited), Set.of());
         checkEquals(event, FailureType.MISSING_FILE_ERROR, "Batch contains files not referenced in METS: \n{actual}",
                     fromAnotInB(tiffFilesVisited, tiffFilesFromMets), Set.of());
-    
-    
+        
+        
     }
     
     private Set<String> fromAnotInB(Set<String> altoFilesFromMets, Set<String> altoFilesVisited) {
