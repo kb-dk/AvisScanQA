@@ -15,11 +15,11 @@ import java.util.Objects;
 
 public class TiffChecker extends DecoratedEventHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
-    
+
     public TiffChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
-    
+
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent event,
                              String injectedType,
@@ -28,39 +28,46 @@ public class TiffChecker extends DecoratedEventHandler {
                              String udgave,
                              String sectionName,
                              Integer pageNumber) throws IOException {
-    
+
         //TODO this should probably be folded into XpathCrossChecker..
-    
-        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)){
+
+        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)) {
             return;
         }
         log.info("Checking {}", event.getLocation());
-    
-    
+
+
         YAML result;
         try (InputStream in = event.getData()) {
             result = YAML.parse(in);
         }
         YAML yaml = result;
-        
+
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
-        
+
         checkEquals(event,
-                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid format {actual}. Should have been {expected}", yaml.getString("Image.Format"),
+                    FailureType.INVALID_TIFF_ERROR,
+                    "ImageMagick reports invalid format {actual}. Should have been {expected}",
+                    yaml.getString("Image.Format"),
                     "TIFF (Tagged Image File Format)"
-        );
-        
+                   );
+
         checkEquals(event,
-                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}", yaml.getString("Image.Colorspace"),
+                    FailureType.INVALID_TIFF_ERROR,
+                    "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}",
+                    yaml.getString("Image.Colorspace"),
                     "sRGB"
-        );
-        
+                   );
+
         checkEquals(event,
-                    FailureType.INVALID_TIFF_ERROR, "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}", yaml.getString("Image.Depth"),
+                    FailureType.INVALID_TIFF_ERROR,
+                    "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}",
+                    yaml.getString("Image.Depth"),
                     "8-bit"
-        );
-        
+                   );
+
         //TODO other tests
+        //TODO test uncompressed
     }
-    
+
 }

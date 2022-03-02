@@ -50,6 +50,7 @@ public class XpathMixChecker extends DecoratedEventHandler {
         Integer height = xpath.selectInteger(document,
                                             "/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageHeight");
         //All pages stand up, so height > width.
+        //TODO not true
         checkAtLeast(event,
                      FailureType.INVALID_MIX_ERROR,
                      height.doubleValue(),
