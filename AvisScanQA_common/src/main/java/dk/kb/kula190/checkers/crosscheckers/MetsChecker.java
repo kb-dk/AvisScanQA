@@ -209,11 +209,40 @@ public class MetsChecker extends DecoratedEventHandler {
             Node metadataDC = asSeparateXML(xpath.selectNode(metsDoc,
                                                "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*"));
             //            log.debug("DC metadata\n{}",XML.domToString(metadataDC));
-            
-    
+            String language = xpath.selectString(metadataDC,"/oai_dc:dc/dc:language");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets dc language was incorrect should have been {expected} but was {actual}",
+                        language,
+                        "dan");
+
+            Set<String> dcFormat = new HashSet<>(xpath.selectStringList(metadataDC,"/oai_dc:dc/dc:format"));
+            Set<String> expectedDcFormat = Set.of("text", "image/tif","electronic");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets dc format should have been {expected} but was {actual}",
+                        dcFormat,
+                        expectedDcFormat
+                       );
+            Set<String> dcType = new HashSet<>(xpath.selectStringList(metadataDC,"/oai_dc:dc/dc:type"));
+            Set<String> expectedDcType = Set.of("newspaper", "text");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets dc type should have been {expected} but was {actual}",
+                        dcType,
+                        expectedDcType
+                       );
+            String dcDate = xpath.selectString(metadataDC,"/oai_dc:dc/dc:type");
+            Set<String> dcCoverage = new HashSet<>(xpath.selectStringList(metadataDC,"/oai_dc:dc/dc:coverage"));
+            dcCoverage.contains(dcDate);
+            checkTrue(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets dc date ({actual}) is not within dc coverage ({expected})",
+                        dcCoverage.contains(dcDate));
+
             Node metadataMarc = asSeparateXML(xpath.selectNode(metsDoc,
                                                  "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*"));
-            
+
             
             // Save the filelists for later
             xpath.selectStringList(metsDoc,
