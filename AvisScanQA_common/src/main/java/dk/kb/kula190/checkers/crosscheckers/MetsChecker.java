@@ -148,11 +148,60 @@ public class MetsChecker extends DecoratedEventHandler {
             Node metadataMods = asSeparateXML(xpath.selectNode(metsDoc,
                                                  "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*"));
 
-            String x1 = xpath.selectString(metadataMods, "/mods:mods/mods:titleInfo/mods:title");
-            System.out.println(x1);
             //TODO check this with same checks as in ModsChecker
-            
-            
+            String digitalOrigin = xpath.selectString(metadataMods, "/mods:mods/mods:physicalDescription/mods:digitalOrigin");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets digital origin should have been {expected} but was {actual}",
+                        digitalOrigin,
+                        "digitized newspaper"
+                       );
+
+            Set<String> internetMediaType = new HashSet<>(xpath.selectStringList(metadataMods,
+                                                                                 "/mods:mods/mods:physicalDescription/mods:internetMediaType/text()"));
+            Set<String> expectedInternetMediaTypes = Set.of("text", "image/tif");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets internet media type should have been {expected} but was {actual}",
+                        internetMediaType,
+                        expectedInternetMediaTypes
+                       );
+
+
+            String form = xpath.selectString(metadataMods, "/mods:mods/mods:physicalDescription/mods:form/text()");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets physical description form should have been {expected} but was {actual}",
+                        form,
+                        "electronic"
+                       );
+
+
+            String dateIssuedStart = xpath.selectString(metadataMods,
+                                                        "/mods:mods/mods:originInfo/mods:dateIssued[@point='start']");
+            String temporalStart = xpath.selectString(metadataMods, "/mods:mods/mods:subject/mods:temporal[@point='start']");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets start dates do not match date issued: {actual}, temporal: {expected}",
+                        dateIssuedStart,
+                        temporalStart);
+
+
+            String dateIssuedEnd = xpath.selectString(metadataMods, "/mods:mods/mods:originInfo/mods:dateIssued[@point='end']");
+            String temporalEnd = xpath.selectString(metadataMods, "/mods:mods/mods:subject/mods:temporal[@point='end']");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets end dates do not match date issued: {actual}, temporal: {expected}",
+                        dateIssuedEnd,
+                        temporalEnd);
+
+            String titleFamily = xpath.selectString(metadataMods, "/mods:mods/mods:identifier[@type='title_family']");
+            String title = decoratedEvent.getName().split("_")[0];
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets file family was incorrect should have been {expected} but was {actual}",
+                        titleFamily,
+                        title);
             Node metadataDC = asSeparateXML(xpath.selectNode(metsDoc,
                                                "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*"));
             //            log.debug("DC metadata\n{}",XML.domToString(metadataDC));
