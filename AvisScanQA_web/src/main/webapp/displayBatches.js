@@ -124,7 +124,7 @@ function renderBatchTable(filter) {
         })
     } else {
         $table.bootstrapTable('filterBy', {})
-    }console.log($table.data());
+    }
 
 
 }

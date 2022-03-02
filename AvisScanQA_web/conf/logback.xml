@@ -29,6 +29,12 @@
 
     <logger name="dk.kb.kula190" level="DEBUG"/>
 
+    <!-- If not, you will get
+    WARN  o.a.cxf.phase.PhaseInterceptorChain(LogUtils.java:465) - Interceptor for {http://impl.api.kula190.kb.dk/}DefaultApiServiceImpl has thrown exception, unwinding now
+    when jquery cancels a pending ajax request. Which it WILL DO, at times
+    -->
+    <logger name="org.apache.cxf.phase.PhaseInterceptorChain" level="ERROR"/>
+
     <root level="INFO">
         <appender-ref ref="FILE"/>
     </root>
