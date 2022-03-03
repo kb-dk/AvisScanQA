@@ -9,8 +9,8 @@ import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
-import dk.kb.kula190.checkers.singlecheckers.TiffChecker;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerImageMagick;
+import dk.kb.kula190.checkers.singlecheckers.TiffCheckerImageMagick;
 import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
 import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
@@ -46,8 +46,8 @@ class DatabaseEventRunnerTest {
                     
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
-                        new TiffAnalyzer(resultCollector),
-                        new TiffChecker(resultCollector),
+                        new TiffAnalyzerImageMagick(resultCollector),
+                        new TiffCheckerImageMagick(resultCollector),
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
                     

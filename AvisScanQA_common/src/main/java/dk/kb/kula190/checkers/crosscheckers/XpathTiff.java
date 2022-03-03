@@ -1,6 +1,5 @@
 package dk.kb.kula190.checkers.crosscheckers;
 
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.util.yaml.YAML;
 
@@ -8,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Objects;
 
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;

@@ -5,24 +5,16 @@ import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.ChecksumChecker;
-import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.MetsChecker;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
 import dk.kb.kula190.checkers.singlecheckers.*;
-import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.common.TreeIterator;
-import dk.kb.kula190.iterators.filesystem.transparent.TransparintingFileSystemIterator;
 import org.junit.jupiter.api.Test;
-import org.postgresql.Driver;
 
 import java.io.File;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 class MultiThreadedEventRunnerTest {
     
@@ -48,8 +40,8 @@ class MultiThreadedEventRunnerTest {
                         
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
-                        new TiffAnalyzer(resultCollector),
-                        new TiffChecker(resultCollector),
+                        new TiffAnalyzerImageMagick(resultCollector),
+                        new TiffCheckerImageMagick(resultCollector),
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
                         //CrossCheckers

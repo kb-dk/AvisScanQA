@@ -2,7 +2,7 @@ package dk.kb.kula190.checkers.crosscheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzer;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerImageMagick;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
@@ -10,7 +10,6 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Objects;
 
 /**
  * @see XpathAlto for how values are extracted from ALTO
@@ -90,7 +89,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
             throws IOException {
    
         switch (injectedType) {
-            case TiffAnalyzer.INJECTED_TYPE -> { // ImageMagick Output
+            case TiffAnalyzerImageMagick.INJECTED_TYPE -> { // ImageMagick Output
                 XpathTiff xpathTiff = Tiff.get();
                 xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName,
                                                   pageNumber);

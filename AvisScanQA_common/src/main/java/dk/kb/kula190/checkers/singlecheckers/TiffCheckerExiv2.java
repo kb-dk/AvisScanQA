@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Properties;
 
-public class TiffChecker extends DecoratedEventHandler {
+public class TiffCheckerExiv2 extends DecoratedEventHandler {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    public TiffChecker(ResultCollector resultCollector) {
+    public TiffCheckerExiv2(ResultCollector resultCollector) {
         super(resultCollector);
     }
 
@@ -31,38 +32,38 @@ public class TiffChecker extends DecoratedEventHandler {
 
         //TODO this should probably be folded into XpathCrossChecker..
 
-        if (!Objects.equals(injectedType, TiffAnalyzer.INJECTED_TYPE)) {
+        if (!Objects.equals(injectedType, TiffAnalyzerExiv2.INJECTED_TYPE)) {
             return;
         }
         log.info("Checking {}", event.getLocation());
-
-
-        YAML result;
+    
+    
+        Properties properties = new Properties();
         try (InputStream in = event.getData()) {
-            result = YAML.parse(in);
+            properties.load(in);
         }
-        YAML yaml = result;
+        
 
         //See src/test/resources/sampleImageMagickOutput.yaml for what and how
-
+        //TODO implement these checks
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
                     "ImageMagick reports invalid format {actual}. Should have been {expected}",
-                    yaml.getString("Image.Format"),
+                    properties.getProperty("Image.Format"),
                     "TIFF (Tagged Image File Format)"
                    );
 
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
                     "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}",
-                    yaml.getString("Image.Colorspace"),
+                    properties.getProperty("Image.Colorspace"),
                     "sRGB"
                    );
 
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
                     "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}",
-                    yaml.getString("Image.Depth"),
+                    properties.getProperty("Image.Depth"),
                     "8-bit"
                    );
 

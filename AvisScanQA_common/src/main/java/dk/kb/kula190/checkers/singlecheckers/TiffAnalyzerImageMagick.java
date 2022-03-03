@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TiffAnalyzer extends InjectingTreeEventHandler {
+public class TiffAnalyzerImageMagick extends InjectingTreeEventHandler {
     public static final String INJECTED_TYPE = "ImageMagick Metadata Yaml";
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     
-    public TiffAnalyzer(ResultCollector resultCollector) {
+    public TiffAnalyzerImageMagick(ResultCollector resultCollector) {
         super(resultCollector);
     }
     
