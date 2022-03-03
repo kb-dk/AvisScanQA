@@ -250,7 +250,6 @@ function renderEdition(entity, pageIndex) {
             href: editPageIndexInHash(location.hash, i),
 
             class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-warning":"")}`,
-            title: `${(nrOfProblems > 0 ? "problems: "+nrOfProblems:"")}`,
         }).text(i + 1);
         $pageNav.append(link);
     }
