@@ -8,6 +8,7 @@ import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.model.NewspaperEntity;
 import dk.kb.kula190.model.Note;
+import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +19,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -28,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.LongStream;
 
 public class NewspaperQADao {
     private final Logger log = LoggerFactory.getLogger(getClass());
@@ -104,20 +104,12 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
-
+    
     public void setState(@Nonnull String batchID,
-                         @Nullable String state) throws DAOFailureException {
+                         @Nullable String state,
+                         @Nonnull String username) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE batch SET state = ? WHERE batchid = ?")) {
-                int param = 1;
-                ps.setString(param++, state);
-                ps.setString(param++,batchID);
-                ps.execute();
-                if (!conn.getAutoCommit()) {
-                    conn.commit();
-                }
-            }
+            DaoBatchHelper.setBatchState(batchID, state, username, conn);
         } catch (SQLException e) {
             log.error("Failed to lookup batch ID", e);
             throw new DAOFailureException("Err looking up batch ID", e);
@@ -144,37 +136,22 @@ public class NewspaperQADao {
         }
     }
     
+    
+    public Batch getBatch(String batchID) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoBatchHelper.getLatestBatch(batchID, conn);
+        } catch (SQLException e) {
+            log.error("Failed to lookup batch ids", e);
+            throw new NotFoundServiceException("Err looking up batch id " + batchID, e);
+        }
+    }
+    
+    
     public List<Batch> getBatchIDs() throws DAOFailureException {
         log.debug("Looking up batch ids");
-        String
-                SQL
-                = "SELECT batch.batchid, batch.avisid, roundtrip, start_date, end_date, delivery_date, problems, num_problems, state, n.notes as notes FROM batch left join notes n on batch.batchid = n.batchid and batch.avisid = n.avisid and n.edition_date is null and n.edition_title is null and n.section_title is null and n.page_number is null";
         
-        try (Connection conn = connectionPool.getConnection(); PreparedStatement ps = conn.prepareStatement(SQL)) {
-            List<Batch> list = new ArrayList<>();
-            try (ResultSet res = ps.executeQuery()) {
-                
-                while (res.next()) {
-                    Batch batch = new Batch();
-                    batch.setBatchid(res.getString("batchid"));
-                    batch.setAvisid(res.getString("avisid"));
-                    batch.setRoundtrip(res.getInt("roundtrip"));
-                    batch.setStartDate(res.getDate("start_date").toLocalDate());
-                    batch.setEndDate(res.getDate("end_date").toLocalDate());
-                    batch.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
-                    batch.setProblems(res.getString("problems"));
-                    batch.setState(res.getString("state"));
-                    batch.setNotes(res.getString("notes"));
-                    batch.setNumProblems(res.getInt("num_problems"));
-                    list.add(batch);
-                }
-                
-            }
-            for (Batch batch : list) {
-//                TODO really bad way to do this. Include this in the SQL above
-                batch.setNumNotes(getNotes(batch.getBatchid()).size());
-            }
-            return list;
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoBatchHelper.getAllBatches(conn);
         } catch (SQLException e) {
             log.error("Failed to lookup batch ids", e);
             throw new DAOFailureException("Err looking up batch ids", e);
@@ -208,53 +185,37 @@ public class NewspaperQADao {
     public List<NewspaperDate> getDatesForNewspaperID(String avisID, String year) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}', in year {}", avisID, year);
         
-        
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
         
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "select batchid, roundtrip, start_date, end_date, state  from batch where avisid = ? and ( EXTRACT(YEAR FROM start_date) = ? or EXTRACT(YEAR FROM end_date) = ? ) ")) {
-                ps.setString(1, avisID);
-                ps.setInt(2, Integer.parseInt(year));
-                ps.setInt(3, Integer.parseInt(year));
-                
-                try (ResultSet res = ps.executeQuery()) {
-                    while (res.next()) {
-                        String batchID = res.getString("batchid");
-                        Integer roundTrip = res.getInt("roundtrip");
-                        LocalDate startDate = res.getDate("start_date").toLocalDate();
-                        LocalDate endDate = res.getDate("end_date").toLocalDate();
-                        String state = res.getString("state");
-                        LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
-                                  .mapToObj(startDate::plusDays)
-                                  .forEach(date -> {
-                                      final NewspaperDate newspaperDate = new NewspaperDate();
-                                      newspaperDate.setBatchid(batchID);
-                                      newspaperDate.setAvisid(avisID);
-                                      newspaperDate.setRoundtrip(roundTrip);
-                                      newspaperDate.setDate(date);
-                                      newspaperDate.setPageCount(0);
-                                      newspaperDate.setProblems("");
-                                      newspaperDate.setEditionCount(0);
-                                      newspaperDate.setState(state);
-                                      resultMap.put(date, newspaperDate);
-                                  });
-                    }
-                }
+            List<Batch> batches = DaoBatchHelper.getLatestBatches(avisID, conn);
+            for (Batch batch : batches) {
+                DaoBatchHelper.batchDays(batch)
+                              .forEach(date -> {
+                                  final NewspaperDate newspaperDate =
+                                          new NewspaperDate().date(date)
+                                                             .pageCount(0)
+                                                             .problems("")
+                                                             .editionCount(0)
+                                                             .batchid(batch.getBatchid())
+                                                             .avisid(batch.getAvisid())
+                                                             .state(batch.getState());
+                                  resultMap.put(date, newspaperDate);
+                    
+                              });
             }
             
-            try (PreparedStatement ps = conn.prepareStatement("select edition_date, "
-                                                              + " b.batchid, "
-                                                              + " b.roundtrip, "
-                                                              + " b.state, "
-                                                              + " count(DISTINCT(edition_title)) as numEditions, "
-                                                              + " count(*) as numPages, "
-                                                              + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
-                                                              + " from newspaperarchive "
-                                                              + " join batch b on b.batchid = newspaperarchive.batchid "
-                                                              + " where newspaperarchive.avisid = ? and EXTRACT(YEAR FROM edition_date) = ? "
-                                                              + " group by edition_date, b.batchid, roundtrip "
-                                                              + " order by roundtrip asc ")) {
+            
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "select edition_date, "
+                    + "         batchid, "
+                    + "         count(DISTINCT(edition_title)) as numEditions, "
+                    + "         count(*) as numPages, "
+                    + "         string_agg(newspaperarchive.problems, '\\n') as allProblems "
+                    + " from newspaperarchive "
+                    + " where newspaperarchive.avisid = ? and "
+                    + "       EXTRACT(YEAR FROM edition_date) = ? "
+                    + " group by edition_date, batchid ")) {
                 //ascending sort ensures that the highest roundtrips are last
                 //last entry for a given date wins. So this way, the calender will show the latest roundtrips
                 
@@ -266,22 +227,27 @@ public class NewspaperQADao {
                     while (res.next()) {
                         
                         Date date = res.getDate("edition_date");
+                        String batchID = res.getString("batchid");
+                        
                         int editionCount = res.getInt("numEditions");
                         int pageCount = res.getInt("numPages");
                         String problems = res.getString("allProblems").translateEscapes().trim();
-                        String state = res.getString("state");
-                        String batchID = res.getString("batchid");
-                        Integer roundtrip = res.getInt("roundtrip");
-                        NewspaperDate result = new NewspaperDate();
+                        
+                        Optional<Batch> batch = batches.stream()
+                                                       .filter(b -> b.getBatchid().equals(batchID))
+                                                       .limit(1)
+                                                       .findFirst();
                         final LocalDate localDate = date.toLocalDate();
-                        result.setDate(localDate);
-                        result.setPageCount(pageCount);
-                        result.setEditionCount(editionCount);
-                        result.setProblems(problems);
-                        result.setBatchid(batchID);
-                        result.setAvisid(avisID);
-                        result.setState(state);
-                        result.setRoundtrip(roundtrip);
+                        
+                        NewspaperDate result =
+                                new NewspaperDate().date(localDate)
+                                                   .pageCount(pageCount)
+                                                   .editionCount(editionCount)
+                                                   .problems(problems)
+                                                   .batchid(batchID)
+                                                   .avisid(avisID);
+                        batch.ifPresent(val -> result.setAvisid(val.getAvisid()));
+                        batch.ifPresent(val -> result.setBatchid(val.getBatchid()));
                         resultMap.put(localDate, result);
                     }
                 }
@@ -302,47 +268,34 @@ public class NewspaperQADao {
         
         final int year = Integer.parseInt(yearString);
         try (Connection conn = connectionPool.getConnection()) {
+            Batch batch = DaoBatchHelper.getLatestBatch(batchID, conn);
+            
+            DaoBatchHelper.batchDays(batch)
+                          .filter(date -> date.getYear() == year) //We could also make limits on the range...
+                          .forEach(date -> {
+                              final NewspaperDate newspaperDate =
+                                      new NewspaperDate().date(date)
+                                                         .pageCount(0)
+                                                         .problems("")
+                                                         .editionCount(0)
+                                                         .batchid(batchID)
+                                                         .avisid(batch.getAvisid())
+                                                         .state(batch.getState());
+                              resultMap.put(date, newspaperDate);
+                          });
+            
+            
             try (PreparedStatement ps = conn.prepareStatement(
-                    "select start_date, end_date, state, avisid from batch where batchid = ?")) {
-                ps.setString(1, batchID);
-                
-                try (ResultSet res = ps.executeQuery()) {
-                    while (res.next()) {
-                        LocalDate startDate = res.getDate("start_date").toLocalDate();
-                        LocalDate endDate = res.getDate("end_date").toLocalDate();
-                        String state = res.getString("state");
-                        String avisID = res.getString("avisid");
-                        LongStream.rangeClosed(0, ChronoUnit.DAYS.between(startDate, endDate))
-                                  .mapToObj(startDate::plusDays)
-                                  .filter(date -> date.getYear() == year) //We could also make limits on the range...
-                                  .forEach(date -> {
-                                      final NewspaperDate newspaperDate = new NewspaperDate();
-                                      newspaperDate.setDate(date);
-                                      newspaperDate.setPageCount(0);
-                                      newspaperDate.setProblems("");
-                                      newspaperDate.setEditionCount(0);
-                                      newspaperDate.setBatchid(batchID);
-                                      newspaperDate.setAvisid(avisID);
-                                      newspaperDate.setState(state);
-                                      resultMap.put(date, newspaperDate);
-                                  });
-                    }
-                }
-            }
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "select edition_date, "
-                    + " b.state, "
-                    + " count(DISTINCT(edition_title)) as numEditions, "
-                    + " count(*) as numPages, "
-                    + " string_agg(newspaperarchive.problems, '\\n') as allProblems "
+                    "select edition_date, count(DISTINCT(edition_title)) as numEditions,  count(*) as numPages,  string_agg(newspaperarchive.problems, '\\n') as allProblems "
                     + " from newspaperarchive "
-                    + " join batch b on b.batchid = newspaperarchive.batchid "
+                    + " join batch b on b.batchid = newspaperarchive.batchid and b.lastmodified = ? "
                     + " where newspaperarchive.batchid = ? and "
                     + " EXTRACT(YEAR FROM edition_date) = ? "
-                    + " group by edition_date, b.batchid ")) {
-                
-                ps.setString(1, batchID);
-                ps.setInt(2, year);
+                    + " group by edition_date ")) {
+                int param = 1;
+                ps.setTimestamp(param++, Timestamp.from(batch.getLastModified().toInstant()));
+                ps.setString(param++, batchID);
+                ps.setInt(param++, year);
                 //ps.setString(3, year);
                 try (ResultSet res = ps.executeQuery()) {
                     
@@ -352,17 +305,16 @@ public class NewspaperQADao {
                         int editionCount = res.getInt("numEditions");
                         int pageCount = res.getInt("numPages");
                         String problems = res.getString("allProblems").translateEscapes().trim();
-                        String state = res.getString("state");
                         
-                        NewspaperDate result = new NewspaperDate();
                         final LocalDate localDate = date.toLocalDate();
-                        result.setDate(localDate);
-                        result.setPageCount(pageCount);
-                        result.setEditionCount(editionCount);
-                        result.setProblems(problems);
-                        result.setBatchid(batchID);
-                        result.setState(state);
-                        result.setAvisid(resultMap.get(localDate).getAvisid());
+                        NewspaperDate result =
+                                new NewspaperDate().date(localDate)
+                                                   .pageCount(pageCount)
+                                                   .editionCount(editionCount)
+                                                   .problems(problems)
+                                                   .batchid(batchID)
+                                                   .state(batch.getState())
+                                                   .avisid(resultMap.get(localDate).getAvisid());
                         resultMap.put(localDate, result);
                     }
                 }
@@ -384,10 +336,7 @@ public class NewspaperQADao {
             throws DAOFailureException {
         //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
         
-        NewspaperDay result = new NewspaperDay();
-        result.setBatchid(batchID);
-        result.setAvisid(newspaperID);
-        result.setDate(date);
+        NewspaperDay result = new NewspaperDay().batchid(batchID).avisid(newspaperID).date(date);
         
         
         try (Connection conn = connectionPool.getConnection()) {
@@ -466,50 +415,40 @@ public class NewspaperQADao {
                 while (res.next()) {
                     String edition_title = res.getString("edition_title");
                     
-                    NewspaperEdition edition = editions.getOrDefault(edition_title, new NewspaperEdition());
-                    editions.put(edition_title, edition);
-                    edition.setBatchid(batchID);
-                    edition.setEdition(edition_title);
-                    edition.setDate(date);
-                    edition.setAvisid(newspaperID);
+                    
+                    editions.put(edition_title, editions.getOrDefault(edition_title, new NewspaperEdition()));
+                    NewspaperEdition edition =
+                            editions.get(edition_title)
+                                    .batchid(batchID)
+                                    .edition(edition_title)
+                                    .date(date)
+                                    .avisid(newspaperID);
                     if (edition.getPages() == null) {
                         edition.setPages(new ArrayList<>());
                     }
                     
-                    NewspaperEntity entity = new NewspaperEntity();
+                    final String orig_relpath = res.getString("orig_relpath");
                     
-                    //Paths
-                    entity.setOrigRelpath(res.getString("orig_relpath"));
-                    entity.setShadowPath(res.getString("shadow_path"));
-                    
-                    final String s = batchesFolder + entity.getOrigRelpath();
-                    final String origFullPath = s.replaceAll(Pattern.quote("/"), "\\\\");
-                    entity.setOrigFullPath(origFullPath);
-                    
-                    entity.setFormatType(res.getString("format_type"));
-                    
-                    
-                    // Identification
-                    entity.setBatchid(batchID);
-                    entity.setAvisid(res.getString("avisid"));
-                    entity.setAvistitle(res.getString("avistitle"));
-                    entity.setEditionDate(res.getDate("edition_date").toLocalDate());
-                    entity.setEditionTitle(edition_title);
-                    entity.setSectionTitle(res.getString("section_title"));
-                    entity.setPageNumber(res.getInt("page_number"));
-                    
-                    
-                    entity.setDeliveryDate(res.getDate("delivery_date").toLocalDate());
-                    
-                    entity.setHandle(res.getLong("handle"));
-                    
-                    entity.setSinglePage(res.getBoolean("single_page"));
-                    entity.setFraktur(res.getBoolean("fraktur"));
-                    
-                    entity.setProblems(res.getString("problems"));
-                    entity.setNotes(res.getString("notes"));
-                    
-                    edition.addPagesItem(entity);
+                    edition.addPagesItem(new NewspaperEntity().origRelpath(orig_relpath)
+                                                              .shadowPath(res.getString("shadow_path"))
+                                                              .origFullPath((batchesFolder + orig_relpath).replaceAll(
+                                                                      Pattern.quote("/"),
+                                                                      "\\\\"))
+                                                              .formatType(res.getString("format_type"))
+                                                              .batchid(batchID)
+                                                              .avisid(res.getString("avisid"))
+                                                              .avistitle(res.getString("avistitle"))
+                                                              .editionDate(res.getDate("edition_date").toLocalDate())
+                                                              .editionTitle(edition_title)
+                                                              .sectionTitle(res.getString("section_title"))
+                                                              .pageNumber(res.getInt("page_number"))
+                                                              .deliveryDate(res.getDate("delivery_date").toLocalDate())
+                                                              .handle(res.getLong("handle"))
+                                                              .singlePage(res.getBoolean(
+                                                                      "single_page"))
+                                                              .fraktur(res.getBoolean("fraktur"))
+                                                              .problems(res.getString("problems"))
+                                                              .notes(res.getString("notes")));
                     
                 }
                 
@@ -581,13 +520,13 @@ public class NewspaperQADao {
                 List<CharacterizationInfo> list = new ArrayList<>();
                 
                 while (res.next()) {
-                    CharacterizationInfo info = new CharacterizationInfo();
-                    info.setOrigRelpath(res.getString("orig_relpath"));
-                    info.setTool(res.getString("tool"));
-                    info.setCharacterisationDate(res.getDate("characterisation_date").toLocalDate());
-                    info.setToolOutput(res.getString("tool_output"));
-                    info.setStatus(res.getString("status"));
-                    list.add(info);
+                    list.add(new CharacterizationInfo().origRelpath(res.getString("orig_relpath"))
+                                                       .tool(res.getString(
+                                                               "tool"))
+                                                       .characterisationDate(res.getDate("characterisation_date")
+                                                                                .toLocalDate())
+                                                       .toolOutput(res.getString("tool_output"))
+                                                       .status(res.getString("status")));
                 }
                 return list;
             }
@@ -596,5 +535,4 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up characterization info for newspaper entity", e);
         }
     }
-    
 }

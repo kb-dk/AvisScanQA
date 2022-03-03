@@ -1,14 +1,18 @@
-CREATE TABLE batch
+create table batch
 (
-    batchid       VARCHAR(255) PRIMARY KEY,
-    avisid        VARCHAR(255) NOT NULL,
-    roundtrip     INTEGER      NOT NULL,
-    start_date    DATE         NOT NULL,
-    end_date      DATE         NOT NULL,
-    delivery_date DATE         NOT NULL,
-    problems      TEXT         DEFAULT NULL,
-    state         TEXT         NOT NULL,
-    num_problems  INTEGER      NOT NULL DEFAULT 0
+    batchid       varchar(255)      not null,
+    avisid        varchar(255)      not null,
+    roundtrip     integer           not null,
+    start_date    date              not null,
+    end_date      date              not null,
+    delivery_date date              not null,
+    problems      text,
+    state         text              not null,
+    num_problems  integer default 0 not null,
+    username      varchar(255)      not null,
+    lastmodified  timestamp         not null,
+
+    CONSTRAINT unique_modstate UNIQUE (batchid, lastmodified)
 );
 
 
@@ -60,5 +64,6 @@ CREATE INDEX notes_batch_avis_index ON notes (batchid, avisid);
 CREATE INDEX notes_batch_avis_date_index ON notes (batchid, avisid, edition_date);
 CREATE INDEX notes_batch_avis_date_edition_index ON notes (batchid, avisid, edition_date, edition_title);
 CREATE INDEX notes_batch_avis_date_edition_section_index ON notes (batchid, avisid, edition_date, edition_title, section_title);
-CREATE INDEX notes_batch_avis_date_edition_section_page_index ON notes (batchid, avisid, edition_date, edition_title, section_title, page_number);
+CREATE INDEX notes_batch_avis_date_edition_section_page_index ON notes (batchid, avisid, edition_date, edition_title,
+                                                                        section_title, page_number);
 

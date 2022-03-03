@@ -43,8 +43,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
+import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * AvisScanQA_web
@@ -175,6 +177,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
                          String page) {
         //        Note that null values might have the value "null". Regard this as null
         log.info("{}/{}/{}/{}/{}/{}, {}", batchID, avis, date, edition, section, page, body);
+        Principal loggedInUser = securityContext.getUserPrincipal();
+        String username = loggedInUser.getName();
         try {
             getDAO().setNotes(batchID,
                               DaoUtils.nullableDate(date),
@@ -200,9 +204,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     public void setState(String batchID, String state) {
         //        Note that null values might have the value "null". Regard this as null
         log.info("{}/{}", batchID, state);
+        String username = securityContext.getUserPrincipal().getName();
         try {
             getDAO().setState(batchID,
-                              DaoUtils.nullable(state));
+                              DaoUtils.nullable(state),
+                              username);
         } catch (DAOFailureException e) {
             log.error("Could not store notes for {}/{}",
                       batchID,
@@ -226,14 +232,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
     @Override
     public Batch getBatch(String batchID) {
         try {
-            //TODO this is a bad way to get a specific batch...
-            return getDAO().getBatchIDs()
-                           .stream()
-                           .filter(batch -> batch.getBatchid().equals(batchID))
-                           .findFirst()
-                           .orElseThrow(() -> new NotFoundServiceException("Batch " + batchID + " not found"));
+            return getDAO().getBatch(batchID);
         } catch (DAOFailureException e) {
-            log.error("Could not get dates for newspaper ID {}", batchID);
             throw handleException(e);
         }
     }

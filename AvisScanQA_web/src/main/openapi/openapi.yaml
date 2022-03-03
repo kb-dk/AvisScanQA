@@ -371,6 +371,11 @@ components:
           type: integer
         state:
           type: string
+        username:
+          type: string
+        lastModified:
+          type: string
+          format: 'date-time'
 
     NewspaperDate:
       type: object
