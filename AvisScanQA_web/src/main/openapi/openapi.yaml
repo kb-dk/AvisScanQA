@@ -312,12 +312,31 @@ paths:
       responses:
         '201':
           description: Created
+    delete:
+      operationId: removeNote
+      summary: ""
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Note deleted
 
 components:
   schemas:
     Note:
       type: object
       properties:
+        id:
+          type: integer
         batchid:
           type: string
         avisid:
@@ -338,6 +357,11 @@ components:
           nullable: true
         note:
           type: string
+        username:
+          type: string
+        created:
+          type: string
+          format: date-time
 
     Batch:
       type: object
@@ -409,8 +433,9 @@ components:
           type: string
           format: date
         notes:
-          type: string
-          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
         editions:
           type: array
           items:
@@ -429,7 +454,9 @@ components:
         edition:
           type: string
         notes:
-          type: string
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
         pages:
           type: array
           items:
@@ -475,8 +502,9 @@ components:
           type: string
           nullable: true
         notes:
-          type: string
-          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
 
 
 

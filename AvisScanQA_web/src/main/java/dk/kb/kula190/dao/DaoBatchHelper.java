@@ -87,7 +87,7 @@ public class DaoBatchHelper {
     static List<Batch> getAllBatches(Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "SELECT b1.batchid, b1.avisid, roundtrip, start_date, end_date, delivery_date, problems, "
-                + "num_problems, state, username, lastmodified, n.notes as notes "
+                + "num_problems, state, b1.username, lastmodified, n.notes as notes "
                 + "FROM batch b1"
                 + "   LEFT JOIN  notes n on b1.batchid = n.batchid and "
                 + "                         b1.avisid = n.avisid and "

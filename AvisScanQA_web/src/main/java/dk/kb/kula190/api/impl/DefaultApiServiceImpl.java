@@ -133,7 +133,17 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
+
+    @Override public void removeNote(String batchID, String id) {
+        try {
+            getDAO().removeNotes(id);
+        }catch (DAOFailureException e) {
+            log.error("Could not delete notes for '{}' '{}'",
+                      batchID,id, e);
+            throw handleException(e);
+        }
+    }
+
     @Override
     public List<Note> getNotes(String batchID) {
         try {

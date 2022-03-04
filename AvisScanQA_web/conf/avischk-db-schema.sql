@@ -44,16 +44,16 @@ CREATE INDEX avisid_format_index ON newspaperarchive (avisid, format_type);
 
 CREATE TABLE notes
 (
-    id            VARCHAR(1024) primary key not null,
-    batchid       VARCHAR(255) NOT NULL,
-    avisid        VARCHAR(255) NULL,
-    edition_date  DATE         NULL,
-    edition_title VARCHAR(255) NULL,
-    section_title VARCHAR(255) NULL,
-    page_number   INTEGER      NULL,
-    username      VARCHAR(255) NOT NULL,
-    notes         TEXT         NOT NULL
-
+    id            SERIAL primary key unique not null,
+    batchid       VARCHAR(255)              NOT NULL,
+    avisid        VARCHAR(255)              NULL,
+    edition_date  DATE                      NULL,
+    edition_title VARCHAR(255)              NULL,
+    section_title VARCHAR(255)              NULL,
+    page_number   INTEGER                   NULL,
+    username      VARCHAR(255)              NOT NULL,
+    notes         TEXT                      NOT NULL,
+    created       timestamptz               not null
 
 
 --     FOREIGN KEY (batchid) REFERENCES batch (batchid)
