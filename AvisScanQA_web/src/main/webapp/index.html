@@ -2,16 +2,20 @@
 <head>
     <title>QA tool til avis arkiver</title>
     <meta charset="utf-8">
-<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
+    <!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">-->
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css"
           integrity="sha384-zCbKRCUGaJDkqS1kPbPd7TveP5iyJE0EjAuZQTgFLD2ylzuqKfdKlfG/eSrtxUkn" crossorigin="anonymous">
 
     <link href="dashboard.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.standalone.min.css" integrity="sha512-TQQ3J4WkE/rwojNFo6OJdyu6G8Xe9z8rMrlF9y7xpFbQfW5g8aSWcygCQ4vqRiJqFsDsE1T6MoAOMJkFXlrI9A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.standalone.min.css"
+          integrity="sha512-TQQ3J4WkE/rwojNFo6OJdyu6G8Xe9z8rMrlF9y7xpFbQfW5g8aSWcygCQ4vqRiJqFsDsE1T6MoAOMJkFXlrI9A=="
+          crossorigin="anonymous" referrerpolicy="no-referrer"/>
 
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css"
+          integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
 
     <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.19.1/dist/bootstrap-table.min.css">
 
@@ -51,14 +55,10 @@
             <div id="state-div"></div>
             <div id="notice-div"></div>
             <div id="primary-show"></div>
-
-                <table id="batchOverview-table">
-                </table>
-
+            <table id="batchOverview-table"></table>
         </main>
     </div>
 </div>
-
 
 
 <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"
@@ -76,9 +76,13 @@
 <script src="https://unpkg.com/bootstrap-table@1.19.1/dist/extensions/filter-control/bootstrap-table-filter-control.min.js"></script>
 
 <!--https://cdnjs.com/libraries/bootstrap-datepicker-->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js" integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"
+        integrity="sha512-T/tUfKSV1bihCnd+MxKD0Hm1uBBroVYBOYSk1knyvQ9VyZJpc/ALb4P0r6ubwVPSGB2GvjeoMAJJImBG12TiaQ=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.da.min.js" integrity="sha512-0RKwdfRfITpeIA9liQr9emGidOEIlTly+gNsPz6GSI0/aoULagyyXVpFloNY4z0hAP8yzF1VI9KuAKqgYCOy1A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.da.min.js"
+        integrity="sha512-0RKwdfRfITpeIA9liQr9emGidOEIlTly+gNsPz6GSI0/aoULagyyXVpFloNY4z0hAP8yzF1VI9KuAKqgYCOy1A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
 <script src="jquery.routes.js"></script>
@@ -93,37 +97,37 @@
 
 <script>
 
-    $.routes.add('/dashboard/', function () {
-        // Dashboard
+    function clearAll(){
         $("#headline-div").empty();
         $("#notice-div").empty();
         $("#state-div").empty();
+        $("#primary-show").empty();
         $("#batchOverview-table").empty();
-        // $("#batchOverview-table").empty();
+    }
+
+    $.routes.add('/dashboard/', function () {
+        clearAll();
         $("#primary-show").html("Vælg avis i menuen til venstre");
         renderBatchTable();
     });
 
     $.routes.add('/newspaper/{id:string}/{year:int}', function () {
-        // Display all years
-        $("#primary-show").html("Indlæser datoer for: " + this.id + " i år: " + this.year);
+        clearAll();
         loadYearsForNewspaper(this.id, this.year);
     });
 
     $.routes.add('/batch/{id:string}', function () {
-        // Display this batch
-        $("#primary-show").html("Indlæser batch: " + this.id);
+        clearAll();
         loadBatchForNewspaper(this.id);
     });
 
     $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{page:int}', function () {
-        // Display all months in a given year
-        $("#primary-show").html("Indlæser udgivelser for: " + this.id + " på den: " + this.day);
+        clearAll();
         loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
     });
 
 
-    $.routes.add('/batch/{batchid:string}/notes',function(){
+    $.routes.add('/batch/{batchid:string}/notes', function () {
         handleNotesDownload(this.batchid);
     })
 

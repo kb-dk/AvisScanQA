@@ -1,25 +1,27 @@
 function loadNewspaperIDs() {
-    $.getJSON('api/newspaperIDs', {}, function (newspaperIDs) {
-        for (const newspaperID of newspaperIDs) {
-            $("#avisIDer").append(
-                "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
-        }
-    });
+    $.getJSON('api/newspaperIDs')
+        .done(function (newspaperIDs) {
+            for (const newspaperID of newspaperIDs) {
+                $("#avisIDer").append(
+                    "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
+            }
+        });
 }
 
 
 function loadYearsForNewspaper(avisID, year) {
     const url = `api/years/${avisID}`;
-    $.getJSON(url, {}, function (years) {
-        $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
-        $("#state-div").empty();
-        $("#notice-div").empty();
-        if (year === 0){
-            year = parseInt(years.sort()[0]);
-        }
-        renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
-        renderBatchTable(avisID);
-    });
+    $.getJSON(url)
+        .done(function (years) {
+            $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
+            $("#state-div").empty();
+            $("#notice-div").empty();
+            if (year === 0) {
+                year = parseInt(years.sort()[0]);
+            }
+            renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
+            renderBatchTable(avisID);
+        });
 }
 
 /**
@@ -54,7 +56,8 @@ function renderNewspaperForYear(years, currentyear, url) {
 
     //See dk.kb.kula190.api.impl.DefaultApiServiceImpl.getDatesForNewspaperYear
     // var url = 'api/dates/' + newspaper + '/' + currentyear;
-    $.getJSON(url, {}, function (dates) {
+    $.getJSON(url)
+        .done(function (dates) {
         let datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {

@@ -5,7 +5,9 @@ import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.crosscheckers.MetsChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.singlecheckers.*;
+import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerExiv2;
+import dk.kb.kula190.checkers.singlecheckers.TiffCheckerExiv2;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -17,48 +19,47 @@ class EventRunnerTest {
     private final File
             specificBatch
             = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
-  
+    
     
     @Test
     void run() throws Exception {
-    
+        
         Path batchPath = specificBatch.toPath().toAbsolutePath();
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-    
-    
+        
+        
         RunnableComponent component = new RunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
-                        //                        new TiffAnalyzer(resultCollector),
-                        new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector),
-        
-        
+                        new TiffAnalyzerExiv2(resultCollector),
+                        // new MetsSplitter(resultCollector),
+                        // new MetsChecker(resultCollector),
+                        new TiffCheckerExiv2(resultCollector)
+                        
                         //Simple Checkers
 //                        new ChecksumChecker(resultCollector),
                         
                         //Per file- checkers
-                     //   new XmlSchemaChecker(resultCollector),
-                       // new TiffChecker(resultCollector),
-                      //  new XpathAltoChecker(resultCollector),
-                       // new XpathMixChecker(resultCollector),
+                        //   new XmlSchemaChecker(resultCollector),
+                        // new TiffChecker(resultCollector),
+                        //  new XpathAltoChecker(resultCollector),
+                        // new XpathMixChecker(resultCollector),
 //                            new ModsChecker(resultCollector),
                         //CrossCheckers
 //                        new XpathCrossChecker(resultCollector)
-                       // new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
-
+                        // new NoMissingMiddlePagesChecker(resultCollector),
+                        // new PageStructureChecker(resultCollector)
+                
                               );
             }
             
         };
-    
+        
         ResultCollector resultCollector = component.doWorkOnItem(batch);
         
         System.out.println(resultCollector.toReport());
         
         
-      
     }
 }

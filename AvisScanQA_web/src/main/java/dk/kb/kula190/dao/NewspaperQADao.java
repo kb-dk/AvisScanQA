@@ -9,6 +9,7 @@ import dk.kb.kula190.model.NewspaperEdition;
 import dk.kb.kula190.model.NewspaperEntity;
 import dk.kb.kula190.model.Note;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
+import dk.kb.util.yaml.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,8 +22,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -64,8 +63,7 @@ public class NewspaperQADao {
                         note.setSectionTitle(res.getString("section_title"));
                         note.setPageNumber(DaoUtils.nullableInt(res.getInt("page_number")).orElse(null));
                         note.setNote(res.getString("notes"));
-                            note.created(OffsetDateTime.ofInstant(res.getTimestamp("created").toInstant(),
-                                                              ZoneId.systemDefault()));
+                            note.created(DaoUtils.toOffsetDateTime(res.getTimestamp("created")));
                             note.setUsername(res.getString("username"));
                     }
                     return notes;
@@ -147,7 +145,7 @@ public class NewspaperQADao {
 
     public Batch getBatch(String batchID) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
-            return DaoBatchHelper.getLatestBatch(batchID, conn);
+            return Optional.ofNullable(DaoBatchHelper.getLatestBatch(batchID, conn)).orElseThrow(() -> new NotFoundServiceException("Batch "+batchID+" not found"));
         } catch (SQLException e) {
             log.error("Failed to lookup batch ids", e);
             throw new NotFoundServiceException("Err looking up batch id " + batchID, e);
@@ -345,7 +343,14 @@ public class NewspaperQADao {
     public NewspaperDay getNewspaperEditions(String batchID, String newspaperID, LocalDate date, String batchesFolder)
             throws DAOFailureException {
         //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
-
+        
+        //TODO Cleaner way to check if a batch exists
+        Batch batch = getBatch(batchID);
+        if (date.isBefore(batch.getStartDate()) || date.isAfter(batch.getEndDate())){
+            throw new NotFoundServiceException("Date " + date + " is not within start (" + batch.getStartDate() +") "
+                                               + "and end ("+batch.getEndDate()+") of batch "+batch.getBatchid());
+        }
+        
         NewspaperDay result = new NewspaperDay().batchid(batchID).avisid(newspaperID).date(date);
 
 
@@ -403,8 +408,7 @@ public class NewspaperQADao {
                                           .editionTitle(edition_title)
                                           .username(res.getString("username"))
                                           .note(res.getString("notes"))
-                                          .created(OffsetDateTime.ofInstant(res.getTimestamp("created").toInstant(),
-                                                                            ZoneId.systemDefault()));
+                                          .created(DaoUtils.toOffsetDateTime(res.getTimestamp("created")));
                     List<Note> editionNoteList = editionNotes.getOrDefault(edition_title, new ArrayList<>());
                     editionNoteList.add(note);
                     editionNotes.put(edition_title, editionNoteList);
@@ -450,8 +454,7 @@ public class NewspaperQADao {
                                           .pageNumber(res.getInt("page_number"))
                                           .username(res.getString("username"))
                                           .note(res.getString("notes"))
-                    .created(OffsetDateTime.ofInstant(res.getTimestamp("created").toInstant(),
-                                                      ZoneId.systemDefault()));
+                    .created(DaoUtils.toOffsetDateTime(res.getTimestamp("created")));
                     List<Note> pageNoteList = pageNotes.getOrDefault(key, new ArrayList<>());
                     pageNoteList.add(note);
                     pageNotes.put(key, pageNoteList);
@@ -550,8 +553,7 @@ public class NewspaperQADao {
                                           .editionDate(res.getDate("edition_date").toLocalDate())
                                           .username(res.getString("username"))
                                           .note(res.getString("notes"))
-                                          .created(OffsetDateTime.ofInstant(res.getTimestamp("created").toInstant(),
-                                                                            ZoneId.systemDefault()));
+                                          .created(DaoUtils.toOffsetDateTime(res.getTimestamp("created")));
                     result.add(note);
 
                 }
@@ -559,7 +561,7 @@ public class NewspaperQADao {
             return result;
         }
     }
-
+    
     public String getOrigRelPath(long handle) throws DAOFailureException {
         log.debug("Looking up relpath by handle for handle {}", handle);
         String SQL = "SELECT orig_relpath FROM newspaperarchive WHERE handle = ?";

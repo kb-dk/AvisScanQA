@@ -1,20 +1,31 @@
 function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
     var day = moment(date).format('YYYY-MM-DD');
     var url = `api/batch/${batchID}/${avisID}/${day}`
-    $.getJSON(url, {}, function (newspaperDay) {
-        const $headlineDiv = $("#headline-div");
-        $headlineDiv.empty().append($("<a/>",{class:"btn btn-secondary",text: "Back to newspaper year", href:`#/newspaper/${avisID}/${day.split('-')[0]}/`}))
-        $headlineDiv.append($("<a/>",{class:"btn btn-secondary",text: "Back to batch", href:`#/batch/${batchID}/`}))
-        $headlineDiv.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
-        $("#notice-div").empty();
-        $("#state-div").empty();
-        $("#batchOverview-table").empty();
-        console.log("Starting rendering of entites.");
-        renderDayDisplay(newspaperDay, editionIndex, pageIndex);
-    }).fail(function () {
-        console.log("Failed to load entites");
-        alert("Could not load entities");
-    });
+    $("#notice-div").empty();
+    $("#state-div").empty();
+    $("#batchOverview-table").empty();
+    const $headline = $("#headline-div").empty();
+    $("#primary-show").empty();
+
+    $.getJSON(url)
+        .done(function (newspaperDay) {
+            $headline.append($("<a/>", {
+                class: "btn btn-secondary",
+                text: "Back to newspaper year",
+                href: `#/newspaper/${avisID}/${day.split('-')[0]}/`
+            }))
+            $headline.append($("<a/>", {
+                class: "btn btn-secondary",
+                text: "Back to batch",
+                href: `#/batch/${batchID}/`
+            }))
+            $headline.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
+            // console.log("Starting rendering of entites.");
+            renderDayDisplay(newspaperDay, editionIndex, pageIndex);
+        })
+        .fail(function (jqxhr, textStatus, error) {
+            $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
+        });
 }
 
 
@@ -72,10 +83,13 @@ function initComponents() {
 function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
-    $("#contentRow");
 
-
-    const $dayCol = $("#dayCol");
+    const editions = newspaperDay.editions;
+    if (editionIndex < 0 || editionIndex >= editions.length){
+        $("#primary-show").text(`Edition ${editionIndex+1} not found. Day only has ${editions.length} editions`);
+        return;
+    }
+    const edition = editions[editionIndex];
 
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
     $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
@@ -95,7 +109,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.avisid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: newspaperDay.date}));
     $dayNotesForm.submit(noteSubmitHandler);
-    $dayCol.append($dayNotesForm);
+    $("#dayCol").append($dayNotesForm);
 
     const $editionCol = $("#editionCol");
 
@@ -109,7 +123,6 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
     $editionCol.append(editionShow);
 
-    let editions = newspaperDay.editions;
     for (let i = 0; i < editions.length; i++) {
         const edition = editions[i];
         const link = $("<a/>").attr({
@@ -118,34 +131,39 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         }).text(edition.edition);
         $editionNav.append(link);
     }
-    $("#edition-show").load("editionDisplay.html", function () {
-        var edition = editions[editionIndex];
-        if (edition.pages.length === 1) {
-            renderSinglePage(edition.pages[0]);
-        } else {
-            renderEdition(edition, pageIndex);
-        }
+    $("#edition-show").load("editionDisplay.html",
+        function () {
+            if (edition.pages.length === 1) {
+                renderSinglePage(edition.pages[0]);
+            } else {
+                renderEdition(edition, pageIndex);
+            }
 
-        const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
-        $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
-        $editionForm.append($("<textarea/>", {
-            class: "userNotes",
-            id: "editionNotes",
-            type: "text",
-            name: "notes"
-        }).text(edition.notes))
-        $editionForm.append($("<input/>", {id: "submit", type: "submit", name: "submit", form: "editionNotesForm"}));
-        $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
-        $editionForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
-        $editionForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
-        $editionForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
+            const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
+            $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
+            $editionForm.append($("<textarea/>", {
+                class: "userNotes",
+                id: "editionNotes",
+                type: "text",
+                name: "notes"
+            }).text(edition.notes))
+            $editionForm.append($("<input/>", {
+                id: "submit",
+                type: "submit",
+                name: "submit",
+                form: "editionNotesForm"
+            }));
+            $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
+            $editionForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
+            $editionForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
+            $editionForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
 
-        $editionCol.append($editionForm);
-        // alert($editionNotesForm.length) // if is == 0, not found form
+            $editionCol.append($editionForm);
+            // alert($editionNotesForm.length) // if is == 0, not found form
 
-        $editionForm.submit(noteSubmitHandler);
+            $editionForm.submit(noteSubmitHandler);
 
-    });
+        });
 }
 
 function renderSinglePage(page) {
@@ -211,12 +229,12 @@ function renderSinglePage(page) {
 function loadImage(filename, element) {
     let result = $("<div>");
     element.append(result);
-    const url = "api/file/?file="+filename;
+    const url = "api/file/?file=" + filename;
     return $.ajax({
         type: "GET",
         url: url,
-        xhrFields: { responseType: 'arraybuffer'},
-        beforeSend: function(){
+        xhrFields: {responseType: 'arraybuffer'},
+        beforeSend: function () {
             result.text(`Loading Page`);
         },
         success: function (data) {
@@ -225,7 +243,7 @@ function loadImage(filename, element) {
             var height = tiff.height();
             var canvas = tiff.toCanvas();
             if (canvas) {
-                canvas.setAttribute('style', `width:100%;` );
+                canvas.setAttribute('style', `width:100%;`);
                 canvas.download = filename;
                 canvas.title = filename;
                 canvas.filename = filename;
@@ -249,12 +267,16 @@ function renderEdition(entity, pageIndex) {
         const link = $("<a/>").attr({
             href: editPageIndexInHash(location.hash, i),
 
-            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-warning":"")}`,
+            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-warning" : "")}`,
         }).text(i + 1);
         $pageNav.append(link);
     }
-
-    renderSinglePage(pages[pageIndex]);
+    if (pageIndex >= 0 && pageIndex < pages.length) {
+        renderSinglePage(pages[pageIndex]);
+    } else {
+        let $pageDisplay = $("#primary-show");
+        $pageDisplay.text(`Page ${pageIndex+1} not found. Edition only has ${pages.length} pages`);
+    }
 }
 
 

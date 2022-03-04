@@ -9,13 +9,13 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+
+import static dk.kb.kula190.dao.DaoUtils.toOffsetDateTime;
 
 public class DaoBatchHelper {
     static List<Batch> getLatestBatches(String avisID, Connection conn) throws SQLException {
@@ -41,9 +41,7 @@ public class DaoBatchHelper {
                                            .state(res.getString("state"))
                                            .numProblems(res.getInt("num_problems"))
                                            .username(res.getString("username"))
-                                           .lastModified(OffsetDateTime.ofInstant(res.getTimestamp("lastmodified")
-                                                                                     .toInstant(),
-                                                                                  ZoneId.systemDefault()))
+                                           .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
                                            .numNotes(getNumNotes(batchID, conn)));
                 }
             }
@@ -64,19 +62,15 @@ public class DaoBatchHelper {
                     
                     return new Batch().batchid(batchID)
                                       .avisid(res.getString("avisid"))
-                                      .roundtrip(res.getInt(
-                                              "roundtrip"))
+                                      .roundtrip(res.getInt("roundtrip"))
                                       .startDate(res.getDate("start_date").toLocalDate())
-                                      .endDate(res.getDate(
-                                              "end_date").toLocalDate())
+                                      .endDate(res.getDate("end_date").toLocalDate())
                                       .deliveryDate(res.getDate("delivery_date").toLocalDate())
                                       .problems(res.getString("problems"))
                                       .state(res.getString("state"))
                                       .numProblems(res.getInt("num_problems"))
                                       .username(res.getString("username"))
-                                      .lastModified(OffsetDateTime.ofInstant(res.getTimestamp("lastmodified")
-                                                                                .toInstant(),
-                                                                             ZoneId.systemDefault()))
+                                      .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
                                       .numNotes(getNumNotes(batchID, conn));
                 }
             }
@@ -113,9 +107,7 @@ public class DaoBatchHelper {
                                         .notes(res.getString("notes"))
                                         .numProblems(res.getInt("num_problems"))
                                         .username(res.getString("username"))
-                                        .lastModified(OffsetDateTime.ofInstant(res.getTimestamp("lastmodified")
-                                                                                  .toInstant(),
-                                                                               ZoneId.systemDefault())));
+                                        .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified"))));
                 }
                 
             }
@@ -136,7 +128,6 @@ public class DaoBatchHelper {
             int param = 1;
             ps.setString(param++, batchID);
             try (ResultSet res = ps.executeQuery()) {
-                List<Note> notes = new ArrayList<>();
                 if (res.next()) {
                     return res.getInt("numNotes");
                 } else {

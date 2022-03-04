@@ -3,8 +3,11 @@ package dk.kb.kula190.dao;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Optional;
 
 public class DaoUtils {
@@ -64,5 +67,10 @@ public class DaoUtils {
         } else {
             return Optional.of(integer);
         }
+    }
+    
+    static OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
+        return OffsetDateTime.ofInstant(timestamp.toInstant(),
+                                        ZoneId.systemDefault());
     }
 }

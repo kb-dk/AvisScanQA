@@ -1,10 +1,15 @@
-
-
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
-    $.getJSON(url, {},
-        //TODO when parsing fails. Try it with non-existing batch. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-27
-        function (batch) {
+
+    let $state = $("#state-div").empty();
+    const $headline = $("#headline-div").empty();
+    let $notice = $("#notice-div").empty();
+
+    $.getJSON(url)
+        .fail(function ( jqxhr, textStatus, error) {
+            $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
+        })
+        .done(function (batch) {
             let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
             let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
 
@@ -12,27 +17,25 @@ function loadBatchForNewspaper(batchID) {
 
             let newspaperYears = range(fromYEAR, toYEAR);
 
-            const $headline = $("#headline-div");
-            $headline.empty().append($("<h1/>").text(`Batch ${batch.batchid}`));
+            $headline.append($("<h1/>").text(`Batch ${batch.batchid}`));
 
-
-            let $state = $("#state-div").empty();
-            $state.load("dropDownState.html",function (){
+            $state.load("dropDownState.html", function () {
                 $("#stateFormBatchID").val(batch.batchid);
                 const $stateForm = $("#stateForm");
                 $("#dropDownState").text(batch.state)
                 //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
-                $(`[value=${batch.state}]`).css("font-weight","Bold");
+                $(`[value=${batch.state}]`).css("font-weight", "Bold");
 
                 $stateForm.submit(stateSubmitHandler);
                 $state.append($stateForm);
             })
 
-            let $notice = $("#notice-div").empty();
-
             if (batch.numNotes > 0) {
-                $notice.append($("<a>", {href: `#/batch/${batch.batchid}/notes`, target: "_blank"}).text(`Get Notes (${batch.numNotes})`))
+                $notice.append($("<a>", {
+                    href: `#/batch/${batch.batchid}/notes`,
+                    target: "_blank"
+                }).text(`Get Notes (${batch.numNotes})`))
             }
 
             if (batch.numProblems > 0) {
@@ -51,6 +54,7 @@ function loadBatchForNewspaper(batchID) {
             renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
             renderBatchTable(batch.avisid);
         });
+
 }
 
 
@@ -72,7 +76,7 @@ function renderBatchTable(filter) {
 
     $table.bootstrapTable({
         url: "api/batch",
-        filterControl:true,
+        filterControl: true,
         columns: [{
             title: 'BatchID',
             field: 'batchid',
@@ -82,12 +86,12 @@ function renderBatchTable(filter) {
 
             },
             sortable: true,
-            filterControl:"input"
+            filterControl: "input"
         }, {
             title: 'Delivery Date',
             field: 'deliveryDate',
             sortable: true,
-            filterControl:"datepicker",
+            filterControl: "datepicker",
             "filterDatepickerOptions": {
                 //Some of these appears to HAVE to be in " to be picked up...
                 //https://bootstrap-datepicker.readthedocs.io/en/stable/options.html
@@ -95,19 +99,19 @@ function renderBatchTable(filter) {
                 autoclose: 'true',
                 todayHighlight: 'true',
                 "keyboardNavigation": 'true',
-                "clearBtn":true,
+                "clearBtn": true,
                 language: "da"
             }
         }, {
             title: 'State',
             field: 'state',
             sortable: true,
-            filterControl:"select"
+            filterControl: "select"
         }, {
             title: 'Problem Count',
             field: 'numProblems',
             sortable: true,
-            filterControl:"input"
+            filterControl: "input"
         }]
     })
 
@@ -128,6 +132,7 @@ function renderBatchTable(filter) {
 
 
 }
+
 function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
@@ -135,7 +140,7 @@ function stateSubmitHandler(event) {
     const state = event.originalEvent.submitter.value;
 
 
-    let parts = ["api", "batch",data.get('batch')]
+    let parts = ["api", "batch", data.get('batch')]
     var query = new URLSearchParams();
 
     query.append("state", state);
@@ -163,7 +168,8 @@ function stateSubmitHandler(event) {
 
 
 function handleNotesDownload(batchId) {
-    $.getJSON(`api/notes/${batchId}`, {}, function (notes) {
+    $.getJSON(`api/notes/${batchId}`)
+        .done(function (notes) {
         const items = notes;
         const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
         if (items.length > 0) {
@@ -185,5 +191,5 @@ function handleNotesDownload(batchId) {
         }
         //Close the window, but wait 100 ms to ensure that the download have started
         setTimeout("window.close()", 100)
-    })
+    });
 }
