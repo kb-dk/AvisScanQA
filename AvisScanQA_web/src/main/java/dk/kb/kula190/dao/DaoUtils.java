@@ -2,6 +2,7 @@ package dk.kb.kula190.dao;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
@@ -72,5 +73,17 @@ public class DaoUtils {
     static OffsetDateTime toOffsetDateTime(Timestamp timestamp) {
         return OffsetDateTime.ofInstant(timestamp.toInstant(),
                                         ZoneId.systemDefault());
+    }
+    
+    static Integer readNullableInt(ResultSet res, String column) throws SQLException {
+        Integer page_number = res.getInt(column);
+        if (res.wasNull()){
+            page_number = null;
+        }
+        return page_number;
+    }
+    
+    static LocalDate readNullableDate(ResultSet res, String column) throws SQLException {
+        return Optional.ofNullable(res.getDate(column)).map(Date::toLocalDate).orElse(null);
     }
 }

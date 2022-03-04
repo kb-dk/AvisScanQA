@@ -389,8 +389,9 @@ components:
           description: "Number of problems found. Use this to see if the batch completed checks without any errors"
           type: integer
         notes:
-          type: string
-          nullable: true
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
         numNotes:
           type: integer
         state:

@@ -1,9 +1,7 @@
 package dk.kb.kula190.dao;
 
 import dk.kb.kula190.model.Batch;
-import dk.kb.kula190.model.Note;
 
-import javax.annotation.Nonnull;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,7 +19,7 @@ public class DaoBatchHelper {
     static List<Batch> getLatestBatches(String avisID, Connection conn) throws SQLException {
         List<Batch> results = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(
-                "select batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, num_problems, username, lastmodified "
+                "select * "
                 + "from batch b "
                 + "where avisid = ? and "
                 + "b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)")) {
@@ -29,49 +27,26 @@ public class DaoBatchHelper {
             
             try (ResultSet res = ps.executeQuery()) {
                 if (res.next()) {
-                    
-                    String batchID = res.getString("batchid");
-                    results.add(new Batch().batchid(batchID)
-                                           .avisid(avisID)
-                                           .roundtrip(res.getInt("roundtrip"))
-                                           .startDate(res.getDate("start_date").toLocalDate())
-                                           .endDate(res.getDate("end_date").toLocalDate())
-                                           .deliveryDate(res.getDate("delivery_date").toLocalDate())
-                                           .problems(res.getString("problems"))
-                                           .state(res.getString("state"))
-                                           .numProblems(res.getInt("num_problems"))
-                                           .username(res.getString("username"))
-                                           .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
-                                           .numNotes(getNumNotes(batchID, conn)));
+                    final Batch e = readBatch(conn, res);
+                    results.add(e);
                 }
             }
             return results;
         }
     }
     
+    
     static Batch getLatestBatch(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
-                "select batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, num_problems, username, lastmodified "
+                "select * "
                 + "from batch b "
                 + "where batchid = ? and "
-                + "b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid) limit 1")) {
+                + "      b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid) limit 1")) {
             ps.setString(1, batchID);
             
             try (ResultSet res = ps.executeQuery()) {
                 if (res.next()) {
-                    
-                    return new Batch().batchid(batchID)
-                                      .avisid(res.getString("avisid"))
-                                      .roundtrip(res.getInt("roundtrip"))
-                                      .startDate(res.getDate("start_date").toLocalDate())
-                                      .endDate(res.getDate("end_date").toLocalDate())
-                                      .deliveryDate(res.getDate("delivery_date").toLocalDate())
-                                      .problems(res.getString("problems"))
-                                      .state(res.getString("state"))
-                                      .numProblems(res.getInt("num_problems"))
-                                      .username(res.getString("username"))
-                                      .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
-                                      .numNotes(getNumNotes(batchID, conn));
+                    return readBatch(conn, res);
                 }
             }
         }
@@ -79,62 +54,18 @@ public class DaoBatchHelper {
     }
     
     static List<Batch> getAllBatches(Connection conn) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT b1.batchid, b1.avisid, roundtrip, start_date, end_date, delivery_date, problems, "
-                + "num_problems, state, b1.username, lastmodified, n.notes as notes "
-                + "FROM batch b1"
-                + "   LEFT JOIN  notes n on b1.batchid = n.batchid and "
-                + "                         b1.avisid = n.avisid and "
-                + "                         n.edition_date is null and "
-                + "                         n.edition_title is null and "
-                + "                         n.section_title is null and "
-                + "                         n.page_number is null"
-                + " WHERE"
-                + " lastmodified >= ALL("
-                + "     SELECT lastmodified FROM batch b2 WHERE b1.batchid = b2.batchid)")) {
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * "
+                                                          + " FROM batch b1"
+                                                          + " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch b2 WHERE b1.batchid = b2.batchid)")) {
             List<Batch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
                 
                 while (res.next()) {
-                    list.add(new Batch().batchid(res.getString("batchid"))
-                                        .avisid(res.getString("avisid"))
-                                        .roundtrip(res.getInt("roundtrip"))
-                                        .startDate(res.getDate("start_date").toLocalDate())
-                                        .endDate(res.getDate("end_date").toLocalDate())
-                                        .deliveryDate(res.getDate("delivery_date").toLocalDate())
-                                        .problems(res.getString("problems"))
-                                        .state(res.getString("state"))
-                                        .notes(res.getString("notes"))
-                                        .numProblems(res.getInt("num_problems"))
-                                        .username(res.getString("username"))
-                                        .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified"))));
+                    list.add(readBatch(conn, res));
                 }
                 
-            }
-            for (Batch batch : list) {
-                batch.setNumNotes(getNumNotes(batch.getBatchid(), conn));
             }
             return list;
-        }
-    }
-    
-    public static Integer getNumNotes(@Nonnull String batchID, Connection conn) throws SQLException {
-        //TODO this should probably be included in the callers SQL statement, rather being a separate statement
-        try (PreparedStatement ps = conn.prepareStatement(
-                "SELECT count(*) as numNotes "
-                + " from notes "
-                + " where batchid = ? "
-                + " limit 1")) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            try (ResultSet res = ps.executeQuery()) {
-                if (res.next()) {
-                    return res.getInt("numNotes");
-                } else {
-                    return null;
-                }
-                
-            }
         }
     }
     
@@ -157,6 +88,23 @@ public class DaoBatchHelper {
                 conn.commit();
             }
         }
+    }
+    
+    
+    private static Batch readBatch(Connection conn, ResultSet res) throws SQLException {
+        String batchID = res.getString("batchid");
+        return new Batch().batchid(batchID)
+                          .avisid(res.getString("avisid"))
+                          .roundtrip(res.getInt("roundtrip"))
+                          .startDate(res.getDate("start_date").toLocalDate())
+                          .endDate(res.getDate("end_date").toLocalDate())
+                          .deliveryDate(res.getDate("delivery_date").toLocalDate())
+                          .problems(res.getString("problems"))
+                          .state(res.getString("state"))
+                          .numProblems(res.getInt("num_problems"))
+                          .username(res.getString("username"))
+                          .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
+                          .numNotes(DaoNoteHelper.getNumNotes(batchID, conn));
     }
     
     static Stream<LocalDate> batchDays(Batch batch) {
