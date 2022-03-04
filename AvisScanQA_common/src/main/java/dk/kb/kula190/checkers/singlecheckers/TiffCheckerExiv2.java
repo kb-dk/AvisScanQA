@@ -43,28 +43,31 @@ public class TiffCheckerExiv2 extends DecoratedEventHandler {
             properties.load(in);
         }
         
+        //Compression -> Uncompressed
 
-        //See src/test/resources/sampleImageMagickOutput.yaml for what and how
         //TODO implement these checks
+        //format -> image/tiff
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid format {actual}. Should have been {expected}",
-                    properties.getProperty("Image.Format"),
-                    "TIFF (Tagged Image File Format)"
+                    "Exiv2 reports invalid format {actual}. Should have been {expected}",
+                    properties.getProperty("format"),
+                    "image/tiff"
                    );
 
+        // ColorSpace -> Uncalibrated
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}",
-                    properties.getProperty("Image.Colorspace"),
-                    "sRGB"
+                    "Exiv2 reports invalid PhotometricInterpretation {actual}. Should have been {expected}",
+                    properties.getProperty("PhotometricInterpretation"),
+                    "RGB"
                    );
-
+        
+        //SamplesPerPixel -> 3
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}",
-                    properties.getProperty("Image.Depth"),
-                    "8-bit"
+                    "Exiv2 reports invalid Bit depth {actual}. Should have been {expected}",
+                    properties.getProperty("BitsPerSample"),
+                    "8 8 8"
                    );
 
         //TODO other tests https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-32

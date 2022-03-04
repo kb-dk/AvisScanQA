@@ -73,7 +73,7 @@ public class TiffAnalyzerExiv2 extends InjectingTreeEventHandler {
     
     private List<String> runTool(AttributeParsingEvent event) throws IOException {
         
-        ProcessBuilder builder = new ProcessBuilder("exiv2", "-PEIXnt", event.getLocation());
+        ProcessBuilder builder = new ProcessBuilder("exiv2","-u", "-PEIXnt", event.getLocation());
         Process process = builder.start();
         List<String> lines;
         try {
