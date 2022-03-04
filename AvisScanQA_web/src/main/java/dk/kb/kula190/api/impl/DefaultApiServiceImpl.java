@@ -186,7 +186,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
                               DaoUtils.nullable(avis),
                               DaoUtils.nullable(edition),
                               DaoUtils.nullable(section),
-                              DaoUtils.nullableInteger(page));
+                              DaoUtils.nullableInteger(page),
+                              username);
         } catch (DAOFailureException e) {
             log.error("Could not store notes for {}/{}/{}/{}/{}/{}, '{}'",
                       batchID,

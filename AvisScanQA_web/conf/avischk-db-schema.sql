@@ -44,26 +44,18 @@ CREATE INDEX avisid_format_index ON newspaperarchive (avisid, format_type);
 
 CREATE TABLE notes
 (
+    id            VARCHAR(1024) primary key not null,
     batchid       VARCHAR(255) NOT NULL,
     avisid        VARCHAR(255) NULL,
     edition_date  DATE         NULL,
     edition_title VARCHAR(255) NULL,
     section_title VARCHAR(255) NULL,
     page_number   INTEGER      NULL,
-    notes         TEXT         NOT NULL,
+    username      VARCHAR(255) NOT NULL,
+    notes         TEXT         NOT NULL
 
-    CONSTRAINT notes_batchid_avisid_edition_date_edition_title_section_tit_key
-        UNIQUE (batchid, avisid, edition_date, edition_title, section_title, page_number)
+
 
 --     FOREIGN KEY (batchid) REFERENCES batch (batchid)
 -- TODO many to many links between avisIDs in notes and newspaperArchive
 );
-
-CREATE INDEX notes_batch_index ON notes (batchid);
-CREATE INDEX notes_batch_avis_index ON notes (batchid, avisid);
-CREATE INDEX notes_batch_avis_date_index ON notes (batchid, avisid, edition_date);
-CREATE INDEX notes_batch_avis_date_edition_index ON notes (batchid, avisid, edition_date, edition_title);
-CREATE INDEX notes_batch_avis_date_edition_section_index ON notes (batchid, avisid, edition_date, edition_title, section_title);
-CREATE INDEX notes_batch_avis_date_edition_section_page_index ON notes (batchid, avisid, edition_date, edition_title,
-                                                                        section_title, page_number);
-
