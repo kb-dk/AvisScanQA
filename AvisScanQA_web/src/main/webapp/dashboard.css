@@ -107,5 +107,5 @@ body {
 .userNotes{
   width: 20em;
   height: 2em;
-  display: block;
+  display: inline-block;
 }
