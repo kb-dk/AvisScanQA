@@ -363,7 +363,7 @@ public class NewspaperQADao {
             Map<String, NewspaperEdition> editions = getPages(batchID, newspaperID, date, conn, batchesFolder);
 
             Map<String, List<Note>> editionNotes = getEditionNotes(batchID, newspaperID, date, conn);
-            editions.forEach((key, value) -> value.setNotes(editionNotes.get(key)));
+            editions.forEach((key, value) -> value.setNotes(editionNotes.getOrDefault(key,new ArrayList<>())));
 
             List<String>
                     editionTitles =
@@ -371,7 +371,7 @@ public class NewspaperQADao {
             for (String editionTitle : editionTitles) {
                 NewspaperEdition edition = editions.get(editionTitle);
                 Map<Integer, List<Note>> pageNotes = getPageNotes(batchID, newspaperID, date, editionTitle, conn);
-                edition.getPages().forEach(page -> page.setNotes(pageNotes.get(page.getPageNumber())));
+                edition.getPages().forEach(page -> page.setNotes(pageNotes.getOrDefault(page.getPageNumber(), new ArrayList<>())));
             }
 
             result.setEditions(new ArrayList<>(editions.values()));
@@ -610,13 +610,13 @@ public class NewspaperQADao {
         }
     }
 
-    public void removeNotes(String id) throws DAOFailureException {
+    public void removeNotes(Integer id) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
 
             try (PreparedStatement ps = conn.prepareStatement(
                     "DELETE FROM notes WHERE id = ?")) {
                 int param = 1;
-                ps.setString(param++, id);
+                ps.setInt(param++, id);
                 ps.execute();
                 if (!conn.getAutoCommit()) {
                     conn.commit();

@@ -15,9 +15,7 @@ import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.InvalidArgumentServiceException;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.text.StringSubstitutor;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,14 +37,12 @@ import javax.ws.rs.ext.Providers;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * AvisScanQA_web
@@ -134,7 +130,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
 
-    @Override public void removeNote(String batchID, String id) {
+    @Override
+    public void removeNote(String batchID, Integer id) {
         try {
             getDAO().removeNotes(id);
         }catch (DAOFailureException e) {

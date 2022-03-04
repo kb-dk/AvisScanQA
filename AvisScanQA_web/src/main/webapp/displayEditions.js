@@ -47,7 +47,7 @@ function noteSubmitHandler(event) {
     let url = parts.join("/") + "?" + query.toString();
 
     console.log(url)
-    const notes = data.get('notes');
+    const notes = data.get('standardNote')+" "+ data.get('notes');
 
     $.ajax({
         type: "POST",
@@ -59,10 +59,40 @@ function noteSubmitHandler(event) {
         dataType: "json",
         contentType: "application/json"
     });
-
+    location.reload();
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
+function noteDeleteHandler(event) {
+    event.preventDefault(); // <- cancel event
+
+    const data = new FormData(event.target);
+
+    let parts = ["api", "notes", data.get('batch')]
+    var query = new URLSearchParams();
+
+    query.append("id", data.get('id'));
+
+    // let url = parts.filter(x => x).join("/")
+    let url = parts.join("/") + "?" + query.toString();
+
+    const notes = data.get('notes');
+
+    $.ajax({
+        type: "DELETE",
+        url: url,
+        data: notes,
+        success: function () {
+            alert("note deleted")
+        },
+        dataType: "json",
+        contentType: "application/json"
+    });
+    location.reload();
+    // alert('Handler for .submit() called.');
+    return false;  // <- cancel event
+}
+
 
 function initComponents() {
     let $primary = $("#primary-show");
@@ -84,21 +114,31 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
 
-    const editions = newspaperDay.editions;
+    let editions = newspaperDay.editions;
     if (editionIndex < 0 || editionIndex >= editions.length){
         $("#primary-show").text(`Edition ${editionIndex+1} not found. Day only has ${editions.length} editions`);
         return;
     }
     const edition = editions[editionIndex];
 
-    let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
-    $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
-    $dayNotesForm.append($("<textarea/>", {
+    const $dayCol = $("#dayCol");
+    let $dayNotesTextArea = $("<textarea/>", {
         class: "userNotes",
         id: "dayNotes",
         type: "text",
         name: "notes"
-    }).text(newspaperDay.notes))
+    })
+
+
+    let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
+
+    let $dropDownDayNotes = $("<select/>",{class:"form-select",name:"standardNote"});
+
+    $dropDownDayNotes.append($("<option>",{value:"",html:"",selected:"true"}));
+    $dropDownDayNotes.append($("<option>",{value:"Udkom ikke pgr. strejke",html:"Udkom ikke pgr. strejke"}));
+    $dayNotesForm.append($dropDownDayNotes)
+    $dayNotesForm.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
+    $dayNotesForm.append($dayNotesTextArea);
     $dayNotesForm.append($("<input/>", {
         id: "dayNotesFormSubmit",
         type: "submit",
@@ -109,7 +149,26 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.avisid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: newspaperDay.date}));
     $dayNotesForm.submit(noteSubmitHandler);
-    $("#dayCol").append($dayNotesForm);
+    $dayCol.append($dayNotesForm);
+
+
+    for(let i = 0; i < newspaperDay.notes.length; i++){
+        let $dayFormDiv = $("<div/>", {class:"dayFormDiv"});
+        let $dayForm = $("<form>", {action: "", method: "delete"});
+        $dayForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batchid}));
+        $dayForm.append($("<input/>", {type: "hidden", name: "id", value: newspaperDay.notes[i].id}));
+        let $dayNote = $("<textarea/>",{class:"userNotes",type:"text",name:"notes",text:newspaperDay.notes[i].note, readOnly:"true"});
+        $dayForm.append($dayNote);
+        $dayForm.append($("<input/>", {
+            type: "submit",
+            name: "submit",
+            value:"Delete"
+        }));
+        $dayForm.append($("<label/>",{text:"-"+newspaperDay.notes[i].username + " " + newspaperDay.notes[i].created}))
+        $dayForm.submit(noteDeleteHandler);
+        $dayFormDiv.append($dayForm);
+        $dayCol.append($dayFormDiv);
+    }
 
     const $editionCol = $("#editionCol");
 
@@ -131,39 +190,72 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         }).text(edition.edition);
         $editionNav.append(link);
     }
-    $("#edition-show").load("editionDisplay.html",
-        function () {
-            if (edition.pages.length === 1) {
-                renderSinglePage(edition.pages[0]);
-            } else {
-                renderEdition(edition, pageIndex);
+    $("#edition-show").load("editionDisplay.html", function () {
+
+        let $editionNotesTextArea = $("<textarea/>", {
+            class: "userNotes",
+            id: "editionNotes",
+            type: "text",
+            name: "notes"
+        })
+
+
+        let $editionNotesForm = $("<form>", {id: "editionNotesForm",action: "api/editionNotes", method: "post"});
+
+        let $dropDownEditionNotes = $("<select/>",{class:"form-select",name:"standardNote"});
+
+        $dropDownEditionNotes.append($("<option>",{value:"",html:"",selected:"true"}));
+        $dropDownEditionNotes.append($("<option>",{value:"Ugyldig edition",html:"Ugyldig edition"}));
+        $editionNotesForm.append($dropDownEditionNotes)
+        $editionNotesForm.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
+        $editionNotesForm.append($editionNotesTextArea);
+        $editionNotesForm.append($("<input/>", {
+            id: "editionNotesFormSubmit",
+            type: "submit",
+            name: "submit",
+            form: "editionNotesForm"
+        }));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
+        $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
+        $editionNotesForm.submit(noteSubmitHandler);
+        $editionCol.append($editionNotesForm);
+
+        if(edition.notes) {
+            for (let i = 0; i < edition.notes.length; i++) {
+                let $editionFormDiv = $("<div/>", {class: "dayFormDiv"});
+                let $editionForm = $("<form>", {action: "", method: "delete"});
+                $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
+                $editionForm.append($("<input/>", {type: "hidden", name: "id", value: edition.notes[i].id}));
+                let $editionNote = $("<textarea/>", {
+                    class: "userNotes",
+                    type: "text",
+                    name: "notes",
+                    text: edition.notes[i].note,
+                    readOnly: "true"
+                });
+                $editionForm.append($editionNote);
+                $editionForm.append($("<input/>", {
+                    type: "submit",
+                    name: "submit",
+                    value: "Delete"
+                }));
+                $editionForm.append($("<label/>", {text: "-" + edition.notes[i].username + " " + edition.notes[i].created}))
+                $editionForm.submit(noteDeleteHandler);
+                $editionFormDiv.append($editionForm);
+                $editionCol.append($editionFormDiv);
             }
+        }
+        if (edition.pages.length === 1) {
+            renderSinglePage(edition.pages[0]);
+        } else {
+            renderEdition(edition, pageIndex);
+        }
 
-            const $editionForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
-            $editionForm.append($("<label/>").text("Edition notes").attr("for", "editionNotes"));
-            $editionForm.append($("<textarea/>", {
-                class: "userNotes",
-                id: "editionNotes",
-                type: "text",
-                name: "notes"
-            }).text(edition.notes))
-            $editionForm.append($("<input/>", {
-                id: "submit",
-                type: "submit",
-                name: "submit",
-                form: "editionNotesForm"
-            }));
-            $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
-            $editionForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
-            $editionForm.append($("<input/>", {type: "hidden", name: "date", value: edition.date}));
-            $editionForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
+        // alert($editionNotesForm.length) // if is == 0, not found form
 
-            $editionCol.append($editionForm);
-            // alert($editionNotesForm.length) // if is == 0, not found form
-
-            $editionForm.submit(noteSubmitHandler);
-
-        });
+    });
 }
 
 function renderSinglePage(page) {
@@ -172,25 +264,64 @@ function renderSinglePage(page) {
     const date = moment(page.editionDate).format("YYYY-MM-DD");
     const $pageCol = $("#pageCol");
 
-    let $pageForm = $("<form/>", {id: "pageNotesForm", action: "", method: "post"});
-    $pageForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
-    $pageForm.append($("<textarea/>", {
+
+    let $pageNotesTextArea = $("<textarea/>", {
         class: "userNotes",
         id: "pageNotes",
         type: "text",
         name: "notes"
-    }).text(page.notes));
+    })
 
-    $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "date", value: date}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "edition", value: page.editionTitle}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "section", value: page.sectionTitle}));
-    $pageForm.append($("<input/>", {type: "hidden", name: "page", value: page.pageNumber}));
-    $pageForm.append($("<input/>", {type: "submit", name: "submit", id: "pageNotesFormSubmit", form: "pageNotesForm"}));
-    $pageForm.submit(noteSubmitHandler);
-    $pageCol.append($pageForm);
 
+    let $pageNotesForm = $("<form>", {id: "pageNotesForm",action: "", method: "post"});
+
+    let $dropDownPageNotes = $("<select/>",{class:"form-select",name:"standardNote"});
+
+    $dropDownPageNotes.append($("<option>",{value:"",html:"",selected:"true"}));
+    $dropDownPageNotes.append($("<option>",{value:"Utydelig side",html:"Utydelig side"}));
+    $pageNotesForm.append($dropDownPageNotes)
+    $pageNotesForm.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
+    $pageNotesForm.append($pageNotesTextArea);
+    $pageNotesForm.append($("<input/>", {
+        id: "pageNotesFormSubmit",
+        type: "submit",
+        name: "submit",
+        form: "pageNotesForm"
+    }));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "date", value: page.editionDate}));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: page.editionTitle}));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "section", value: page.sectionTitle}));
+    $pageNotesForm.append($("<input/>", {type: "hidden", name: "page", value: page.pageNumber}));
+    $pageNotesForm.submit(noteSubmitHandler);
+    $pageCol.append($pageNotesForm);
+
+    if(page.notes) {
+        for (let i = 0; i < page.notes.length; i++) {
+            let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
+            let $pageForm = $("<form>", {action: "", method: "delete"});
+            $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
+            $pageForm.append($("<input/>", {type: "hidden", name: "id", value: page.notes[i].id}));
+            let $pageNote = $("<textarea/>", {
+                class: "userNotes",
+                type: "text",
+                name: "notes",
+                text: page.notes[i].note,
+                readOnly: "true"
+            });
+            $pageForm.append($pageNote);
+            $pageForm.append($("<input/>", {
+                type: "submit",
+                name: "submit",
+                value: "Delete"
+            }));
+            $pageForm.append($("<label/>", {text: "-" + page.notes[i].username + " " + page.notes[i].created}))
+            $pageForm.submit(noteDeleteHandler);
+            $pageFormDiv.append($pageForm);
+            $pageCol.append($pageFormDiv);
+        }
+    }
     let $contentRow = $("#contentRow");
     $contentRow.append($pageCol);
 
