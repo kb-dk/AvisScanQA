@@ -45,15 +45,7 @@ public class TiffCheckerExiv2 extends DecoratedEventHandler {
         
         //Compression -> Uncompressed
 
-        //TODO implement these checks
-        //format -> image/tiff
-        checkEquals(event,
-                    FailureType.INVALID_TIFF_ERROR,
-                    "Exiv2 reports invalid format {actual}. Should have been {expected}",
-                    properties.getProperty("format"),
-                    "image/tiff"
-                   );
-
+     
         // ColorSpace -> Uncalibrated
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
