@@ -106,7 +106,7 @@
                         </xs:documentation>
                     </xs:annotation>
                 </xs:element>
-                <xs:element ref="filereference">
+                <xs:element ref="filereference" minOccurs="0">
                     <xs:annotation>
                         <xs:documentation>
                             The file in which a failure is found.
@@ -152,7 +152,7 @@
                 <xs:element name="editionDate" type="xs:string"/>
                 <xs:element name="udgave" type="xs:string"/>
                 <xs:element name="sectionName" type="xs:string"/>
-                <xs:element name="pageNumber" type="xs:int"/>
+                <xs:element name="pageNumber" type="xs:int" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>

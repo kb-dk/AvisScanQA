@@ -9,6 +9,7 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
@@ -23,6 +24,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
     
     
     private String batchName;
+    private Path batchFolder;
     private String newspaperName;
     private Pattern fileNamePattern;
     private LocalDate batchStartDate;
@@ -43,6 +45,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         
         String folderName = EventHandlerUtils.lastName(event.getName());
         if (batchName == null) {
+            batchFolder = Path.of(event.getLocation() );
             batchName = folderName;
             final String[] batchNameSplits = batchName.split("_", 5);
             newspaperName   = batchNameSplits[0];
@@ -53,6 +56,8 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         }
         
         String parentName = new File(event.getLocation()).getParentFile().getName();
+        
+        
         checkEquals(event,
                     FailureType.FILE_STRUCTURE_ERROR,
                     "Parent dir {actual} should always be batch dir {expected}, i.e. only one level of " + "folders",
@@ -63,7 +68,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         //Only ALTO, METS, MIX, MODS, PDF, TIFF allowed here
         checkInSet(event,
                    FailureType.FILE_STRUCTURE_ERROR,
-                   "Folder name {actual} must be in one of {set}",
+                   "Folder name "+batchFolder+"/{actual} must be in one of {set}",
                    folderName,
                    Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF"));
     }
@@ -72,12 +77,13 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
         final File file = new File(event.getLocation());
         String fileName = file.getName();
+        File parent = file.getParentFile();
         String parentName = file.getParentFile().getName();
         
         String extension = EventHandlerUtils.getExtension(fileName);
         String nameWithoutExtension = EventHandlerUtils.removeExtension(fileName);
         
-        checkExtensionMatchFolder(event, parentName, extension);
+        checkExtensionMatchFolder(event, parent, extension);
         checkNameMachPattern(event, extension, nameWithoutExtension);
         
     }
@@ -108,12 +114,13 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                 }
                 
             }
-            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,this.getClass().getSimpleName(),"Extension "+extension+" is not expected here");
+            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,this.getClass().getSimpleName(),
+                                     "Extension "+extension+" is not expected here");
         }
     }
     
-    private void checkExtensionMatchFolder(AttributeParsingEvent event, String parentName, String extension) {
-        switch (parentName) {
+    private void checkExtensionMatchFolder(AttributeParsingEvent event, File parentName, String extension) {
+        switch (parentName.getName()) {
             case "ALTO" -> checkInSet(event,
                                       FailureType.FILE_STRUCTURE_ERROR,
                                       "File in folder "
@@ -169,8 +176,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                                       extension,
                                       Set.of("tif"));
             default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR, this.getClass().getSimpleName(),
-                                  "Folder "+parentName+" not on the list of expected folders (ALTO, METS, MIX, MODS, "
-                                  + "PDF, TIFF) ");
+                                  "File not allowed in folder "+batchFolder.getParent().relativize(Path.of(event.getLocation())).getParent());
         }
     }
 }

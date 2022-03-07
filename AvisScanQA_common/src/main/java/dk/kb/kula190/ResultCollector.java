@@ -1,11 +1,13 @@
 package dk.kb.kula190;
 
-import dk.kb.kula190.generated.*;
-import dk.kb.kula190.iterators.common.AttributeParsingEvent;
-import dk.kb.kula190.iterators.common.NodeParsingEvent;
+import dk.kb.kula190.generated.Details;
+import dk.kb.kula190.generated.Failure;
+import dk.kb.kula190.generated.FailureType;
+import dk.kb.kula190.generated.Failures;
+import dk.kb.kula190.generated.ObjectFactory;
+import dk.kb.kula190.generated.Reference;
+import dk.kb.kula190.generated.Result;
 import dk.kb.kula190.iterators.common.ParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
-import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
 import org.slf4j.Logger;
 
@@ -101,7 +103,8 @@ public class ResultCollector {
     
     /**
      * Add a specific failure to the result collector. All these parameters must be non-null and non-empty
-     *  @param reference   the reference to the file/object that caused the failure
+     *
+     * @param reference   the reference to the file/object that caused the failure
      * @param type        the type of failure
      * @param component   the component that failed
      * @param description Description of the failure.
@@ -126,17 +129,19 @@ public class ResultCollector {
                                         String description,
                                         String... details) {
         resultCount++; //The count of the current failure, starting at 1.
-       
+        
         List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
         
+        failure.setFilereference(fileReference.getLocation());
+        
+        if (fileReference instanceof DecoratedParsingEvent decoratedParsingEvent) {
+            Reference reference = createSpecificReference(decoratedParsingEvent);
+            failure.setReference(reference);
+        }
         
         
-        Reference reference = createSpecificReference(fileReference);
-        failure.setReference(reference);
-    
-        failure.setFilereference(fileReference.getLocation().substring(fileReference.getLocation().indexOf(reference.getAvis()) ));
-
+        
         failure.setType(type);
         failure.setComponent(component);
         failure.setDescription(description);
@@ -167,26 +172,16 @@ public class ResultCollector {
         setSuccess(false);
     }
     
-    private Reference createSpecificReference(ParsingEvent fileReference) {
+    private Reference createSpecificReference(DecoratedParsingEvent decoratedParsingEvent) {
         Reference reference = new Reference();
-        if (fileReference instanceof DecoratedParsingEvent decoratedParsingEvent) {
-            reference.setAvis(decoratedParsingEvent.getAvis());
-            reference.setEditionDate(Optional.ofNullable(decoratedParsingEvent.getEditionDate()).map(LocalDate::toString).orElse(null));
-            reference.setUdgave(decoratedParsingEvent.getUdgave());
-            reference.setSectionName(decoratedParsingEvent.getSectionName());
-            reference.setPageNumber(Optional.ofNullable(decoratedParsingEvent.getPageNumber()).orElse(-1));
-        } else {
-            DecoratedParsingEvent decoratedParsingEvent = switch (fileReference.getType()) {
-                case NodeEnd -> new DecoratedNodeParsingEvent((NodeParsingEvent) fileReference);
-                case NodeBegin -> new DecoratedNodeParsingEvent((NodeParsingEvent) fileReference);
-                case Attribute -> new DecoratedAttributeParsingEvent((AttributeParsingEvent) fileReference);
-            };
-            reference.setAvis(decoratedParsingEvent.getAvis());
-            reference.setEditionDate(Optional.ofNullable(decoratedParsingEvent.getEditionDate()).map(LocalDate::toString).orElse(null));
-            reference.setUdgave(decoratedParsingEvent.getUdgave());
-            reference.setSectionName(decoratedParsingEvent.getSectionName());
-            reference.setPageNumber(Optional.ofNullable(decoratedParsingEvent.getPageNumber()).orElse(-1));
-        }
+        reference.setAvis(decoratedParsingEvent.getAvis());
+        reference.setEditionDate(Optional.ofNullable(decoratedParsingEvent.getEditionDate())
+                                         .map(LocalDate::toString)
+                                         .orElse(null));
+        reference.setUdgave(decoratedParsingEvent.getUdgave());
+        reference.setSectionName(decoratedParsingEvent.getSectionName());
+        reference.setPageNumber(decoratedParsingEvent.getPageNumber());
+        
         return reference;
     }
     
