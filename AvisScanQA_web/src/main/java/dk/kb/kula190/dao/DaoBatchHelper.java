@@ -96,6 +96,7 @@ public class DaoBatchHelper {
         return new Batch().batchid(batchID)
                           .avisid(res.getString("avisid"))
                           .roundtrip(res.getInt("roundtrip"))
+                          .notes(DaoNoteHelper.getBatchLevelNotes(batchID,conn))
                           .startDate(res.getDate("start_date").toLocalDate())
                           .endDate(res.getDate("end_date").toLocalDate())
                           .deliveryDate(res.getDate("delivery_date").toLocalDate())

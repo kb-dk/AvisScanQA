@@ -50,7 +50,85 @@ function loadBatchForNewspaper(batchID) {
                                 2)));
                 }
             }
+            let $notesButton = $("<button/>",{class:"notesButton btn btn-primary", text:"Show and create notes"});
+            let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
+            $notesButton.click(()=>{
 
+                let visible = $showNotesDiv.attr('visible');
+                if (visible == 'false'){
+                    $showNotesDiv.attr('visible',true);
+                    $showNotesDiv.addClass("active")
+                }else{
+                    $showNotesDiv.attr('visible',false);
+                    $showNotesDiv.removeClass("active")
+                }
+
+                console.log(visible)
+            })
+
+            let $batchNotesForm = $("<form/>",{id:"batchNotesForm",action:"",method:"post"});
+            const formRow1 = $("<div>", {class: "form-row"})
+            const formRow2 = $("<div>", {class: "form-row"})
+            $batchNotesForm.append(formRow1);
+            $batchNotesForm.append(formRow2);
+
+            formRow1.append($("<select/>", {
+                class: "form-select", name: "standardNote"
+            }).append($("<option>", {value: "", html: "", selected: "true"}))
+                .append($("<option>", {
+                    value: "Batch ugyldigt", html: "Batch ugyldigt"
+                })))
+
+            formRow2.append($("<textarea/>", {
+                class: "userNotes", id: "batchNotes", type: "text", name: "notes"
+            }));
+            formRow2.append($("<input/>", {
+                id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm"
+            }));
+
+            $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
+            $batchNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: batch.avisid}));
+
+            $batchNotesForm.submit(noteSubmitHandler);
+            $showNotesDiv.append($batchNotesForm);
+            console.log(batch)
+            if (batch.notes) {
+
+
+                for (let i = 0; i < batch.notes.length; i++) {
+                    // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
+                    let $batchForm = $("<form>", {action: "", method: "delete"});
+                    $batchForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
+
+                    const note = batch.notes[i];
+                    $batchForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
+
+                    const formRow = $("<div>", {class: "form-row"})
+                    $batchForm.append(formRow);
+
+                    let $batchNote = $("<textarea/>", {
+                        class: "userNotes",
+                        type: "text",
+                        name: "notes",
+                        text: note.note,
+                        readOnly: "true",
+                        disabled: true
+                    });
+                    formRow.append($("<label/>", {
+                        for: $batchNote.uniqueId().attr("id"),
+                        text: `-${note.username} ${note.created}`
+                    }))
+                    formRow.append($batchNote);
+                    formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+                        "border": "none",
+                        "background-color": "transparent"
+                    }));
+                    $batchForm.submit(noteDeleteHandler);
+                    $showNotesDiv.append($batchForm);
+                }
+            }
+            $notice.append($notesButton);
+            $notice.append($showNotesDiv);
             renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
             renderBatchTable(batch.avisid);
         });

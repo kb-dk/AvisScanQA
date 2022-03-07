@@ -256,7 +256,7 @@ public class NewspaperQADao {
         final int year = Integer.parseInt(yearString);
         try (Connection conn = connectionPool.getConnection()) {
             Batch batch = DaoBatchHelper.getLatestBatch(batchID, conn);
-            
+
             DaoBatchHelper.batchDays(batch)
                           .filter(date -> date.getYear() == year) //We could also make limits on the range...
                           .forEach(date -> {
@@ -412,8 +412,7 @@ public class NewspaperQADao {
                                                                 .editionTitle(edition_title)
                                                                 .sectionTitle(res.getString("section_title"))
                                                                 .pageNumber(res.getInt("page_number"))
-                                                                .deliveryDate(res.getDate("delivery_date")
-                                                                                 .toLocalDate())
+                                                                .deliveryDate(res.getDate("delivery_date").toLocalDate())
                                                                 .handle(res.getLong("handle"))
                                                                 .singlePage(res.getBoolean("single_page"))
                                                                 .fraktur(res.getBoolean("fraktur"))
