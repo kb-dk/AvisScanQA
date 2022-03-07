@@ -11,41 +11,45 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
  * Abstract tree event handler, with no-op methods
  */
 public abstract class DefaultTreeEventHandler implements TreeEventHandler {
-
+    
     protected final Logger log = LoggerFactory.getLogger(this.getClass());
-
+    
     private ResultCollector resultCollector;
-
+    
     public DefaultTreeEventHandler(ResultCollector resultCollector) {
         this.resultCollector = resultCollector;
     }
-
+    
     public final ResultCollector getResultCollector() {
         return resultCollector;
     }
-
-
+    
+    
     public void handleFinish() throws IOException {
     }
-
+    
     public void handleNodeBegin(NodeBeginsParsingEvent event) throws IOException {
     }
-
+    
     public void handleNodeEnd(NodeEndParsingEvent event) throws IOException {
     }
-
+    
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
     }
-
-
+    
+    
     protected void checkEquals(ParsingEvent event,
                                FailureType type,
                                String description,
@@ -60,27 +64,63 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                        description.replace("{expected}", expectedString).replace("{actual}", actualString));
         }
     }
-
+    
+    protected Matcher checkRegExp(ParsingEvent event,
+                                  FailureType type,
+                                  String description,
+                                  String actual,
+                                  Pattern expected) {
+        String actualString = asString(actual);
+        String expectedString = asString(expected);
+        Matcher matcher = null;
+        if (expected != null) {
+            matcher = expected.matcher(actual);
+            if (!expected.matcher(actual).matches()) {
+                addFailure(event,
+                           type,
+                           this.getClass().getSimpleName(),
+                           description.replace("{expected}", expectedString).replace("{actual}", actualString));
+            }
+        }
+        return matcher;
+    }
+    
+    protected void checkInSet(ParsingEvent event,
+                              FailureType type,
+                              String description,
+                              Object actual,
+                              Set<?> set) {
+        String actualString = asString(actual);
+        String expectedString = asString(set);
+        if (set == null || !set.contains(actual)) {
+            addFailure(event,
+                       type,
+                       this.getClass().getSimpleName(),
+                       description.replace("{expected}", expectedString).replace("{actual}", actualString));
+        }
+        
+    }
+    
     protected void checkAllEquals(ParsingEvent event,
                                   FailureType type,
                                   String description,
                                   Object... equals
                                  ) {
         if (Arrays.stream(equals).distinct().count() != 1) {
-
+            
             String replace = description;
             for (int i = 0; i < equals.length; i++) {
                 replace = replace.replace("{val" + i + "}", asString(equals[i]));
             }
-
+            
             addFailure(event,
                        type,
                        this.getClass().getSimpleName(),
                        replace);
         }
-
+        
     }
-
+    
     private String asString(Object object) {
         if (object == null) {
             return "null"; //TODO...
@@ -88,7 +128,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
             return object.toString();
         }
     }
-
+    
     protected void checkTrue(ParsingEvent event,
                              FailureType type,
                              String description,
@@ -100,7 +140,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                        description);
         }
     }
-
+    
     protected void checkAtLeast(ParsingEvent event,
                                 FailureType type,
                                 Double actual,
@@ -113,14 +153,32 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                        description.replace("{required}", asString(required)).replace("{actual}", asString(actual)));
         }
     }
-
+    
+    protected void checkBetween(ParsingEvent event,
+                                FailureType type,
+                                LocalDate actual,
+                                LocalDate requiredMin,
+                                LocalDate requiredMax,
+                                String description) {
+        
+        if (actual.isBefore(requiredMin) || actual.isAfter(requiredMax)) {
+            addFailure(event,
+                       type,
+                       this.getClass().getSimpleName(),
+                       description.replace("{requiredMin}", asString(requiredMin))
+                                  .replace("{actual}", asString(actual))
+                                  .replace("{requiredMax}", asString(requiredMax)));
+        }
+    }
+    
+    
     protected void checkWithinRange(ParsingEvent event,
                                     FailureType type,
                                     Double actual,
                                     Double requiredMin,
                                     Double requiredMax,
                                     String description) {
-
+        
         if (actual < requiredMin || actual > requiredMax) {
             addFailure(event,
                        type,
@@ -130,18 +188,18 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                   .replace("{requiredMax}", asString(requiredMax)));
         }
     }
-
+    
     protected void reportException(ParsingEvent event, Exception e) {
         addFailure(event,
                    FailureType.EXCEPTION,
                    this.getClass().getSimpleName(),
-                   FailureType.UNEXPECTED_ERROR.name() +"\n"+ e,
+                   FailureType.UNEXPECTED_ERROR.name() + "\n" + e,
                    Arrays.stream(e.getStackTrace())
                          .map(StackTraceElement::toString)
                          .collect(Collectors.joining("\n")));
     }
-
-
+    
+    
     public void addFailure(ParsingEvent fileReference,
                            FailureType type,
                            String component,
@@ -154,8 +212,8 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                 "from component '{}' " +
                 "with description '{}' " +
                 "and details '{}'", fileReference, type, component, description, String.join("\n", details));
-
+        
         getResultCollector().addFailure(fileReference, type, component, description, details);
     }
-
+    
 }
