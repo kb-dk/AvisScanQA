@@ -21,10 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class MetsChecker extends DecoratedEventHandler {
@@ -153,6 +150,14 @@ public class MetsChecker extends DecoratedEventHandler {
                                                  "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*"));
 
             //TODO check this with same checks as in ModsChecker
+            String issuanceMods = xpath.selectString(metadataMods, "/mods:mods/mods:originInfo/mods:issuance");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets issuance should have been {expected} but was {actual}",
+                        issuanceMods,
+                        "serial"
+                       );
+
             String digitalOrigin = xpath.selectString(metadataMods, "/mods:mods/mods:physicalDescription/mods:digitalOrigin");
             checkEquals(decoratedEvent,
                         FailureType.INVALID_METS_ERROR,
@@ -242,8 +247,31 @@ public class MetsChecker extends DecoratedEventHandler {
 
             Node metadataMarc = asSeparateXML(xpath.selectNode(metsDoc,
                                                  "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*"));
+            String dateStartMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='650']/marc:subfield[@code='a']");
+            checkAllEquals(decoratedEvent, FailureType.INVALID_METS_ERROR,
+                           "Mets date start do not match throughout mets file {val1},{val2},{val3}",
+                           new String[]{dateStartMarc, dateIssuedStart, temporalStart});
+            String dateEndMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='650']/marc:subfield[@code='y']");
+            checkAllEquals(decoratedEvent, FailureType.INVALID_METS_ERROR,
+                           "Mets date start do not match throughout mets file {val1},{val2},{val3}",
+                           new String[]{dateEndMarc, dateIssuedEnd, temporalEnd});
+            String issuanceMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='250']/marc:subfield[@code='a']");
+            checkEquals(decoratedEvent,
+                        FailureType.INVALID_METS_ERROR,
+                        "Mets issuance should have been {expected} but was {actual}",
+                        issuanceMarc,
+                        issuanceMods
+                       );
+            Set<String> titleDCSet = new HashSet<>(xpath.selectStringList(metadataDC,"/oai_dc:dc/dc:title"));
+            String titleUniformDC = titleDCSet.stream().max(Comparator.comparingInt(String::length)).get();
+            String titleDC = titleDCSet.stream().min(Comparator.comparingInt(String::length)).get();
 
-            
+            String titleUniformMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='130']/marc:subfield[@code='a']");
+            String titleUniformMods = xpath.selectString(metadataMods,"/mods:mods/mods:titleInfo[@type='uniform']/mods:title");
+
+            String titleMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='245']/marc:subfield[@code='a']");
+            String titleMods = xpath.selectString(metadataMods,"/mods:mods/mods:titleInfo[not(@*)]/mods:title");
+
             // Save the filelists for later
             xpath.selectStringList(metsDoc,
                                    "/mets:mets/mets:fileSec/mets:fileGrp[@ID='TIFF']/mets:file/mets:FLocat/@xlink:href")
