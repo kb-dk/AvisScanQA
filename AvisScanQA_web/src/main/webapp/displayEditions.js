@@ -156,9 +156,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
             class: "userNotes", type: "text", name: "notes", text: newspaperDay.notes[i].note, readOnly: "true", disabled: true
         });
         formRow.append($dayNote);
-        formRow.append($("<input/>", {
-            type: "submit", name: "submit", value: "Delete"
-        }));
+        formRow.append($("<button/>",{class:"bi bi-x-circle-fill",type:"submit"}).css({"border":"none","background-color":"#fff"}));
 
         $dayForm.submit(noteDeleteHandler);
 
@@ -218,7 +216,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         for (let i = 0; i < edition.notes.length; i++) {
             const note = edition.notes[i];
 
-            let $editionForm = $("<form>", {action: "", method: "delete"});
+            let $editionForm = $("<form>", {id:"editionForm", action: "", method: "delete"});
             $editionForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
             $editionForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
 
@@ -230,9 +228,8 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
                 class: "userNotes", type: "text", name: "notes", text: note.note, readOnly: "true", disabled: true
             });
             formRow.append($editionNote);
-            formRow.append($("<input/>", {
-                type: "submit", name: "submit", value: "Delete"
-            }));
+            formRow.append($("<button/>",{class:"bi bi-x-circle-fill",type:"submit"}).css({"border":"none","background-color":"#fff"}));
+
 
             $editionForm.submit(noteDeleteHandler);
             $editionCol.append($editionForm);
@@ -309,9 +306,7 @@ function renderSinglePage(page) {
         });
         formRow.append($("<label/>", {for: $pageNote.uniqueId().attr("id"), text: `-${note.username} ${note.created}`}))
         formRow.append($pageNote);
-        formRow.append($("<input/>", {
-            type: "submit", name: "submit", value: "Delete"
-        }));
+        formRow.append($("<button/>",{class:"bi bi-x-circle-fill",type:"submit"}).css({"border":"none","background-color":"#fff"}));
         $pageForm.submit(noteDeleteHandler);
         $pageCol.append($pageForm);
     }
