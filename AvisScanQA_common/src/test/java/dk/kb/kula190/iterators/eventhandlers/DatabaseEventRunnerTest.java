@@ -4,7 +4,6 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.RunnableComponent;
-import dk.kb.kula190.checkers.ChecksumChecker;
 import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
@@ -41,8 +40,6 @@ class DatabaseEventRunnerTest {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
-                        //Simple Checkers
-                        new ChecksumChecker(resultCollector),
                     
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),

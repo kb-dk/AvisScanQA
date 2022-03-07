@@ -45,7 +45,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                             List<String> virtualLevelsRegexp,
                                             String checksumRegexp,
                                             String checksumExtension) {
-        super(specificBatch);
+        super(specificBatch, checksumRegexp, checksumExtension);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.virtualLevelsRegexp = virtualLevelsRegexp;
