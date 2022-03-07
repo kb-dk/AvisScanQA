@@ -108,6 +108,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                 }
                 
             }
+            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,this.getClass().getSimpleName(),"Extension "+extension+" is not expected here");
         }
     }
     
@@ -167,6 +168,9 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                                       + "{expected} but has {actual}",
                                       extension,
                                       Set.of("tif"));
+            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR, this.getClass().getSimpleName(),
+                                  "Folder "+parentName+" not on the list of expected folders (ALTO, METS, MIX, MODS, "
+                                  + "PDF, TIFF) ");
         }
     }
 }
