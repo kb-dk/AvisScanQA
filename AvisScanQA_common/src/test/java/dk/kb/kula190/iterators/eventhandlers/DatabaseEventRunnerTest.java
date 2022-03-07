@@ -3,7 +3,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
@@ -21,6 +21,7 @@ import org.postgresql.Driver;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 class DatabaseEventRunnerTest {
     
@@ -36,7 +37,7 @@ class DatabaseEventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
     
     
-        RunnableComponent component = new MultiThreadedRunnableComponent() {
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
@@ -71,7 +72,7 @@ class DatabaseEventRunnerTest {
         YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
         
         
-        RunnableComponent databaseComponent = new RunnableComponent() {
+        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(

@@ -3,7 +3,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.checkers.crosscheckers.MetsChecker;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 class MultiThreadedEventRunnerTest {
     
@@ -21,7 +22,7 @@ class MultiThreadedEventRunnerTest {
     
     private final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
+            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
     
     @Test
     void run() throws Exception {
@@ -30,23 +31,29 @@ class MultiThreadedEventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        RunnableComponent component = new MultiThreadedRunnableComponent() {
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
-                        
+        
+                        // new TiffAnalyzerExiv2(resultCollector),
+                        // new TiffCheckerExiv2(resultCollector),
+        
+                        new TiffAnalyzerImageMagick(resultCollector),
+                        // new TiffCheckerImageMagick(resultCollector),
+        
+                        new MetsSplitter(resultCollector),
+                        new MetsChecker(resultCollector),
+        
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
-                        new TiffAnalyzerImageMagick(resultCollector),
-                        new TiffCheckerImageMagick(resultCollector),
+        
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
                         //CrossCheckers
                         new XpathCrossChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector),
-                        new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector)
+                        new PageStructureChecker(resultCollector)
                 
                 
                               );

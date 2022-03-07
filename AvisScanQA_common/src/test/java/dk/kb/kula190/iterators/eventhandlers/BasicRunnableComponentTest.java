@@ -3,7 +3,7 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.checkers.simplecheckers.FileNamingChecker;
 import org.junit.jupiter.api.Test;
 
@@ -25,11 +25,8 @@ class BasicRunnableComponentTest {
         Path batchPath = specificBatch.toPath().toAbsolutePath();
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
     
-        RunnableComponent component =
-                new BasicRunnableComponent((resultCollector, treeEventHandlers, treeIterator) -> new EventRunner(
-                        treeIterator,
-                        treeEventHandlers,
-                        resultCollector)) {
+        BasicRunnableComponent component =
+                new BasicRunnableComponent() {
                     //TODO Why both override and functional interface? Cleanup this mess
                     @Override
                     protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {

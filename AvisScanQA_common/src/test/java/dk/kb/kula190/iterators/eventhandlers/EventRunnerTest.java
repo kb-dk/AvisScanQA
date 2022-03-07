@@ -1,13 +1,20 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.Batch;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.RunnableComponent;
 import dk.kb.kula190.checkers.crosscheckers.MetsChecker;
+import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
+import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
 import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
 import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerExiv2;
+import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.singlecheckers.TiffCheckerExiv2;
+import dk.kb.kula190.checkers.singlecheckers.TiffCheckerImageMagick;
+import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
+import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
+import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -28,28 +35,28 @@ class EventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        RunnableComponent component = new RunnableComponent() {
+        DecoratedRunnableComponent component = new DecoratedRunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
                         new TiffAnalyzerExiv2(resultCollector),
-                        // new MetsSplitter(resultCollector),
-                        // new MetsChecker(resultCollector),
-                        new TiffCheckerExiv2(resultCollector)
+                        new TiffCheckerExiv2(resultCollector),
                         
-                        //Simple Checkers
-//                        new ChecksumChecker(resultCollector),
+                        new TiffAnalyzerImageMagick(resultCollector),
+                        new TiffCheckerImageMagick(resultCollector),
+                        
+                         new MetsSplitter(resultCollector),
+                         new MetsChecker(resultCollector),
                         
                         //Per file- checkers
-                        //   new XmlSchemaChecker(resultCollector),
-                        // new TiffChecker(resultCollector),
-                        //  new XpathAltoChecker(resultCollector),
-                        // new XpathMixChecker(resultCollector),
-//                            new ModsChecker(resultCollector),
+                        new XmlSchemaChecker(resultCollector),
+                        
+                        new XpathAltoChecker(resultCollector),
+                        new XpathMixChecker(resultCollector),
                         //CrossCheckers
-//                        new XpathCrossChecker(resultCollector)
-                        // new NoMissingMiddlePagesChecker(resultCollector),
-                        // new PageStructureChecker(resultCollector)
+                        new XpathCrossChecker(resultCollector),
+                        new NoMissingMiddlePagesChecker(resultCollector),
+                        new PageStructureChecker(resultCollector)
                 
                               );
             }

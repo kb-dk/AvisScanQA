@@ -4,7 +4,7 @@ import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.RunnableComponent;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.checkers.DatabaseRegister;
 import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
@@ -25,6 +25,7 @@ import org.postgresql.Driver;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 public class Main {
     
@@ -54,11 +55,8 @@ public class Main {
     }
     
     private static ResultCollector runSimpleChecks(Batch batch) throws Exception {
-        RunnableComponent component =
-                new BasicRunnableComponent((resultCollector, treeEventHandlers, treeIterator) -> new EventRunner(
-                        treeIterator,
-                        treeEventHandlers,
-                        resultCollector)) {
+        BasicRunnableComponent component =
+                new BasicRunnableComponent() {
                     //TODO Why both override and functional interface? Cleanup this mess
                     @Override
                     protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
@@ -84,7 +82,7 @@ public class Main {
         YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
         
         
-        RunnableComponent databaseComponent = new RunnableComponent() {
+        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent() {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
@@ -104,7 +102,7 @@ public class Main {
     }
     
     private static ResultCollector runChecks(Batch batch) throws Exception {
-        RunnableComponent component = new MultiThreadedRunnableComponent() {
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(

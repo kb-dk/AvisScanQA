@@ -27,8 +27,6 @@ import java.util.stream.Collectors;
 public class TransparintingFileSystemIterator extends SimpleIteratorForFilesystems {
     
     protected final List<String> virtualLevelsRegexp;
-    protected final String checksumRegexp;
-    protected final String checksumExtension;
     private final File batchFolder;
     private final List<String> transparentDirNames;
     
@@ -49,8 +47,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.virtualLevelsRegexp = virtualLevelsRegexp;
-        this.checksumRegexp      = checksumRegexp;
-        this.checksumExtension   = checksumExtension;
+
     }
     
     @Override

@@ -17,6 +17,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MetsSplitter extends InjectingTreeEventHandler {
     
@@ -24,8 +25,10 @@ public class MetsSplitter extends InjectingTreeEventHandler {
     public static final String INJECTED_TYPE_METS = "METS REDUCED";
     
     //These are inheritable as they should be preserved when the eventrunner is forked off in a new thread
-    private final ThreadLocal<Node> fileSec = new InheritableThreadLocal<>();
-    private final ThreadLocal<Node> amdSec = new InheritableThreadLocal<>();
+    private Node fileSec = null;
+    private Node amdSec = null;
+    
+    private static final ReentrantReadWriteLock metsLock = new ReentrantReadWriteLock();
     
     public MetsSplitter(ResultCollector resultCollector) {
         super(resultCollector);
@@ -71,8 +74,13 @@ public class MetsSplitter extends InjectingTreeEventHandler {
             return;
         }
         String extension = EventHandlerUtils.getExtension(event.getName());
+        //As M is before T, we will always have one thread parsing the Mets file before any threads start on the Tiff
+        // files
+        //But we need locks to ensure that the "Mets" thread complete before the "Tiff" threads start
         if (extension.equals("mets")) {
+            log.info("Found mets file");
             metsFile(event);
+            log.info("Done mets file");
         } else if (extension.equals("tif")) {
             tiffFile(event);
         }
@@ -88,24 +96,27 @@ public class MetsSplitter extends InjectingTreeEventHandler {
     }
     
     private void tiffFile(AttributeParsingEvent event) throws IOException {
-        
-        XPathSelector xpath = getXpath();
-        String filename = EventHandlerUtils.lastName(event.getName());
-        //TODO perhaps better to have these as Maps?
-        Node fileSecDom = fileSec.get();
-        Node amdSecDom = amdSec.get();
-        
-        String tifFileRef = "..\\TIFF\\" + filename;
-        Node fileNode = xpath.selectNode(fileSecDom, "mets:fileGrp[@ID='TIFF']/"
-                                                     + "mets:file[mets:FLocat/@xlink:href='" + tifFileRef + "']");
-        //            String id = fileNode.getAttributes().getNamedItem("ID").getNodeValue();
-        String admid = fileNode.getAttributes().getNamedItem("ADMID").getNodeValue();
-        
-        
-        Node techMD = xpath.selectNode(amdSecDom, ""
-                                                  + "mets:techMD[@ID='" + admid + "']/"
-                                                  + "mets:mdWrap/mets:xmlData/*");
+        //Ensure we do not start to process this tiff file BEFORE the mets file have been processed
+        //Read lock because we want no limit on the number of concurrent tiff file processings.
+        ReentrantReadWriteLock.ReadLock metsReadLock = metsLock.readLock();
+        metsReadLock.lock();
+        try {
             
+            XPathSelector xpath = getXpath();
+            String filename = EventHandlerUtils.lastName(event.getName());
+            //TODO perhaps better to have these as Maps?
+            
+            String tifFileRef = "..\\TIFF\\" + filename;
+            Node fileNode = xpath.selectNode(fileSec,
+                                             "mets:fileGrp[@ID='TIFF']/mets:file[mets:FLocat/@xlink:href='"
+                                             + tifFileRef
+                                             + "']");
+            //            String id = fileNode.getAttributes().getNamedItem("ID").getNodeValue();
+            String admid = fileNode.getAttributes().getNamedItem("ADMID").getNodeValue();
+            
+            
+            Node techMD = xpath.selectNode(amdSec, "mets:techMD[@ID='" + admid + "']/mets:mdWrap/mets:xmlData/*");
+           
            /* String altoID = xpath.selectString(metsDoc,
                                                "/mets:mets/"
                                                + "mets:structMap[@TYPE='physical']/"
@@ -117,27 +128,35 @@ public class MetsSplitter extends InjectingTreeEventHandler {
                                                     "/mets:mets/mets:fileSec/mets:fileGrp[@ID='ALTO']/mets:file[@ID='"
                                                     + altoID
                                                     + "']/mets:FLocat/@xlink:href");*/
-        try {
-            pushEvent(event, INJECTED_TYPE_MIX, XML.domToString(techMD).getBytes(StandardCharsets.UTF_8));
-        } catch (TransformerException e) {
-            throw new IOException("Failed to extract MIX data from METS for file " + event.getLocation(), e);
+            try {
+                pushEvent(event, INJECTED_TYPE_MIX, XML.domToString(techMD).getBytes(StandardCharsets.UTF_8));
+            } catch (TransformerException e) {
+                throw new IOException("Failed to extract MIX data from METS for file " + event.getLocation(), e);
+            }
+        } finally {
+            metsReadLock.unlock();
         }
     }
     
     private void metsFile(AttributeParsingEvent event) throws IOException {
+        //Take a write lock to prevent any threads using amdSec or fileSec before we have completed them here
+        ReentrantReadWriteLock.WriteLock metsWriteLock = metsLock.writeLock();
+        metsWriteLock.lock();
         XPathSelector xpath = getXpath();
         try (InputStream data = event.getData()) {
             Document metsDoc = XML.fromXML(data, true);
             
-            amdSec.set(xpath.selectNode(metsDoc, "/mets:mets")
-                            .removeChild(xpath.selectNode(metsDoc, "/mets:mets/mets:amdSec")));
-            fileSec.set(xpath.selectNode(metsDoc, "/mets:mets/mets:fileSec"));
+            amdSec  = xpath.selectNode(metsDoc, "/mets:mets")
+                           .removeChild(xpath.selectNode(metsDoc, "/mets:mets/mets:amdSec"));
+            fileSec = xpath.selectNode(metsDoc, "/mets:mets/mets:fileSec");
             metsDoc.normalizeDocument();
             pushEvent(event, INJECTED_TYPE_METS,
                       XML.domToString(metsDoc).getBytes(StandardCharsets.UTF_8));
             
         } catch (ParserConfigurationException | SAXException | TransformerException e) {
             throw new IOException("Failed to parse METS data from " + event.getLocation(), e);
+        } finally {
+            metsWriteLock.unlock();
         }
     }
 }

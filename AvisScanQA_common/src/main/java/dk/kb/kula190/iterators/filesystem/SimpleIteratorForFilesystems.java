@@ -26,8 +26,8 @@ import java.util.List;
 public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     
     
-    private String checksumRegexp;
-    private String checksumExtension;
+    protected final String checksumRegexp;
+    protected final String checksumExtension;
     
     /**
      * Construct an iterator rooted at a given directory
