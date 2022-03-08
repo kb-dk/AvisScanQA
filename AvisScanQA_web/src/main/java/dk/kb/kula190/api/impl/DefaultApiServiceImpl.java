@@ -303,12 +303,12 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<NewspaperDate> getBatchDatesForNewspaper(String newspaperID, String year) {
+    public List<NewspaperDate> getBatchDatesForNewspaper(String batchID, String year) {
         try {
-            List<NewspaperDate> dates = getDAO().getDatesForNewspaperID(newspaperID, year);
+            List<NewspaperDate> dates = getDAO().getDatesForBatchID(batchID, year);
             return dates;
         } catch (DAOFailureException e) {
-            log.error("Could not get dates for batch ID {}", newspaperID);
+            log.error("Could not get dates for batch ID {}", batchID);
             throw handleException(e);
         }
         
