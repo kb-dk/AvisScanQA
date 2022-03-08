@@ -1,3 +1,24 @@
+function noteNewspaperSubmitHandler(event) {
+    event.preventDefault(); // <- cancel event
+
+    const data = new FormData(event.target);
+
+    let parts = ["api",data.get('avis'),"notes"]
+
+    let url = parts.join("/");
+
+    const notes = data.get('standardNote') + " " + data.get('notes');
+
+    $.ajax({
+        type: "POST", url: url, data: notes, success: function () {
+            alert("notes updated")
+        }, dataType: "json", contentType: "application/json"
+    });
+    location.reload();
+    // alert('Handler for .submit() called.');
+    return false;  // <- cancel event
+}
+
 function loadNewspaperIDs() {
     $.getJSON('api/newspaperIDs')
         .done(function (newspaperIDs) {
@@ -15,10 +36,90 @@ function loadYearsForNewspaper(avisID, year) {
         .done(function (years) {
             $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
             $("#state-div").empty();
-            $("#notice-div").empty();
+            let $notice = $("#notice-div").empty();
             if (year === 0) {
                 year = parseInt(years.sort()[0]);
             }
+            const notesUrl = `api/${avisID}/notes`;
+            $.getJSON(notesUrl)
+                .done(function (notes){
+                    let $notesButton = $("<button/>",{class:"notesButton btn btn-primary", text:"Show and create notes"});
+                    let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
+                    $notesButton.click(()=>{
+
+                        let visible = $showNotesDiv.attr('visible');
+                        if (visible == 'false'){
+                            $showNotesDiv.attr('visible',true);
+                            $showNotesDiv.addClass("active")
+                        }else{
+                            $showNotesDiv.attr('visible',false);
+                            $showNotesDiv.removeClass("active")
+                        }
+                    })
+
+                    let $newspaperNotesForm = $("<form/>",{id:"newspaperNotesForm",action:"",method:"post"});
+                    const formRow1 = $("<div>", {class: "form-row"})
+                    const formRow2 = $("<div>", {class: "form-row"})
+                    $newspaperNotesForm.append(formRow1);
+                    $newspaperNotesForm.append(formRow2);
+
+                    formRow1.append($("<select/>", {
+                        class: "form-select", name: "standardNote"
+                    }).append($("<option>", {value: "", html: "", selected: "true"}))
+                        .append($("<option>", {
+                            value: "Avis ugyldigt", html: "Avis ugyldigt"
+                        })))
+
+                    formRow2.append($("<textarea/>", {
+                        class: "userNotes", id: "batchNotes", type: "text", name: "notes"
+                    }));
+                    formRow2.append($("<input/>", {
+                        id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm"
+                    }));
+                    $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
+
+                    $newspaperNotesForm.submit(noteNewspaperSubmitHandler);
+                    $showNotesDiv.append($newspaperNotesForm);
+                    if (notes) {
+
+                        for (let i = 0; i < notes.length; i++) {
+                            // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
+                            let $newspaperForm = $("<form>", {action: "", method: "delete"});
+                            $newspaperForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
+
+                            const note = notes[i];
+                            $newspaperForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
+
+                            const formRow = $("<div>", {class: "form-row"})
+                            $newspaperForm.append(formRow);
+
+                            let $newspaperNote = $("<textarea/>", {
+                                class: "userNotes",
+                                type: "text",
+                                name: "notes",
+                                text: note.note,
+                                readOnly: "true",
+                                disabled: true
+                            });
+                            formRow.append($("<label/>", {
+                                for: $newspaperNote.uniqueId().attr("id"),
+                                text: `-${note.username} ${note.created}`
+                            }))
+                            formRow.append($newspaperNote);
+                            formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+                                "border": "none",
+                                "background-color": "transparent"
+                            }));
+                            $newspaperForm.submit(noteDeleteHandler);
+                            $showNotesDiv.append($newspaperForm);
+                        }
+                    }
+                    $notice.append($notesButton);
+                    $notice.append($showNotesDiv);
+                })
+            /*
+
+            */
             renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
             renderBatchTable(avisID);
         });

@@ -329,7 +329,88 @@ paths:
       responses:
         '204':
           description: Note deleted
+  /{avisid}/notes:
+    get:
+      operationId: getNewspaperNotes
+      summary: ""
+      parameters:
+        - name: avisid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
+    post:
+      operationId: setNewspaperNotes
+      summary: ""
+      parameters:
+        - name: avisid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: batchID
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            #format: date
+        - name: edition
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: section
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: string
 
+      requestBody:
+        description: ""
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+      responses:
+        '201':
+          description: Created
+    delete:
+      operationId: removeNotes
+      summary: ""
+      parameters:
+        - name: avisid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+      responses:
+        '204':
+          description: Note deleted
 components:
   schemas:
     Note:
@@ -339,6 +420,7 @@ components:
           type: integer
         batchid:
           type: string
+          nullable: true
         avisid:
           type: string
           nullable: true

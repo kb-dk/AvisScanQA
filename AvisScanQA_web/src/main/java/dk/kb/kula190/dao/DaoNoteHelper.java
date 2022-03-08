@@ -52,6 +52,29 @@ public class DaoNoteHelper {
             return result;
         }
     }
+    static List<Note> getNewspaperLevelNotes(String avisID, Connection conn) throws SQLException {
+        String dayNotes = null;
+        try (PreparedStatement ps = conn.prepareStatement("SELECT * "
+                                                          + "FROM  notes "
+                                                          + "WHERE "
+                                                          + "avisid = ? AND"
+                                                          + " batchid IS NULL AND "
+                                                          + " edition_date IS NULL AND "
+                                                          + " edition_title IS NULL AND "
+                                                          + " section_title IS NULL AND "
+                                                          + " page_number IS NULL"
+                                                          + " ORDER BY id DESC ")) {
+            int param = 1;
+            ps.setString(param++, avisID);
+            List<Note> result = new ArrayList<>();
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    result.add(readNote(res));
+                }
+            }
+            return result;
+        }
+    }
     
     static List<Note> getDayLevelNotes(String batchID, String newspaperID, LocalDate date, Connection conn)
             throws SQLException {

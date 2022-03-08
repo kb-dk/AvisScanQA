@@ -118,7 +118,17 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
+
+    @Override public List<Note> getNewspaperNotes(String avisID) {
+        try {
+            return getDAO().getNewspaperNotes(avisID);
+        } catch (DAOFailureException e) {
+            log.error("Could not retrieve notes for '{}'",
+                      avisID, e);
+            throw handleException(e);
+        }
+    }
+
     @Override
     public List<String> getYearsForNewspaper(String newspaperID) {
         try {
@@ -137,6 +147,51 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }catch (DAOFailureException e) {
             log.error("Could not delete notes for '{}' '{}'",
                       batchID,id, e);
+            throw handleException(e);
+        }
+    }
+
+    @Override public void removeNotes(String avisID, Integer id) {
+        try {
+            getDAO().removeNotes(id);
+        }catch (DAOFailureException e) {
+            log.error("Could not delete notes for '{}' '{}'",
+                      avisID,id, e);
+            throw handleException(e);
+        }
+
+    }
+
+    @Override
+    public void setNewspaperNotes(String avis,
+                                  String date,
+                                  String body,
+                                  String batchID,
+                                  String edition,
+                                  String section,
+                                  String page) {
+        //        Note that null values might have the value "null". Regard this as null
+        log.info("{}/{}/{}/{}/{}/{}, {}", batchID, avis, date, edition, section, page, body);
+        Principal loggedInUser = securityContext.getUserPrincipal();
+        String username = loggedInUser.getName();
+        try {
+            getDAO().setNotes(DaoUtils.nullable(batchID),
+                              DaoUtils.nullableDate(date),
+                              DaoUtils.nullable(body),
+                              avis,
+                              DaoUtils.nullable(edition),
+                              DaoUtils.nullable(section),
+                              DaoUtils.nullableInteger(page),
+                              username);
+        } catch (DAOFailureException e) {
+            log.error("Could not store notes for {}/{}/{}/{}/{}/{}, '{}'",
+                      batchID,
+                      avis,
+                      date,
+                      edition,
+                      section,
+                      page,
+                      body);
             throw handleException(e);
         }
     }

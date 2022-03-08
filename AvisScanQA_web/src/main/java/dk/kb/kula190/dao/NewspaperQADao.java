@@ -85,7 +85,50 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
-    
+    public List<Note> getNewspaperNotes(@Nonnull String avisID) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoNoteHelper.getNewspaperLevelNotes(avisID, conn);
+        } catch (SQLException e) {
+            log.error("Failed to retrieve notes from {}", avisID, e);
+            throw new DAOFailureException("Failed to retrieve notes from " + avisID, e);
+        }
+
+    }
+    public void setNewspaperNotes(@Nonnull String avis,
+                         @Nullable LocalDate date,
+                         @Nonnull String notes,
+                         @Nullable String batchID,
+                         @Nullable String edition,
+                         @Nullable String section,
+                         @Nullable Integer page,
+                         @Nonnull String username) throws DAOFailureException {
+        try (Connection conn = connectionPool.getConnection()) {
+
+            try (PreparedStatement ps = conn.prepareStatement(
+                    "INSERT INTO notes(batchid, avisid, edition_date, edition_title, section_title, page_number, "
+                    + "username, notes,created) "
+                    + "VALUES (?, ?, ?, ?, ?, ?,?,?,now()) ON CONFLICT (id) DO UPDATE SET notes=excluded.notes")) {
+                int param = 1;
+                param = DaoUtils.setNullable(ps,param,batchID);
+                ps.setString(param++,avis);
+                param = DaoUtils.setNullable(ps, param, date);
+                param = DaoUtils.setNullable(ps, param, edition);
+                param = DaoUtils.setNullable(ps, param, section);
+                param = DaoUtils.setNullable(ps, param, page);
+                ps.setString(param++, username);
+                ps.setString(param++, notes);
+
+
+                ps.execute();
+                if (!conn.getAutoCommit()) {
+                    conn.commit();
+                }
+            }
+        } catch (SQLException e) {
+            log.error("Failed to lookup newspaper ids", e);
+            throw new DAOFailureException("Err looking up newspaper ids", e);
+        }
+    }
     public void setState(@Nonnull String batchID, @Nullable String state, @Nonnull String username)
             throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
@@ -396,7 +439,7 @@ public class NewspaperQADao {
                     }
                     
                     final String orig_relpath = res.getString("orig_relpath");
-                    
+                    String avisID = res.getString("avisid");
                     NewspaperEntity page = new NewspaperEntity().origRelpath(orig_relpath)
                                                                 .shadowPath(res.getString("shadow_path"))
                                                                 .origFullPath((
@@ -406,7 +449,7 @@ public class NewspaperQADao {
                                                                         "\\\\"))
                                                                 .formatType(res.getString("format_type"))
                                                                 .batchid(batchID)
-                                                                .avisid(res.getString("avisid"))
+                                                                .avisid(avisID)
                                                                 .avistitle(res.getString("avistitle"))
                                                                 .editionDate(res.getDate("edition_date").toLocalDate())
                                                                 .editionTitle(edition_title)
@@ -416,7 +459,8 @@ public class NewspaperQADao {
                                                                 .handle(res.getLong("handle"))
                                                                 .singlePage(res.getBoolean("single_page"))
                                                                 .fraktur(res.getBoolean("fraktur"))
-                                                                .problems(res.getString("problems"));
+                                                                .problems(res.getString("problems"))
+                                                   .notes(DaoNoteHelper.getNewspaperLevelNotes(avisID,conn));
                     edition.addPagesItem(page);
                     
                 }
@@ -491,4 +535,5 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err deleting note from id", e);
         }
     }
+
 }

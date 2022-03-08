@@ -27,7 +27,8 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
 }
 
 
-function noteSubmitHandler(event) {
+function noteSubmitHandler(event, url) {
+    console.log(event)
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
@@ -42,7 +43,8 @@ function noteSubmitHandler(event) {
     query.append("page", data.get('page'));
 
     // let url = parts.filter(x => x).join("/")
-    let url = parts.join("/") + "?" + query.toString();
+
+        url = parts.join("/") + "?" + query.toString();
 
     console.log(url)
     const notes = data.get('standardNote') + " " + data.get('notes');
@@ -52,7 +54,7 @@ function noteSubmitHandler(event) {
             alert("notes updated")
         }, dataType: "json", contentType: "application/json"
     });
-    location.reload();
+    //location.reload();
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
