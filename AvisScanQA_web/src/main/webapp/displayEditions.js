@@ -1,5 +1,8 @@
+
 function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
-    var day = moment(date).format('YYYY-MM-DD');
+    let day = moment(date).format('YYYY-MM-DD');
+    let nextDay = moment(date).add(1,'d').format("YYYY-MM-DD")
+    let pastDay = moment(date).subtract(1,'d').format("YYYY-MM-DD")
     var url = `api/batch/${batchID}/${avisID}/${day}`
     $("#notice-div").empty();
     $("#state-div").empty();
@@ -17,6 +20,13 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
             $headline.append($("<a/>", {
                 class: "btn btn-secondary", text: "Back to batch", href: `#/batch/${batchID}/`
             }))
+
+            $headline.append($("<a/>", {
+                class: "btn btn-secondary bi bi-caret-right", href: `#/newspapers/${batchID}/${avisID}/${nextDay}/0/0/`
+            }).css({"float":"right"}))
+            $headline.append($("<a/>", {
+                class: "btn btn-secondary bi bi-caret-left", href: `#/newspapers/${batchID}/${avisID}/${pastDay}/0/0/`
+            }).css({"float":"right"}))
             $headline.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
             // console.log("Starting rendering of entites.");
             renderDayDisplay(newspaperDay, editionIndex, pageIndex);
