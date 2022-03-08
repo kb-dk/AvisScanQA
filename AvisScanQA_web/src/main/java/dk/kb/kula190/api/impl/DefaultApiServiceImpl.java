@@ -10,6 +10,7 @@ import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.Note;
+import dk.kb.kula190.model.SlimBatch;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.InvalidArgumentServiceException;
@@ -282,9 +283,9 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<Batch> getBatches() {
+    public List<SlimBatch> getBatches() {
         try {
-            List<Batch> IDs = getDAO().getBatchIDs();
+            List<SlimBatch> IDs = getDAO().getBatchIDs();
             return IDs;
         } catch (DAOFailureException e) {
             log.error("Could not get newspaper IDs from backend");
@@ -302,12 +303,12 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<NewspaperDate> getBatchDatesForNewspaper(String batchID, String year) {
+    public List<NewspaperDate> getBatchDatesForNewspaper(String newspaperID, String year) {
         try {
-            List<NewspaperDate> dates = getDAO().getDatesForBatchID(batchID, year);
+            List<NewspaperDate> dates = getDAO().getDatesForNewspaperID(newspaperID, year);
             return dates;
         } catch (DAOFailureException e) {
-            log.error("Could not get dates for batch ID {}", batchID);
+            log.error("Could not get dates for batch ID {}", newspaperID);
             throw handleException(e);
         }
         
@@ -315,7 +316,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
     
     
     @Override
-    public NewspaperDay getMappedEntititesForNewspaperDate(String batchID, String newspaperID, String date) {
+    public NewspaperDay getNewspaperDay(String batchID, String newspaperID, String date) {
         try {
             NewspaperDay entities = getDAO().getNewspaperEditions(batchID,
                                                                   newspaperID,

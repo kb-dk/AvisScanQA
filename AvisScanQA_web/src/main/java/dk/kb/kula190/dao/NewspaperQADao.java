@@ -6,8 +6,9 @@ import dk.kb.kula190.model.CharacterizationInfo;
 import dk.kb.kula190.model.NewspaperDate;
 import dk.kb.kula190.model.NewspaperDay;
 import dk.kb.kula190.model.NewspaperEdition;
-import dk.kb.kula190.model.NewspaperEntity;
+import dk.kb.kula190.model.NewspaperPage;
 import dk.kb.kula190.model.Note;
+import dk.kb.kula190.model.SlimBatch;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,6 +86,7 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
+    
     public List<Note> getNewspaperNotes(@Nonnull String avisID) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
             return DaoNoteHelper.getNewspaperLevelNotes(avisID, conn);
@@ -92,33 +94,34 @@ public class NewspaperQADao {
             log.error("Failed to retrieve notes from {}", avisID, e);
             throw new DAOFailureException("Failed to retrieve notes from " + avisID, e);
         }
-
+        
     }
+    
     public void setNewspaperNotes(@Nonnull String avis,
-                         @Nullable LocalDate date,
-                         @Nonnull String notes,
-                         @Nullable String batchID,
-                         @Nullable String edition,
-                         @Nullable String section,
-                         @Nullable Integer page,
-                         @Nonnull String username) throws DAOFailureException {
+                                  @Nullable LocalDate date,
+                                  @Nonnull String notes,
+                                  @Nullable String batchID,
+                                  @Nullable String edition,
+                                  @Nullable String section,
+                                  @Nullable Integer page,
+                                  @Nonnull String username) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
-
+            
             try (PreparedStatement ps = conn.prepareStatement(
                     "INSERT INTO notes(batchid, avisid, edition_date, edition_title, section_title, page_number, "
                     + "username, notes,created) "
                     + "VALUES (?, ?, ?, ?, ?, ?,?,?,now()) ON CONFLICT (id) DO UPDATE SET notes=excluded.notes")) {
                 int param = 1;
-                param = DaoUtils.setNullable(ps,param,batchID);
-                ps.setString(param++,avis);
+                param = DaoUtils.setNullable(ps, param, batchID);
+                ps.setString(param++, avis);
                 param = DaoUtils.setNullable(ps, param, date);
                 param = DaoUtils.setNullable(ps, param, edition);
                 param = DaoUtils.setNullable(ps, param, section);
                 param = DaoUtils.setNullable(ps, param, page);
                 ps.setString(param++, username);
                 ps.setString(param++, notes);
-
-
+                
+                
                 ps.execute();
                 if (!conn.getAutoCommit()) {
                     conn.commit();
@@ -129,6 +132,7 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err looking up newspaper ids", e);
         }
     }
+    
     public void setState(@Nonnull String batchID, @Nullable String state, @Nonnull String username)
             throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
@@ -171,7 +175,7 @@ public class NewspaperQADao {
     }
     
     
-    public List<Batch> getBatchIDs() throws DAOFailureException {
+    public List<SlimBatch> getBatchIDs() throws DAOFailureException {
         log.debug("Looking up batch ids");
         
         try (Connection conn = connectionPool.getConnection()) {
@@ -213,8 +217,8 @@ public class NewspaperQADao {
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
         
         try (Connection conn = connectionPool.getConnection()) {
-            List<Batch> batches = DaoBatchHelper.getLatestBatches(avisID, conn);
-            for (Batch batch : batches) {
+            List<SlimBatch> batches = DaoBatchHelper.getLatestBatches(avisID, conn);
+            for (SlimBatch batch : batches) {
                 DaoBatchHelper.batchDays(batch).forEach(date -> {
                     final NewspaperDate newspaperDate = new NewspaperDate().date(date)
                                                                            .pageCount(0)
@@ -222,6 +226,7 @@ public class NewspaperQADao {
                                                                            .editionCount(0)
                                                                            .batchid(batch.getBatchid())
                                                                            .avisid(batch.getAvisid())
+                                                                           .roundtrip(batch.getRoundtrip())
                                                                            .state(batch.getState());
                     resultMap.put(date, newspaperDate);
                     
@@ -264,10 +269,10 @@ public class NewspaperQADao {
                         int pageCount = res.getInt("numPages");
                         String problems = res.getString("allProblems").translateEscapes().trim();
                         
-                        Optional<Batch> batch = batches.stream()
-                                                       .filter(b -> b.getBatchid().equals(batchID))
-                                                       .limit(1)
-                                                       .findFirst();
+                        Optional<SlimBatch> batch = batches.stream()
+                                                           .filter(b -> b.getBatchid().equals(batchID))
+                                                           .limit(1)
+                                                           .findFirst();
                         final LocalDate localDate = date.toLocalDate();
                         
                         NewspaperDate result = new NewspaperDate().date(localDate)
@@ -278,6 +283,7 @@ public class NewspaperQADao {
                                                                   .avisid(avisID);
                         batch.ifPresent(val -> result.setAvisid(val.getAvisid()));
                         batch.ifPresent(val -> result.setBatchid(val.getBatchid()));
+                        batch.ifPresent(val -> result.setRoundtrip(val.getRoundtrip()));
                         resultMap.put(localDate, result);
                     }
                 }
@@ -298,8 +304,8 @@ public class NewspaperQADao {
         
         final int year = Integer.parseInt(yearString);
         try (Connection conn = connectionPool.getConnection()) {
-            Batch batch = DaoBatchHelper.getLatestBatch(batchID, conn);
-
+            SlimBatch batch = DaoBatchHelper.getLatestSlimBatch(batchID, conn);
+            
             DaoBatchHelper.batchDays(batch)
                           .filter(date -> date.getYear() == year) //We could also make limits on the range...
                           .forEach(date -> {
@@ -360,19 +366,31 @@ public class NewspaperQADao {
     
     public NewspaperDay getNewspaperEditions(String batchID, String newspaperID, LocalDate date, String batchesFolder)
             throws DAOFailureException {
-        //        log.debug("Looking up dates for newspaper id: '{}' on date '{}'", id, date);
-        
-        //TODO Cleaner way to check if a batch exists
-        Batch batch = getBatch(batchID);
-        if (date.isBefore(batch.getStartDate()) || date.isAfter(batch.getEndDate())) {
-            throw new NotFoundServiceException("Date " + date + " is not within start (" + batch.getStartDate() + ") "
-                                               + "and end (" + batch.getEndDate() + ") of batch " + batch.getBatchid());
-        }
-        
-        NewspaperDay result = new NewspaperDay().batchid(batchID).avisid(newspaperID).date(date);
-        
         
         try (Connection conn = connectionPool.getConnection()) {
+            
+            SlimBatch result1;
+            try {
+                result1 = Optional.ofNullable(DaoBatchHelper.getLatestSlimBatch(batchID, conn))
+                                  .orElseThrow(() -> new NotFoundServiceException("Batch " + batchID + " not found"));
+            } catch (SQLException e) {
+                log.error("Failed to lookup batch ids", e);
+                throw new NotFoundServiceException("Err looking up batch id " + batchID, e);
+            }
+            SlimBatch batch = result1;
+            if (date.isBefore(batch.getStartDate()) || date.isAfter(batch.getEndDate())) {
+                throw new NotFoundServiceException("Date "
+                                                   + date
+                                                   + " is not within start ("
+                                                   + batch.getStartDate()
+                                                   + ") "
+                                                   + "and end ("
+                                                   + batch.getEndDate()
+                                                   + ") of batch "
+                                                   + batch.getBatchid());
+            }
+            
+            NewspaperDay result = new NewspaperDay().batch(batch).date(date);
             
             
             List<Note> dayNotes = DaoNoteHelper.getDayLevelNotes(batchID, newspaperID, date, conn);
@@ -440,27 +458,27 @@ public class NewspaperQADao {
                     
                     final String orig_relpath = res.getString("orig_relpath");
                     String avisID = res.getString("avisid");
-                    NewspaperEntity page = new NewspaperEntity().origRelpath(orig_relpath)
-                                                                .shadowPath(res.getString("shadow_path"))
-                                                                .origFullPath((
-                                                                                      batchesFolder +
-                                                                                      orig_relpath).replaceAll(
-                                                                        Pattern.quote("/"),
-                                                                        "\\\\"))
-                                                                .formatType(res.getString("format_type"))
-                                                                .batchid(batchID)
-                                                                .avisid(avisID)
-                                                                .avistitle(res.getString("avistitle"))
-                                                                .editionDate(res.getDate("edition_date").toLocalDate())
-                                                                .editionTitle(edition_title)
-                                                                .sectionTitle(res.getString("section_title"))
-                                                                .pageNumber(res.getInt("page_number"))
-                                                                .deliveryDate(res.getDate("delivery_date").toLocalDate())
-                                                                .handle(res.getLong("handle"))
-                                                                .singlePage(res.getBoolean("single_page"))
-                                                                .fraktur(res.getBoolean("fraktur"))
-                                                                .problems(res.getString("problems"))
-                                                   .notes(DaoNoteHelper.getNewspaperLevelNotes(avisID,conn));
+                    NewspaperPage page = new NewspaperPage().origRelpath(orig_relpath)
+                                                            .shadowPath(res.getString("shadow_path"))
+                                                            .origFullPath((
+                                                                                  batchesFolder +
+                                                                                  orig_relpath).replaceAll(
+                                                                    Pattern.quote("/"),
+                                                                    "\\\\"))
+                                                            .formatType(res.getString("format_type"))
+                                                            .batchid(batchID)
+                                                            .avisid(avisID)
+                                                            .avistitle(res.getString("avistitle"))
+                                                            .editionDate(res.getDate("edition_date").toLocalDate())
+                                                            .editionTitle(edition_title)
+                                                            .sectionTitle(res.getString("section_title"))
+                                                            .pageNumber(res.getInt("page_number"))
+                                                            .deliveryDate(res.getDate("delivery_date").toLocalDate())
+                                                            .handle(res.getLong("handle"))
+                                                            .singlePage(res.getBoolean("single_page"))
+                                                            .fraktur(res.getBoolean("fraktur"))
+                                                            .problems(res.getString("problems"))
+                                                            .notes(DaoNoteHelper.getNewspaperLevelNotes(avisID, conn));
                     edition.addPagesItem(page);
                     
                 }
@@ -535,5 +553,5 @@ public class NewspaperQADao {
             throw new DAOFailureException("Err deleting note from id", e);
         }
     }
-
+    
 }

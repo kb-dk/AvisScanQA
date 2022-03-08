@@ -1,6 +1,7 @@
 package dk.kb.kula190.dao;
 
 import dk.kb.kula190.model.Batch;
+import dk.kb.kula190.model.SlimBatch;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -16,8 +17,8 @@ import java.util.stream.Stream;
 import static dk.kb.kula190.dao.DaoUtils.toOffsetDateTime;
 
 public class DaoBatchHelper {
-    static List<Batch> getLatestBatches(String avisID, Connection conn) throws SQLException {
-        List<Batch> results = new ArrayList<>();
+    static List<SlimBatch> getLatestBatches(String avisID, Connection conn) throws SQLException {
+        List<SlimBatch> results = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(
                 "select * "
                 + "from batch b "
@@ -27,7 +28,7 @@ public class DaoBatchHelper {
             
             try (ResultSet res = ps.executeQuery()) {
                 if (res.next()) {
-                    final Batch e = readBatch(conn, res);
+                    final SlimBatch e = readSlimBatch(conn, res);
                     results.add(e);
                 }
             }
@@ -53,15 +54,33 @@ public class DaoBatchHelper {
         return null;
     }
     
-    static List<Batch> getAllBatches(Connection conn) throws SQLException {
+    
+    static SlimBatch getLatestSlimBatch(String batchID, Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "select * "
+                + "from batch b "
+                + "where batchid = ? and "
+                + "      b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid) limit 1")) {
+            ps.setString(1, batchID);
+            
+            try (ResultSet res = ps.executeQuery()) {
+                if (res.next()) {
+                    return readSlimBatch(conn, res);
+                }
+            }
+        }
+        return null;
+    }
+    
+    static List<SlimBatch> getAllBatches(Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("SELECT * "
                                                           + " FROM batch b1"
                                                           + " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch b2 WHERE b1.batchid = b2.batchid)")) {
-            List<Batch> list = new ArrayList<>();
+            List<SlimBatch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
                 
                 while (res.next()) {
-                    list.add(readBatch(conn, res));
+                    list.add(readSlimBatch(conn, res));
                 }
                 
             }
@@ -96,19 +115,45 @@ public class DaoBatchHelper {
         return new Batch().batchid(batchID)
                           .avisid(res.getString("avisid"))
                           .roundtrip(res.getInt("roundtrip"))
+
                           .notes(DaoNoteHelper.getBatchLevelNotes(batchID,conn))
+                          .numNotes(DaoNoteHelper.getNumNotes(batchID, conn))
+
                           .startDate(res.getDate("start_date").toLocalDate())
                           .endDate(res.getDate("end_date").toLocalDate())
                           .deliveryDate(res.getDate("delivery_date").toLocalDate())
+                          
                           .problems(res.getString("problems"))
-                          .state(res.getString("state"))
                           .numProblems(res.getInt("num_problems"))
+
+                          .state(res.getString("state"))
                           .username(res.getString("username"))
-                          .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")))
-                          .numNotes(DaoNoteHelper.getNumNotes(batchID, conn));
+                          .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")));
     }
     
-    static Stream<LocalDate> batchDays(Batch batch) {
+    
+    private static SlimBatch readSlimBatch(Connection conn, ResultSet res) throws SQLException {
+        String batchID = res.getString("batchid");
+        return new SlimBatch().batchid(batchID)
+                              .avisid(res.getString("avisid"))
+                              .roundtrip(res.getInt("roundtrip"))
+
+                              // .notes(DaoNoteHelper.getBatchLevelNotes(batchID,conn))
+                              .numNotes(DaoNoteHelper.getNumNotes(batchID, conn))
+
+                              .startDate(res.getDate("start_date").toLocalDate())
+                              .endDate(res.getDate("end_date").toLocalDate())
+                              .deliveryDate(res.getDate("delivery_date").toLocalDate())
+
+                              // .problems(res.getString("problems"))
+                              .numProblems(res.getInt("num_problems"))
+
+                              .state(res.getString("state"))
+                              .username(res.getString("username"))
+                              .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")));
+    }
+    
+    static <T extends SlimBatch> Stream<LocalDate> batchDays(T batch) {
         return LongStream.rangeClosed(0, ChronoUnit.DAYS.between(batch.getStartDate(), batch.getEndDate()))
                          .mapToObj((long t) -> batch.getStartDate().plusDays(t));
     }

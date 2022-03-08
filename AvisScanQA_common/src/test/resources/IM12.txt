@@ -1,0 +1,133 @@
+Image:
+  Filename: /avis-scanner-prod/_05-uredigerede-opslag/Modersmaalet (Haderslev, 100-9)/modersmaalet_19070701_19071231_RT1/modersmaalet_19070701_19071231_RT1-003.tif
+  Format: TIFF (Tagged Image File Format)
+  Mime type: image/tiff
+  Class: DirectClass
+  Geometry: 8688x5792+0+0
+  Resolution: 240x240
+  Print size: 36.2x24.1333
+  Units: PixelsPerInch
+  Colorspace: sRGB
+  Type: TrueColor
+  Endianness: LSB
+  Depth: 8-bit
+  Channel depth:
+    red: 8-bit
+    green: 8-bit
+    blue: 8-bit
+  Channel statistics:
+    Pixels: 50320896
+    Red:
+      min: 0  (0)
+      max: 248 (0.972549)
+      mean: 88.4882 (0.347012)
+      standard deviation: 73.3063 (0.287475)
+      kurtosis: -0.840535
+      skewness: 0.981189
+      entropy: 0.834058
+    Green:
+      min: 0  (0)
+      max: 228 (0.894118)
+      mean: 83.1734 (0.32617)
+      standard deviation: 66.389 (0.260349)
+      kurtosis: -0.786136
+      skewness: 0.994004
+      entropy: 0.849382
+    Blue:
+      min: 0  (0)
+      max: 211 (0.827451)
+      mean: 73.8753 (0.289707)
+      standard deviation: 51.677 (0.202655)
+      kurtosis: -0.683266
+      skewness: 0.99631
+      entropy: 0.857021
+  Image statistics:
+    Overall:
+      min: 0  (0)
+      max: 248 (0.972549)
+      mean: 81.8456 (0.320963)
+      standard deviation: 63.7908 (0.25016)
+      kurtosis: -0.49379
+      skewness: 1.07707
+      entropy: 0.846821
+  Rendering intent: Perceptual
+  Gamma: 0.454545
+  Chromaticity:
+    red primary: (0.64,0.33)
+    green primary: (0.3,0.6)
+    blue primary: (0.15,0.06)
+    white point: (0.3127,0.329)
+  Background color: white
+  Border color: srgb(223,223,223)
+  Matte color: grey74
+  Transparent color: black
+  Interlace: None
+  Intensity: Undefined
+  Compose: Over
+  Page geometry: 8688x5792+0+0
+  Dispose: Undefined
+  Iterations: 0
+  Compression: None
+  Orientation: TopLeft
+  Profiles:
+    Profile-8bim: 7472 bytes
+    Profile-icc: 560 bytes
+    Profile-xmp: 11751 bytes
+  Properties:
+    date:create: 2022-03-02T13:46:45+00:00
+    date:modify: 2020-11-11T13:04:38+00:00
+    exif:ApertureValue: 6.339850
+    exif:BodySerialNumber: 483055000013
+    exif:ColorSpace: 65535
+    exif:CustomRendered: 0
+    exif:DateTimeDigitized: 2020:11:04 14:38:35
+    exif:DateTimeOriginal: 2020:11:04 14:38:35
+    exif:ExifVersion: 0x30,0x32,0x33,0x31
+    exif:ExposureBiasValue: 0.000000
+    exif:ExposureMode: 1
+    exif:ExposureProgram: 1
+    exif:ExposureTime: 0.050000
+    exif:Flash: 16
+    exif:FNumber: 9.000000
+    exif:FocalLength: 55.000000
+    exif:FocalPlaneResolutionUnit: 3
+    exif:FocalPlaneXResolution: 2413.333252
+    exif:FocalPlaneYResolution: 2413.333252
+    exif:ISOSpeedRatings: 100
+    exif:LensModel: Zeiss Otus 1.4/55 ZE
+    exif:LensSerialNumber: 0000000000
+    exif:LensSpecification: 55.000000,55.000000,0.000000,0.000000
+    exif:MaxApertureValue: 1.000000
+    exif:MeteringMode: 5
+    exif:OffsetTime: +01:00
+    exif:OffsetTimeDigitized: +01:00
+    exif:OffsetTimeOriginal: +01:00
+    exif:RecommendedExposureIndex: 100
+    exif:SceneCaptureType: 0
+    exif:SensitivityType: 2
+    exif:ShutterSpeedValue: 4.321928
+    exif:SubSecTimeDigitized: 00
+    exif:SubSecTimeOriginal: 00
+    exif:WhiteBalance: 1
+    icc:copyright: Copyright 1999 Adobe Systems Incorporated
+    icc:description: Adobe RGB (1998)
+    signature: 5da2aec147975418dd56d9e0ce45dc58cce94d423bb0b8d9096b86fdc581b9aa
+    tiff:alpha: unspecified
+    tiff:endian: lsb
+    tiff:make: Canon
+    tiff:model: Canon EOS 5DS R
+    tiff:photometric: RGB
+    tiff:rows-per-strip: 1
+    tiff:software: Adobe Photoshop Lightroom Classic 10.0 (Windows)
+    tiff:timestamp: 2020:11:11 14:04:36
+  Artifacts:
+    filename: /avis-scanner-prod/_05-uredigerede-opslag/Modersmaalet (Haderslev, 100-9)/modersmaalet_19070701_19071231_RT1/modersmaalet_19070701_19071231_RT1-003.tif
+    verbose: true
+  Tainted: False
+  Filesize: 143.989MiB
+  Number pixels: 50.3209M
+  Pixels per second: 176.542MB
+  User time: 0.290u
+  Elapsed time: 0:01.285
+  Version: ImageMagick 6.9.12-37 Q16 x86_64 2022-01-29 https://imagemagick.org
+identify: Incorrect value for "RichTIFFIPTC"; tag ignored. `TIFFFetchNormalTag' @ warning/tiff.c/TIFFWarnings/897.

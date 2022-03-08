@@ -62,7 +62,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Batch"
+                  $ref: "#/components/schemas/SlimBatch"
 
 
 
@@ -128,7 +128,7 @@ paths:
 
   /batch/{batchID}/{newspaperID}/{date}:
     get:
-      operationId: getMappedEntititesForNewspaperDate
+      operationId: getNewspaperDay
       parameters:
         - name: batchID
           in: path
@@ -329,6 +329,7 @@ paths:
       responses:
         '204':
           description: Note deleted
+          
   /{avisid}/notes:
     get:
       operationId: getNewspaperNotes
@@ -411,8 +412,35 @@ paths:
       responses:
         '204':
           description: Note deleted
+
+
 components:
   schemas:
+  
+    NewspaperDate:
+      type: object
+      properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+        roundtrip:
+          type: integer
+        date:
+          type: string
+          format: date
+        pageCount:
+          type: integer
+        editionCount:
+          type: integer
+        state:
+          type: string
+        problems:
+          type: string
+  
+  
+  
+  
     Note:
       type: object
       properties:
@@ -445,15 +473,16 @@ components:
           type: string
           format: date-time
 
-    Batch:
+
+    SlimBatch:
       type: object
       properties:
         batchid:
           type: string
-        avisid:
-          type: string
         roundtrip:
           type: integer
+        avisid:
+          type: string
         startDate:
           type: string
           format: date
@@ -463,17 +492,9 @@ components:
         deliveryDate:
           type: string
           format: date
-        problems:
-          description: "Problems not associated with any page"
-          type: string
-          nullable: true
         numProblems:
           description: "Number of problems found. Use this to see if the batch completed checks without any errors"
           type: integer
-        notes:
-          type: array
-          items:
-            $ref: '#/components/schemas/Note'
         numNotes:
           type: integer
         state:
@@ -483,35 +504,26 @@ components:
         lastModified:
           type: string
           format: 'date-time'
-
-    NewspaperDate:
-      type: object
-      properties:
-        batchid:
-          type: string
-        avisid:
-          type: string
-        roundtrip:
-          type: integer
-        date:
-          type: string
-          format: date
-        pageCount:
-          type: integer
-        editionCount:
-          type: integer
-        state:
-          type: string
-        problems:
-          type: string
-
+    
+    Batch:
+      allOf:
+        - $ref: '#/components/schemas/SlimBatch'
+        - type: object
+          properties:
+            problems:
+              description: "Problems not associated with any page"
+              type: string
+              nullable: true
+            notes:
+              type: array
+              items:
+                $ref: '#/components/schemas/Note'
+    
     NewspaperDay:
       type: object
       properties:
-        batchid:
-          type: string
-        avisid:
-          type: string
+        batch:
+          $ref: '#/components/schemas/SlimBatch'
         date:
           type: string
           format: date
@@ -543,9 +555,9 @@ components:
         pages:
           type: array
           items:
-            $ref: '#/components/schemas/NewspaperEntity'
-
-    NewspaperEntity:
+            $ref: '#/components/schemas/NewspaperPage'
+  
+    NewspaperPage:
       type: object
       properties:
         batchid:
