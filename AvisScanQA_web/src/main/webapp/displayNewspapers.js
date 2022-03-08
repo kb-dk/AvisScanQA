@@ -18,6 +18,30 @@ function noteNewspaperSubmitHandler(event) {
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
+function noteNewspaperDeleteHandler(event) {
+    event.preventDefault(); // <- cancel event
+
+    const data = new FormData(event.target);
+
+    let parts = ["api",data.get('avis') ,"notes"]
+    var query = new URLSearchParams();
+
+    query.append("id", data.get('id'));
+
+    // let url = parts.filter(x => x).join("/")
+    let url = parts.join("/") + "?" + query.toString();
+
+    const notes = data.get('notes');
+
+    $.ajax({
+        type: "DELETE", url: url, data: notes, success: function () {
+            alert("note deleted")
+        }, dataType: "json", contentType: "application/json"
+    });
+    location.reload();
+    // alert('Handler for .submit() called.');
+    return false;  // <- cancel event
+}
 
 function loadNewspaperIDs() {
     $.getJSON('api/newspaperIDs')
@@ -110,7 +134,7 @@ function loadYearsForNewspaper(avisID, year) {
                                 "border": "none",
                                 "background-color": "transparent"
                             }));
-                            $newspaperForm.submit(noteDeleteHandler);
+                            $newspaperForm.submit(noteNewspaperDeleteHandler);
                             $showNotesDiv.append($newspaperForm);
                         }
                     }
