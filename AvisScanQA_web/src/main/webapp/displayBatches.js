@@ -50,7 +50,7 @@ function loadBatchForNewspaper(batchID) {
                                 2)));
                 }
             }
-            let $notesButton = $("<button/>",{class:"notesButton btn btn-primary", text:"Show and create notes"});
+            let $notesButton = $("<button/>",{class:`notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`, text:`${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and"  : ""} create notes`});
             let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
             $notesButton.click(()=>{
 

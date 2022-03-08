@@ -67,7 +67,7 @@ function loadYearsForNewspaper(avisID, year) {
             const notesUrl = `api/${avisID}/notes`;
             $.getJSON(notesUrl)
                 .done(function (notes){
-                    let $notesButton = $("<button/>",{class:"notesButton btn btn-primary", text:"Show and create notes"});
+                    let $notesButton = $("<button/>",{class:`notesButton btn ${notes.length > 0 ? "btn-warning":"btn-primary"} btn-primary`, text:`${notes.length > 0 ? "Show " + notes.length + " notes and ": ""}create notes`});
                     let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
                     $notesButton.click(()=>{
 
