@@ -272,6 +272,18 @@ public class MetsChecker extends DecoratedEventHandler {
             String titleMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='245']/marc:subfield[@code='a']");
             String titleMods = xpath.selectString(metadataMods,"/mods:mods/mods:titleInfo[not(@*)]/mods:title");
 
+            checkAllEquals(decoratedEvent,FailureType.INVALID_METS_ERROR,"Title was not the same throughout mets file: {val1}, {val2}, {val3}",new String[]{titleDC, titleMarc, titleMods});
+            checkAllEquals(decoratedEvent,FailureType.INVALID_METS_ERROR,"Title uniform was not the same throughout mets file: {val1}, {val2}, {val3}",new String[]{titleUniformDC, titleUniformMarc, titleUniformMods});
+
+            String locationMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='260']/marc:subfield[@code='a']");
+            String locationMods = xpath.selectString(metadataMods,"/mods:mods/mods:subject/mods:hierarchicalGeographic/mods:city");
+            String placeMods = xpath.selectString(metadataMods,"/mods:mods/mods:originInfo/mods:place/mods:placeTerm");
+
+            checkAllEquals(decoratedEvent,FailureType.INVALID_METS_ERROR,"Location throughout mets file do no match: {val1}, {val2}, {val3}", new String[]{locationMarc,locationMods,placeMods});
+
+            String serialMarc = xpath.selectString(metadataMarc,"/marc:record/marc:datafield[@tag='250']/marc:subfield[@code='a']");
+            checkEquals(decoratedEvent,FailureType.INVALID_METS_ERROR,"Mets file {expected} was instead {actual}",serialMarc,"serial");
+
             // Save the filelists for later
             xpath.selectStringList(metsDoc,
                                    "/mets:mets/mets:fileSec/mets:fileGrp[@ID='TIFF']/mets:file/mets:FLocat/@xlink:href")
