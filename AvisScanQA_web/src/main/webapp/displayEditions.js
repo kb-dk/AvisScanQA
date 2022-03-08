@@ -12,6 +12,8 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
 
     $.getJSON(url)
         .done(function (newspaperDay) {
+            console.log(day === newspaperDay.batch.startDate);
+            console.log(day === newspaperDay.batch.endDate);
             $headline.append($("<a/>", {
                 class: "btn btn-secondary",
                 text: "Back to newspaper year",
@@ -20,13 +22,29 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
             $headline.append($("<a/>", {
                 class: "btn btn-secondary", text: "Back to batch", href: `#/batch/${batchID}/`
             }))
+            let $buttonForward = $("<a/>", {
+                class: "btn btn-secondary bi bi-caret-right",href: `#/newspapers/${batchID}/${avisID}/${nextDay}/0/0/`
+            }).css({"float":"right"})
+            if(day === newspaperDay.batch.endDate){
 
-            $headline.append($("<a/>", {
-                class: "btn btn-secondary bi bi-caret-right", href: `#/newspapers/${batchID}/${avisID}/${nextDay}/0/0/`
-            }).css({"float":"right"}))
-            $headline.append($("<a/>", {
+                $buttonForward.css({
+                    "background-color" : "#6c757d9e",
+                    "border-color":"#6c757d9e",
+                    "pointer-events":"none"
+                })
+            }
+            $headline.append($buttonForward)
+            let $buttonBack = $("<a/>", {
                 class: "btn btn-secondary bi bi-caret-left", href: `#/newspapers/${batchID}/${avisID}/${pastDay}/0/0/`
-            }).css({"float":"right"}))
+            }).css({"float":"right"})
+            if(day === newspaperDay.batch.startDate){
+                $buttonBack.css({
+                    "background-color" : "#6c757d9e",
+                    "border-color":"#6c757d9e",
+                    "pointer-events":"none"
+                })
+            }
+            $headline.append($buttonBack)
             $headline.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
             // console.log("Starting rendering of entites.");
             renderDayDisplay(newspaperDay, editionIndex, pageIndex);
