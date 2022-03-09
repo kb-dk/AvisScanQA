@@ -22,7 +22,21 @@ function loadBatchForNewspaper(batchID) {
             $state.load("dropDownState.html", function () {
                 $("#stateFormBatchID").val(batch.batchid);
                 const $stateForm = $("#stateForm");
-                $("#dropDownState").text(batch.state)
+                let $dropDownState = $("#dropDownState");
+                $dropDownState.text(batch.state)
+                switch(batch.state){
+                    case "REJECTED":
+                        $dropDownState.css({"background-color":"#cf1d1d","border-color":"#cf1d1d"})
+                        break
+                    case "APPROVED":
+                        $dropDownState.css({"background-color":"#1e7e34","border-color":"#1e7e34"})
+                        break
+                    default:
+                        $dropDownState.css({"background-color":"#007bff","border-color":"#007bff"})
+                        break
+
+                }
+
                 //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
                 $(`[value=${batch.state}]`).css("font-weight", "Bold");
