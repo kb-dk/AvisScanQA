@@ -1,11 +1,12 @@
+let batchConfig;
+$.getJSON("config.json",function(data){batchConfig = data.batch;})
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
 
     let $state = $("#state-div").empty();
     const $headline = $("#headline-div").empty();
     let $notice = $("#notice-div").empty();
-    let batchConfig;
-    $.getJSON("config.json",function(data){batchConfig = data.batch;})
+
     $.getJSON(url)
         .fail(function ( jqxhr, textStatus, error) {
             $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
@@ -29,10 +30,11 @@ function loadBatchForNewspaper(batchID) {
                 $dropDownState.text(batch.state)
                 let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
                 $dropDownState.css(stateButtonColors);
-                for(let [option,val] of Object.entries(batchConfig.stateButtonOptions)){
-                    $stateDropDownMenu.append($("<input/>",{type:"submit",class:"dropdown-item",form:"stateForm",value:`${option}`}));
-                }
 
+                for(let [option,val] of Object.entries(batchConfig.stateButtonOptions)){
+                    $stateDropDownMenu.append($("<input/>",{type:"submit",class:"dropdown-item",title:val.description,form:"stateForm",value:`${option}`}));
+
+                }
                 //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
                 $(`[value="${batch.state}"`).css("font-weight", "Bold");
@@ -194,7 +196,13 @@ function renderBatchTable(filter) {
             title: 'State',
             field: 'state',
             sortable: true,
-            filterControl: "select"
+            filterControl: "select",
+            formatter: function (value, row) {
+                // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
+                return `<p title='${batchConfig.stateButtonOptions[value].description}'>${value} </p>`;
+
+            },
+
         }, {
             title: 'Problem Count',
             field: 'numProblems',
