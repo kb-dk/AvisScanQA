@@ -139,3 +139,13 @@ margin-right: 10px;
 .showNotesDiv.active *{
   margin-left: 0.1rem;
 }
+#stateDropDownMenu *{
+  background-color: #fff;
+}
+#stateDropDownMenu input:hover{
+  background-color: #cbcbcb;
+  font-weight: Bold
+}
+#stateDropDownMenu{
+  max-width: max-content;
+}

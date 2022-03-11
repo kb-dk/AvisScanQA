@@ -1,0 +1,42 @@
+{
+  "global": {
+  },
+  "newspaper": {
+  },
+  "batch": {
+    "stateButtonOptions":
+      {
+        "APPROVED": {
+          "backgroundColor": "#1e7e34",
+          "borderColor": "#1e7e34"
+        },
+        "REJECTED": {
+          "backgroundColor": "#cf1d1d",
+          "borderColor": "#cf1d1d"
+        },
+        "CHECKED": {
+          "backgroundColor": "#007bff",
+          "borderColor": "#007bff"
+        }
+      }
+  },
+  "edition": {
+    "dropDownStandardMessage": {
+      "dayDropDown": {
+        "options": [
+          "Udkom ikke pgr. af strejke"
+        ]
+      },
+      "udgDropDown": {
+        "options": [
+          "Ugyldig edition"
+        ]
+      },
+      "pageDropDown": {
+        "options": [
+          "Utydelig side"
+        ]
+      }
+    }
+  }
+}

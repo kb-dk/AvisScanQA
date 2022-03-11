@@ -4,7 +4,8 @@ function loadBatchForNewspaper(batchID) {
     let $state = $("#state-div").empty();
     const $headline = $("#headline-div").empty();
     let $notice = $("#notice-div").empty();
-
+    let batchConfig;
+    $.getJSON("config.json",function(data){batchConfig = data.batch;})
     $.getJSON(url)
         .fail(function ( jqxhr, textStatus, error) {
             $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
@@ -20,26 +21,21 @@ function loadBatchForNewspaper(batchID) {
             $headline.append($("<h1/>").text(`Batch ${batch.batchid}`));
 
             $state.load("dropDownState.html", function () {
+                let $stateDropDownMenu = $("#stateDropDownMenu");
+
                 $("#stateFormBatchID").val(batch.batchid);
                 const $stateForm = $("#stateForm");
                 let $dropDownState = $("#dropDownState");
                 $dropDownState.text(batch.state)
-                switch(batch.state){
-                    case "REJECTED":
-                        $dropDownState.css({"background-color":"#cf1d1d","border-color":"#cf1d1d"})
-                        break
-                    case "APPROVED":
-                        $dropDownState.css({"background-color":"#1e7e34","border-color":"#1e7e34"})
-                        break
-                    default:
-                        $dropDownState.css({"background-color":"#007bff","border-color":"#007bff"})
-                        break
-
+                let stateButtonColors = batchConfig.stateButtonOptions[batch.state];
+                $dropDownState.css(stateButtonColors);
+                for(let [option,val] of Object.entries(batchConfig.stateButtonOptions)){
+                    $stateDropDownMenu.append($("<input/>",{type:"submit",class:"dropdown-item",form:"stateForm",value:`${option}`}));
                 }
 
                 //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
-                $(`[value=${batch.state}]`).css("font-weight", "Bold");
+                $(`[value="${batch.state}"`).css("font-weight", "Bold");
 
                 $stateForm.submit(stateSubmitHandler);
                 $state.append($stateForm);
