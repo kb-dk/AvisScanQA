@@ -27,7 +27,7 @@ function loadBatchForNewspaper(batchID) {
                 const $stateForm = $("#stateForm");
                 let $dropDownState = $("#dropDownState");
                 $dropDownState.text(batch.state)
-                let stateButtonColors = batchConfig.stateButtonOptions[batch.state];
+                let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
                 $dropDownState.css(stateButtonColors);
                 for(let [option,val] of Object.entries(batchConfig.stateButtonOptions)){
                     $stateDropDownMenu.append($("<input/>",{type:"submit",class:"dropdown-item",form:"stateForm",value:`${option}`}));

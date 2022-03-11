@@ -4,27 +4,33 @@
   "newspaper": {
   },
   "batch": {
-    "stateButtonOptions":
-      {
-        "APPROVED": {
+    "stateButtonOptions": {
+      "APPROVED": {
+        "styling": {
           "backgroundColor": "#1e7e34",
           "borderColor": "#1e7e34"
-        },
-        "REJECTED": {
+        }
+      },
+      "REJECTED": {
+        "styling": {
           "backgroundColor": "#cf1d1d",
           "borderColor": "#cf1d1d"
-        },
-        "CHECKED": {
+        }
+      },
+      "CHECKED": {
+        "styling": {
           "backgroundColor": "#007bff",
           "borderColor": "#007bff"
         }
       }
+    }
   },
   "edition": {
     "dropDownStandardMessage": {
       "dayDropDown": {
         "options": [
-          "Udkom ikke pgr. af strejke"
+          "Udkom ikke pgr. af strejke",
+          "Udkom ikke pgr. af særlig lejlighed"
         ]
       },
       "udgDropDown": {

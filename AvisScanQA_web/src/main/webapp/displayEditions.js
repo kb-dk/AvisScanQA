@@ -1,3 +1,4 @@
+let editionJsonData;
 
 function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
     let day = moment(date).format('YYYY-MM-DD');
@@ -9,6 +10,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
     $("#batchOverview-table").empty();
     const $headline = $("#headline-div").empty();
     $("#primary-show").empty();
+    $.getJSON("config.json").done(function (data){editionJsonData = data.edition})
 
     $.getJSON(url)
         .done(function (newspaperDay) {
@@ -157,7 +159,10 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     let $dropDownDayNotes = $("<select/>", {class: "form-select", name: "standardNote"});
 
     $dropDownDayNotes.append($("<option>", {value: "", html: "", selected: "true"}));
-    $dropDownDayNotes.append($("<option>", {value: "Udkom ikke pgr. strejke", html: "Udkom ikke pgr. strejke"}));
+    for(let option of editionJsonData.dropDownStandardMessage.dayDropDown.options){
+        $dropDownDayNotes.append($("<option>", {value: option, html: option}));
+    }
+
     formRow1.append($dropDownDayNotes)
     formRow1.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
     formRow2.append($dayNotesTextArea);
@@ -229,7 +234,10 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         let $dropDownEditionNotes = $("<select/>", {class: "form-select", name: "standardNote"});
 
         $dropDownEditionNotes.append($("<option>", {value: "", html: "", selected: "true"}));
-        $dropDownEditionNotes.append($("<option>", {value: "Ugyldig edition", html: "Ugyldig edition"}));
+        for(let option of editionJsonData.dropDownStandardMessage.udgDropDown.options){
+            $dropDownEditionNotes.append($("<option>", {value:option, html: option}));
+        }
+
         formRow1.append($dropDownEditionNotes)
         formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
         formRow2.append($editionNotesTextArea);
@@ -287,13 +295,16 @@ function renderSinglePage(page) {
     const formRow2 = $("<div>", {class: "form-row"})
     $pageNotesForm.append(formRow1);
     $pageNotesForm.append(formRow2);
-
-    formRow1.append($("<select/>", {
+    let $standardMessageSelect = $("<select/>", {
         class: "form-select", name: "standardNote"
-    }).append($("<option>", {value: "", html: "", selected: "true"}))
-        .append($("<option>", {
-            value: "Utydelig side", html: "Utydelig side"
-        })))
+    }).append($("<option>", {value: "", html: "", selected: "true"}));
+    for (let option of editionJsonData.dropDownStandardMessage.pageDropDown.options){
+        $standardMessageSelect.append($("<option>", {
+            value: option, html: option
+        }))
+    }
+    formRow1.append($standardMessageSelect)
+
 
     formRow1.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
 
