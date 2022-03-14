@@ -158,12 +158,8 @@ function loadBatchForNewspaper(batchID) {
             $notice.append($showNotesDiv);
             renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
             renderBatchTable(batch.avisid);
-        });
-    let all = $(".stateCell").map(function() {
-        return this.innerHTML;
-    }).get();
 
-    console.log(all.join());
+        });
 }
 
 
@@ -186,6 +182,11 @@ function renderBatchTable(filter) {
     $table.bootstrapTable({
         url: "api/batch",
         filterControl: true,
+        detailView: true,
+        detailFormatter:function (i, r){
+            console.log(r)
+            return "State description: " + batchConfig.stateButtonOptions[r.state].description;
+        },
         columns: [{
             title: 'BatchID',
             field: 'batchid',
@@ -216,12 +217,6 @@ function renderBatchTable(filter) {
             field: 'state',
             sortable: true,
             filterControl: "select",
-            cellStyle: function(val,r,i,f){
-              return{classes:"stateCell"}
-            },
-            "titleTooltip": function (val){
-                return batchConfig.stateButtonOptions[val].description
-            }
         }, {
             title: 'Problem Count',
             field: 'numProblems',

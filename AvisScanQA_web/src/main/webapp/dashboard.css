@@ -149,3 +149,6 @@ margin-right: 10px;
 #stateDropDownMenu{
   max-width: max-content;
 }
+.stateCell{
+  background-color: red;
+}
