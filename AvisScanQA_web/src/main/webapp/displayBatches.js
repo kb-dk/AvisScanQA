@@ -1,5 +1,8 @@
 let batchConfig;
-$.getJSON("config.json",function(data){batchConfig = data.batch;})
+$.getJSON("api/config", function (data) {
+    batchConfig = data.batch;
+})
+
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
 
@@ -8,7 +11,7 @@ function loadBatchForNewspaper(batchID) {
     let $notice = $("#notice-div").empty();
 
     $.getJSON(url)
-        .fail(function ( jqxhr, textStatus, error) {
+        .fail(function (jqxhr, textStatus, error) {
             $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
         })
         .done(function (batch) {
@@ -31,8 +34,14 @@ function loadBatchForNewspaper(batchID) {
                 let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
                 $dropDownState.css(stateButtonColors);
 
-                for(let [option,val] of Object.entries(batchConfig.stateButtonOptions)){
-                    $stateDropDownMenu.append($("<input/>",{type:"submit",class:"dropdown-item",title:val.description,form:"stateForm",value:`${option}`}));
+                for (let [option, val] of Object.entries(batchConfig.stateButtonOptions)) {
+                    $stateDropDownMenu.append($("<input/>", {
+                        type: "submit",
+                        class: "dropdown-item",
+                        title: val.description,
+                        form: "stateForm",
+                        value: `${option}`
+                    }));
 
                 }
                 //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
@@ -62,23 +71,29 @@ function loadBatchForNewspaper(batchID) {
                                 2)));
                 }
             }
-            let $notesButton = $("<button/>",{class:`notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`, text:`${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and"  : ""} create notes`});
-            let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
-            $notesButton.click(()=>{
+            let $notesButton = $("<button/>", {
+                class: `notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`,
+                text: `${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and" : ""} create notes`
+            });
+            let $showNotesDiv = $("<div/>", {
+                visible: false,
+                class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`
+            })
+            $notesButton.click(() => {
 
                 let visible = $showNotesDiv.attr('visible');
-                if (visible == 'false'){
-                    $showNotesDiv.attr('visible',true);
+                if (visible == 'false') {
+                    $showNotesDiv.attr('visible', true);
                     $showNotesDiv.addClass("active")
-                }else{
-                    $showNotesDiv.attr('visible',false);
+                } else {
+                    $showNotesDiv.attr('visible', false);
                     $showNotesDiv.removeClass("active")
                 }
 
                 console.log(visible)
             })
 
-            let $batchNotesForm = $("<form/>",{id:"batchNotesForm",action:"",method:"post"});
+            let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
             const formRow1 = $("<div>", {class: "form-row"})
             const formRow2 = $("<div>", {class: "form-row"})
             $batchNotesForm.append(formRow1);
@@ -144,7 +159,11 @@ function loadBatchForNewspaper(batchID) {
             renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
             renderBatchTable(batch.avisid);
         });
+    let all = $(".stateCell").map(function() {
+        return this.innerHTML;
+    }).get();
 
+    console.log(all.join());
 }
 
 
@@ -197,12 +216,12 @@ function renderBatchTable(filter) {
             field: 'state',
             sortable: true,
             filterControl: "select",
-            formatter: function (value, row) {
-                // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
-                return `<p title='${batchConfig.stateButtonOptions[value].description}'>${value} </p>`;
-
+            cellStyle: function(val,r,i,f){
+              return{classes:"stateCell"}
             },
-
+            "titleTooltip": function (val){
+                return batchConfig.stateButtonOptions[val].description
+            }
         }, {
             title: 'Problem Count',
             field: 'numProblems',
@@ -225,6 +244,7 @@ function renderBatchTable(filter) {
     } else {
         $table.bootstrapTable('filterBy', {})
     }
+    //console.log($(".stateCell").attributes("title", "test"))
 
 
 }
@@ -266,26 +286,26 @@ function stateSubmitHandler(event) {
 function handleNotesDownload(batchId) {
     $.getJSON(`api/notes/${batchId}`)
         .done(function (notes) {
-        const items = notes;
-        const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
-        if (items.length > 0) {
-            const header = Object.keys(items[0])
-            const csv = [
-                header.join(','), // header row first
-                ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
-            ].join('\r\n')
+            const items = notes;
+            const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+            if (items.length > 0) {
+                const header = Object.keys(items[0])
+                const csv = [
+                    header.join(','), // header row first
+                    ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
+                ].join('\r\n')
 
 
-            console.log(csv)
-            let link = document.createElement("a");
-            link.download = `${batchId}.csv`;
-            link.href = `data:text/csv,${csv}`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            link.remove();
-        }
-        //Close the window, but wait 100 ms to ensure that the download have started
-        setTimeout("window.close()", 100)
-    });
+                console.log(csv)
+                let link = document.createElement("a");
+                link.download = `${batchId}.csv`;
+                link.href = `data:text/csv,${csv}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                link.remove();
+            }
+            //Close the window, but wait 100 ms to ensure that the download have started
+            setTimeout("window.close()", 100)
+        });
 }

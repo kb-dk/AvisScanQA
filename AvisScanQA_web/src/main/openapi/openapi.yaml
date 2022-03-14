@@ -36,6 +36,16 @@ paths:
                 type: string
                 format: binary
 
+  /config:
+    get:
+      operationId: getConfig
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
 
 
   /newspaperIDs:

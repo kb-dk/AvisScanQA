@@ -1,5 +1,8 @@
 package dk.kb.kula190.api.impl;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
@@ -18,6 +21,7 @@ import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +39,14 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * AvisScanQA_web
@@ -208,7 +211,35 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
         
     }
-    
+    @Override
+    public Object getConfig() {
+            ObjectMapper mapper = new ObjectMapper();
+            try  {
+                Object jsonObj = mapper.readValue(Paths.get("src/main/resources/config.json").toFile(),Object.class);
+                return jsonObj;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+
+        return null;
+    }
+    /*
+    private class JsonConfig{
+        private Object global;
+        private Object newspaper;
+        private Object batch;
+        private Object edition;
+
+        public JsonConfig(Object global, Object newspaper, Object batch, Object edition){
+
+            this.global = global;
+            this.newspaper = newspaper;
+            this.batch = batch;
+            this.edition = edition;
+        }
+    }
+    */
     @Override
     public StreamingOutput getTiffFile(String relPath) {
         return output -> {

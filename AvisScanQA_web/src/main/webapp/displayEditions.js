@@ -10,7 +10,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
     $("#batchOverview-table").empty();
     const $headline = $("#headline-div").empty();
     $("#primary-show").empty();
-    $.getJSON("config.json").done(function (data){editionJsonData = data.edition})
+    $.getJSON("api/config").done(function (data){editionJsonData = data.edition})
 
     $.getJSON(url)
         .done(function (newspaperDay) {
