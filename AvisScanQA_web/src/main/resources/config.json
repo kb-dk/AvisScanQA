@@ -1,0 +1,51 @@
+{
+  "global": {
+  },
+  "newspaper": {
+  },
+  "batch": {
+    "stateButtonOptions": {
+      "APPROVED": {
+        "description": "The batch contains no or acceptable errors",
+        "styling": {
+          "backgroundColor": "#1e7e34",
+          "borderColor": "#1e7e34"
+        }
+      },
+      "REJECTED": {
+        "description": "The batch contains contains errors, that a new roundtrip is needed",
+        "styling": {
+          "backgroundColor": "#cf1d1d",
+          "borderColor": "#cf1d1d"
+        }
+      },
+      "CHECKED": {
+        "description": "The batch has gone through automated checkers",
+        "styling": {
+          "backgroundColor": "#007bff",
+          "borderColor": "#007bff"
+        }
+      }
+    }
+  },
+  "edition": {
+    "dropDownStandardMessage": {
+      "dayDropDown": {
+        "options": [
+          "Udkom ikke pgr. af strejke",
+          "Udkom ikke pgr. af særlig lejlighed"
+        ]
+      },
+      "udgDropDown": {
+        "options": [
+          "Ugyldig edition"
+        ]
+      },
+      "pageDropDown": {
+        "options": [
+          "Utydelig side"
+        ]
+      }
+    }
+  }
+}
