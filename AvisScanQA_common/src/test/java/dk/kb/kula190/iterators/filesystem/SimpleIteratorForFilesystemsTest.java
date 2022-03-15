@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintStream;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -18,7 +19,7 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
     private TreeIterator iterator;
     
     @Override
-    public TreeIterator getIterator() {
+    public TreeIterator getIterator() throws IOException {
         if (iterator == null) {
             //File file = new File(Thread.currentThread().getContextClassLoader().getResource("batch").toURI());
             File file = new File(System.getenv("HOME")+"/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19061231_RT1");
@@ -42,8 +43,7 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
                                                                     "\\.[^_]+$" //filename.split(pageRegexp)[0];
                                                                    ),
                     
-                                                            "\\.[^_]+$",
-                                                            ".md5");
+                                                            "checksums.txt");
         }
         return iterator;
         

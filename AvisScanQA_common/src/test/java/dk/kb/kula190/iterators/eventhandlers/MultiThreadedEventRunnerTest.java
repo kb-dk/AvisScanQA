@@ -39,21 +39,21 @@ class MultiThreadedEventRunnerTest {
                         // new TiffAnalyzerExiv2(resultCollector),
                         // new TiffCheckerExiv2(resultCollector),
         
-                        new TiffAnalyzerImageMagick(resultCollector),
+                        // new TiffAnalyzerImageMagick(resultCollector),
                         // new TiffCheckerImageMagick(resultCollector),
         
                         new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector),
+                        new MetsChecker(resultCollector)
         
                         //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
+                        // new XmlSchemaChecker(resultCollector),
         
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
+                        // new XpathAltoChecker(resultCollector),
+                        // new XpathMixChecker(resultCollector),
                         //CrossCheckers
-                        new XpathCrossChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
+                        // new XpathCrossChecker(resultCollector),
+                        // new NoMissingMiddlePagesChecker(resultCollector),
+                        // new PageStructureChecker(resultCollector)
                 
                 
                               );

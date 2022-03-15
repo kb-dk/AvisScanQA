@@ -8,16 +8,20 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.AndFileFilter;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.FileFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Iterator for parsing a tree structure backed by a file system. Each iterator represents a node. A node corresponds
@@ -26,20 +30,31 @@ import java.util.List;
 public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     
     
-    protected final String checksumRegexp;
-    protected final String checksumExtension;
+    protected final Map<String, String> checksums;
+    protected final String checksumFile;
     
     /**
      * Construct an iterator rooted at a given directory
      *
-     * @param dir               the directory at which to root the iterator.
-     * @param checksumRegexp
-     * @param checksumExtension
+     * @param dir the directory at which to root the iterator.
      */
-    public SimpleIteratorForFilesystems(File dir, String checksumRegexp, String checksumExtension) {
+    public SimpleIteratorForFilesystems(File dir, String checksumFile) throws IOException {
         super(dir);
-        this.checksumRegexp    = checksumRegexp;
-        this.checksumExtension = checksumExtension;
+        this.checksumFile = checksumFile;
+        checksums         = Files.readAllLines(dir.toPath().resolve(checksumFile))
+                         .stream()
+                         .map(line -> line.split("  ", 2))
+                         .collect(Collectors.toMap(lineSplits -> new File(dir, lineSplits[1]).toString(),
+                                                   lineSplits -> lineSplits[0]));
+        
+    }
+    
+    protected SimpleIteratorForFilesystems(File id,
+                                           String checksumFile,
+                                           Map<String, String> checksums) {
+        super(id);
+        this.checksums = checksums;
+        this.checksumFile = checksumFile;
     }
     
     @Override
@@ -49,7 +64,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         Arrays.sort(children);
         ArrayList<DelegatingTreeIterator> result = new ArrayList<>(children.length);
         for (File child : children) {
-            result.add(new SimpleIteratorForFilesystems(child, checksumRegexp, checksumExtension));
+            result.add(new SimpleIteratorForFilesystems(child, checksumFile, checksums));
         }
         return result.iterator();
     }
@@ -59,9 +74,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         List<File> attributes = new ArrayList<>(FileUtils.listFiles(id,
                                                                     new AndFileFilter(FileFileFilter.INSTANCE,
                                                                                       new NotFileFilter(
-                                                                                              new WildcardFileFilter(
-                                                                                                      "*"
-                                                                                                      + checksumExtension))),
+                                                                                              new NameFileFilter(checksumFile))),
                                                                     null));
         Collections.sort(attributes);
         return attributes.iterator();
@@ -69,7 +82,8 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     
     @Override
     protected AttributeParsingEvent makeAttributeEvent(File nodeID, File attributeID) {
-        return new FileAttributeParsingEvent(attributeID.getPath(), attributeID, checksumRegexp, checksumExtension);
+        String checksum = checksums.get(attributeID.toString());
+        return new FileAttributeParsingEvent(attributeID.getPath(), attributeID, checksum);
     }
     
     

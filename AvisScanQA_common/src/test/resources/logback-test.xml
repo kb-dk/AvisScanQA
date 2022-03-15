@@ -1,15 +1,25 @@
 <configuration scan="true" scanPeriod="5 minutes">
 
+    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+
+    <evaluator name="DISP_CALLER_EVAL" class="ch.qos.logback.classic.boolex.GEventEvaluator">
+        <expression>return message.startsWith("Adding failure for ");</expression>
+    </evaluator>
+
+    <evaluator name="NOT_DISP_CALLER_EVAL">
+        <expression>return !message.startsWith("Adding failure for ");</expression>
+    </evaluator>
+
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <!-- encoders are assigned the type
              ch.qos.logback.classic.encoder.PatternLayoutEncoder by default -->
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36}\(%file:%line\) - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} %replace(%caller{1}){'[^(]+(.*)\n','$1'} %replace(%caller{2..3}){'[^(]+(.*)\n','$1'} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="dk.kb" level="INFO"/>
-    <logger name="dk.kb.kula190" level="DEBUG"/>
+    <!--    <logger name="dk.kb" level="INFO"/>-->
+    <!--    <logger name="dk.kb.kula190" level="DEBUG"/>-->
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>

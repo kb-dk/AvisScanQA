@@ -11,6 +11,7 @@ import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Objects;
@@ -206,32 +207,32 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         }
     }
 
-
+    
     boolean isEdition(ParsingEvent event) {
-        return getLevel(event) == 2
+        return getLevel(event) == 3
                && !Set.of("METS", "MODS").contains(EventHandlerUtils.lastName(event.getName()))
                && event.getName().matches( //TODO are all editions named thus??
                                            ".*\\d{8}_udg\\d{2}$");
     }
 
     boolean isSection(ParsingEvent event) {
-        return getLevel(event) == 3;
-    }
-
-    boolean isPage(ParsingEvent event) {
         return getLevel(event) == 4;
     }
 
+    boolean isPage(ParsingEvent event) {
+        return getLevel(event) == 5;
+    }
+
     boolean isMETS(ParsingEvent event) {
-        return getLevel(event) == 2 && Objects.equals("METS", EventHandlerUtils.lastName(event.getName()));
+        return getLevel(event) == 1 && Objects.equals("METS", EventHandlerUtils.lastName(event.getName()));
     }
 
     boolean isMODS(ParsingEvent event) {
-        return getLevel(event) == 2 && Objects.equals("MODS", EventHandlerUtils.lastName(event.getName()));
+        return getLevel(event) == 1 && Objects.equals("MODS", EventHandlerUtils.lastName(event.getName()));
     }
 
     public final int getLevel(ParsingEvent event) {
-        return event.getName().split("/").length;
+        return new File(event.getName()).getName().split("_").length;
     }
 
     void handlePage(NodeParsingEvent event) throws IOException {
