@@ -159,7 +159,9 @@ public class MetsChecker extends DecoratedEventHandler {
             
             Node metadataMarc = asSeparateXML(xpath.selectNode(metsDoc,
                                                                "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*"));
-            
+
+            //Node metadataMix = asSeparateXML(xpath.selectNode(metsDoc,"/mets:mets/mets:amdSec[]"));
+
             checkMods(decoratedEvent, xpath, metadataMods);
     
             checkDC(decoratedEvent, xpath, metadataDC);

@@ -169,8 +169,10 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     formRow2.append($("<input/>", {
         id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm"
     }));
-    $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batchid}));
-    $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.avisid}));
+    $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batch.batchid}));
+    console.log("tetst")
+    console.log(newspaperDay)
+    $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.batch.avisid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "date", value: newspaperDay.date}));
     $dayNotesForm.submit(noteSubmitHandler);
     $dayCol.append($dayNotesForm);
@@ -180,7 +182,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
 
         let $dayForm = $("<form>", {action: "", method: "delete"});
 
-        $dayForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batchid}));
+        $dayForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batch.batchid}));
         $dayForm.append($("<input/>", {type: "hidden", name: "id", value: newspaperDay.notes[i].id}));
 
         const formRow = $("<div>", {class: "form-row"})

@@ -215,7 +215,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     public Object getConfig() {
             ObjectMapper mapper = new ObjectMapper();
             try  {
+                //this works on localhost
                 Object jsonObj = mapper.readValue(Paths.get("src/main/resources/config.json").toFile(),Object.class);
+
+                //This works on canopus
+                //Object jsonObj = mapper.readValue(this.getClass().getClassLoader().getResourceAsStream("config.json"),Object.class);
                 return jsonObj;
             } catch (IOException e) {
                 e.printStackTrace();
