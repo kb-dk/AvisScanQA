@@ -97,8 +97,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
             case MetsSplitter.INJECTED_TYPE_MIX -> { //MIX FROM METS FILE
                 //        This is the mix extracted from METS for a specific page
                 log.debug("Injected MIX event for {},{},{},{},{}", avis, editionDate, udgave, sectionName, pageNumber);
-                //TODO handle this with XpathMix https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-31
-                //TODO single checks ala MixChecker
+                XpathMix xpathMix = Mix.get();
+                xpathMix.setMetsMixInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName, pageNumber);
             }
         }
     }

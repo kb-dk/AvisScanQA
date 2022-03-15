@@ -53,6 +53,19 @@ public class XpathMix {
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest");
     }
+    
+    public void setMetsMixInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent,
+                                        String injectedType,
+                                        String avis,
+                                        LocalDate editionDate,
+                                        String udgave,
+                                        String sectionName,
+                                        Integer pageNumber) throws IOException {
+        Document document = EventHandlerUtils.handleDocument(decoratedEvent);
+        XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
+    //    TODO extract stuff from injected MetsMix here
+    
+    }
 
     public Integer getMixImageHeight() {
         return MixImageHeight;
