@@ -20,19 +20,30 @@ import java.io.InputStream;
 public class FileAttributeParsingEvent extends AttributeParsingEvent {
     
     
-    private File file;
-    private File checksumFile;
+    private final String checksum;
+    private final File file;
+    private final File checksumFile;
     
     public FileAttributeParsingEvent(String name, File file) {
         super(name, file.getAbsolutePath());
         this.file         = file;
         this.checksumFile = null;
+        checksum          = null;
     }
+    
+    public FileAttributeParsingEvent(String name, File file, String checksum) {
+        super(name, file.getAbsolutePath());
+        this.file         = file;
+        this.checksumFile = null;
+        this.checksum = checksum;
+    }
+    
     
     public FileAttributeParsingEvent(String name, File file, String checksumRegexp, String checksumPostfix) {
         super(name, file.getAbsolutePath());
         this.file         = file;
         this.checksumFile = new File(file.getAbsolutePath().replaceFirst(checksumRegexp, checksumPostfix));
+        checksum          = null;
     }
     
     
@@ -48,6 +59,9 @@ public class FileAttributeParsingEvent extends AttributeParsingEvent {
     
     @Override
     public String getChecksum() throws IOException {
+        if (checksum != null){
+            return checksum;
+        }
         //TODO caching so not read multiple times
         if (checksumFile != null) {
             try (BufferedReader reader = new BufferedReader(new FileReader(checksumFile))) {

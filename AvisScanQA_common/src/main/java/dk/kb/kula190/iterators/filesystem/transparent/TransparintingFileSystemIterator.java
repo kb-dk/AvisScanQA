@@ -14,6 +14,7 @@ import org.apache.commons.io.filefilter.WildcardFileFilter;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -41,14 +42,28 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                             File folderForBatches,
                                             List<String> transparentDirNames,
                                             List<String> virtualLevelsRegexp,
-                                            String checksumRegexp,
-                                            String checksumExtension) {
-        super(specificBatch, checksumRegexp, checksumExtension);
+                                            String checksumFile) throws IOException {
+        super(specificBatch, checksumFile);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.virtualLevelsRegexp = virtualLevelsRegexp;
-
+        
     }
+    
+    protected TransparintingFileSystemIterator(File specificBatch,
+                                            File folderForBatches,
+                                            List<String> transparentDirNames,
+                                            List<String> virtualLevelsRegexp,
+                                            String checksumFile,
+                                            Map<String, String> checksums
+                                            ) {
+        super(specificBatch, checksumFile, checksums);
+        this.batchFolder         = folderForBatches;
+        this.transparentDirNames = transparentDirNames;
+        this.virtualLevelsRegexp = virtualLevelsRegexp;
+        
+    }
+    
     
     @Override
     protected Iterator<? extends DelegatingTreeIterator> initializeChildrenIterator() {
@@ -64,8 +79,9 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                                   batchFolder,
                                                                   transparentDirNames,
                                                                   virtualLevelsRegexp,
-                                                                  checksumRegexp,
-                                                                  checksumExtension))
+                                                                  checksumFile,
+                                                                  checksums
+                                                                  ))
               .forEach(result::add);
         
         
@@ -87,8 +103,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                          transparentDirNames,
                                                          virtualLevelsRegexp.subList(1,
                                                                                      virtualLevelsRegexp.size()),
-                                                         checksumRegexp,
-                                                         checksumExtension
+                                                         checksumFile,
+                                                         checksums
               ))
               .forEach(result::add);
         return result.iterator();
@@ -114,8 +130,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
         return dirs.stream()
                    .flatMap(dir -> FileUtils.listFiles(dir,
                                                        new AndFileFilter(FileFileFilter.INSTANCE,
-                                                                         new NotFileFilter(new WildcardFileFilter(
-                                                                                 "*" + checksumExtension))),
+                                                                         new NotFileFilter(new NameFileFilter(checksumFile))),
                                                        new NameFileFilter(transparentDirNames))
                                             .stream())
                    .sorted()
@@ -144,7 +159,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
     @Override
     protected AttributeParsingEvent makeAttributeEvent(File nodeID, File attributeID) {
         String name = toPathID(attributeID);
-        return new FileAttributeParsingEvent(name, attributeID, checksumRegexp, checksumExtension);
+        String checksum = checksums.get(attributeID.toString());
+        return new FileAttributeParsingEvent(name, attributeID, checksum);
     }
     
     @Override

@@ -5,6 +5,7 @@ import dk.kb.kula190.iterators.eventhandlers.MultiThreadedEventRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.concurrent.ExecutorService;
 
 public abstract class MultiThreadedRunnableComponent extends DecoratedRunnableComponent {
@@ -31,8 +32,9 @@ public abstract class MultiThreadedRunnableComponent extends DecoratedRunnableCo
             
             @Override
             public boolean shouldFork(ParsingEvent event) {
-                int level = event.getName().split("/").length;
-                return level == 2; //level 2 is editions
+                int level1 = event.getName().split("/").length;
+                int level2 = new File(event.getName()).getName().split("_").length;
+                return level1 == 2 && level2 == 3; //level 2 is editions
             }
         
             @Override

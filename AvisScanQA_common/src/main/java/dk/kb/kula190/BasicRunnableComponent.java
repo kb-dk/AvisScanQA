@@ -8,6 +8,7 @@ import org.apache.commons.lang3.function.TriFunction;
 import org.slf4j.Logger;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -55,7 +56,7 @@ public abstract class BasicRunnableComponent {
    
     
     
-    protected TreeIterator getIterator(Path pathname) {
+    protected TreeIterator getIterator(Path pathname) throws IOException {
         
         File specificBatch = pathname.toFile();
         
@@ -66,8 +67,7 @@ public abstract class BasicRunnableComponent {
         
         TreeIterator iterator = new SimpleIteratorForFilesystems(specificBatch,
                                                                  //How to adapt the filename for the checksum extension below
-                                                                 "\\.[^_]+$",
-                                                                 ".md5");
+                                                                 "checksums.txt");
         
         return iterator;
         

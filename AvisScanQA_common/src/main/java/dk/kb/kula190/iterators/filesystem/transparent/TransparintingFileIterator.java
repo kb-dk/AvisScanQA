@@ -24,9 +24,9 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                       File batchFolder,
                                       List<String> transparentDirNames,
                                       List<String> virtualLevelsRegexp,
-                                      String checksumRegexp,
-                                      String checksumExtension) {
-        super(id, batchFolder, transparentDirNames, virtualLevelsRegexp, checksumRegexp, checksumExtension);
+                                      String checksumFile,
+                                      Map<String, String> checksums) {
+        super(id, batchFolder, transparentDirNames, virtualLevelsRegexp, checksumFile, checksums);
         this.prefix              = prefix;
         this.group               = group;
         this.batchFolder         = batchFolder;
@@ -50,14 +50,14 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                          .stream()
                          .sorted(Map.Entry.comparingByKey())
                          .filter(group -> group.getValue().size() > 1)
-                         .map(group -> new TransparintingFileIterator(new File(id, group.getKey()),
+                         .map(group -> new TransparintingFileIterator(new File(id.getParentFile(), group.getKey()),
                                                                       prefix + "/" + group.getKey(),
                                                                       group.getValue(),
                                                                       batchFolder,
                                                                       transparentDirNames,
                                                                       virtualLevelsRegexp,
-                                                                      checksumRegexp,
-                                                                      checksumExtension))
+                                                                      checksumFile,
+                                                                      checksums))
                          .iterator();
             //}
         }
@@ -92,10 +92,10 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
             File folder = file.getParentFile().getAbsoluteFile();
             String pathId = folder.getPath()
                                   .replaceFirst(Pattern.quote(batchFolder.getAbsolutePath() + "/"), "");
-            for (String transparentDirName : transparentDirNames) {
-                pathId = pathId.replaceAll(Pattern.quote("/" + transparentDirName) + "(/|\\z)", "/");
-            }
-            pathId = new File(new File(pathId, prefix), file.getName()).toString();
+            // for (String transparentDirName : transparentDirNames) {
+            //     pathId = pathId.replaceAll(Pattern.quote("/" + transparentDirName) + "(/|\\z)", "/");
+            // }
+            pathId = new File(pathId, file.getName()).toString();
             return pathId;
         } else {
             return super.toPathID(file);

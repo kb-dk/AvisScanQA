@@ -4,6 +4,7 @@ import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.DecoratedRunnableComponent;
+import dk.kb.kula190.checkers.simplecheckers.ChecksumChecker;
 import dk.kb.kula190.checkers.simplecheckers.FileNamingChecker;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +33,7 @@ class BasicRunnableComponentTest {
                     protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                         return List.of(
                                 //Simple Checkers
-                                // new ChecksumChecker(resultCollector),
+                                new ChecksumChecker(resultCollector),
                                 new FileNamingChecker(resultCollector)
                                       );
                     }
