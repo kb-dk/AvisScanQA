@@ -14,7 +14,7 @@ function noteNewspaperSubmitHandler(event) {
             alert("notes updated")
         }, dataType: "json", contentType: "application/json"
     });
-    location.reload();
+    //location.reload();
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
@@ -38,7 +38,7 @@ function noteNewspaperDeleteHandler(event) {
             alert("note deleted")
         }, dataType: "json", contentType: "application/json"
     });
-    location.reload();
+    //location.reload();
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
@@ -127,7 +127,7 @@ function loadYearsForNewspaper(avisID, year) {
                             });
                             formRow.append($("<label/>", {
                                 for: $newspaperNote.uniqueId().attr("id"),
-                                text: `-${note.username} ${note.created}`
+                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
                             }))
                             formRow.append($newspaperNote);
                             formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({

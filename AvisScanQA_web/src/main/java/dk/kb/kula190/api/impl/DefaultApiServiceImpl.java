@@ -228,22 +228,6 @@ public class DefaultApiServiceImpl implements DefaultApi {
 
         return null;
     }
-    /*
-    private class JsonConfig{
-        private Object global;
-        private Object newspaper;
-        private Object batch;
-        private Object edition;
-
-        public JsonConfig(Object global, Object newspaper, Object batch, Object edition){
-
-            this.global = global;
-            this.newspaper = newspaper;
-            this.batch = batch;
-            this.edition = edition;
-        }
-    }
-    */
     @Override
     public StreamingOutput getTiffFile(String relPath) {
         return output -> {

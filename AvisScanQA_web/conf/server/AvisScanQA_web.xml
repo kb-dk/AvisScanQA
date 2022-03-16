@@ -20,9 +20,10 @@
                override="false"
                description="The start of the CAS server URL"/>
     <Parameter name="serverName"
-               value="${hostname}:9631"
+               value="canopus.statsbiblioteket.dk:9631"
                override="false"
                description="The server name of the server this application is hosted on"/>
+    <!-- value="${hostname}:9631 gives an IllegalArgumentException on $ -->
 <!--
 
 
