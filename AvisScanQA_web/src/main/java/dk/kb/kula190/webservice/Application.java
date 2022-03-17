@@ -91,5 +91,8 @@ public class Application extends javax.ws.rs.core.Application {
     }
     
     
+    public YAML getConfig() {
+        return serviceConfig;
+    }
 }
 

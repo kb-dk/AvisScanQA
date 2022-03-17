@@ -44,10 +44,8 @@ paths:
           description: ""
           content:
             application/json:
-              schema:
-                type: object
-
-
+              schema: {}
+  
   /newspaperIDs:
     get:
       operationId: getNewspaperIDs

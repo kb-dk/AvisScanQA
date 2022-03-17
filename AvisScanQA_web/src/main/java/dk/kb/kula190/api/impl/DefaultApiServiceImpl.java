@@ -1,9 +1,7 @@
 package dk.kb.kula190.api.impl;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dk.kb.avischk.qa.web.ContentLocationResolver;
+import dk.kb.kula190.JsonYamlUtils;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
 import dk.kb.kula190.dao.DaoUtils;
@@ -19,6 +17,8 @@ import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.InvalidArgumentServiceException;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
+import dk.kb.util.yaml.YAML;
+import dk.kb.util.yaml.YAMLUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
 import org.json.JSONObject;
@@ -29,6 +29,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
@@ -39,14 +40,16 @@ import javax.ws.rs.core.StreamingOutput;
 import javax.ws.rs.core.UriInfo;
 import javax.ws.rs.ext.ContextResolver;
 import javax.ws.rs.ext.Providers;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * AvisScanQA_web
@@ -211,21 +214,19 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
         
     }
+    
     @Override
     public Object getConfig() {
-            ObjectMapper mapper = new ObjectMapper();
-            try  {
-                //this works on localhost
-                Object jsonObj = mapper.readValue(Paths.get("src/main/resources/config.json").toFile(),Object.class);
-
-                //This works on canopus
-                //Object jsonObj = mapper.readValue(this.getClass().getClassLoader().getResourceAsStream("config.json"),Object.class);
-                return jsonObj;
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-
+        try {
+            YAML subConfigMap = getApplication().getConfig()
+                                                .getSubMap(
+                                                        "avischk-web-qa.webserviceConfig",
+                                                        false);
+            return JsonYamlUtils.yaml2Json(JsonYamlUtils.yamlToString(subConfigMap));
+        } catch (IOException e){
+            log.error("Failed to handle webapp json config",e);
+            handleException(e);
+        }
         return null;
     }
     @Override
