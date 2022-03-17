@@ -143,7 +143,7 @@ function loadBatchForNewspaper(batchID) {
                     });
                     formRow.append($("<label/>", {
                         for: $batchNote.uniqueId().attr("id"),
-                        text: `-${note.username} ${note.created}`
+                        text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
                     }))
                     formRow.append($batchNote);
                     formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({

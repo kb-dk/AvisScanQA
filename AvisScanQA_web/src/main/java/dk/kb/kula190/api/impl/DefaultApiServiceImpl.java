@@ -215,7 +215,11 @@ public class DefaultApiServiceImpl implements DefaultApi {
     public Object getConfig() {
             ObjectMapper mapper = new ObjectMapper();
             try  {
+                //this works on localhost
                 Object jsonObj = mapper.readValue(Paths.get("src/main/resources/config.json").toFile(),Object.class);
+
+                //This works on canopus
+                //Object jsonObj = mapper.readValue(this.getClass().getClassLoader().getResourceAsStream("config.json"),Object.class);
                 return jsonObj;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -224,22 +228,6 @@ public class DefaultApiServiceImpl implements DefaultApi {
 
         return null;
     }
-    /*
-    private class JsonConfig{
-        private Object global;
-        private Object newspaper;
-        private Object batch;
-        private Object edition;
-
-        public JsonConfig(Object global, Object newspaper, Object batch, Object edition){
-
-            this.global = global;
-            this.newspaper = newspaper;
-            this.batch = batch;
-            this.edition = edition;
-        }
-    }
-    */
     @Override
     public StreamingOutput getTiffFile(String relPath) {
         return output -> {
