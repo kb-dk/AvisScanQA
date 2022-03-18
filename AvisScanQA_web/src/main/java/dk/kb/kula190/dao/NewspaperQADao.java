@@ -268,7 +268,6 @@ public class NewspaperQADao {
                         int editionCount = res.getInt("numEditions");
                         int pageCount = res.getInt("numPages");
                         String problems = res.getString("allProblems").translateEscapes().trim();
-                        
                         Optional<SlimBatch> batch = batches.stream()
                                                            .filter(b -> b.getBatchid().equals(batchID))
                                                            .limit(1)
@@ -283,6 +282,7 @@ public class NewspaperQADao {
                                                                   .avisid(avisID);
                         batch.ifPresent(val -> result.setAvisid(val.getAvisid()));
                         batch.ifPresent(val -> result.setBatchid(val.getBatchid()));
+                        batch.ifPresent(val -> result.setState(val.getState()));
                         batch.ifPresent(val -> result.setRoundtrip(val.getRoundtrip()));
                         resultMap.put(localDate, result);
                     }

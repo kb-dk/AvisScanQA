@@ -27,7 +27,7 @@ public class DaoBatchHelper {
             ps.setString(1, avisID);
             
             try (ResultSet res = ps.executeQuery()) {
-                if (res.next()) {
+                while (res.next()) {
                     final SlimBatch e = readSlimBatch(conn, res);
                     results.add(e);
                 }

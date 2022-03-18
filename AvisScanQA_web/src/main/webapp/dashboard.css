@@ -142,9 +142,8 @@ margin-right: 10px;
 #stateDropDownMenu *{
   background-color: #fff;
 }
-#stateDropDownMenu input:hover{
+#stateDropDownMenu button:hover{
   background-color: #cbcbcb;
-  font-weight: Bold
 }
 #stateDropDownMenu{
   max-width: max-content;

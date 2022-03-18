@@ -1,3 +1,4 @@
+let configJson;
 function noteNewspaperSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
@@ -55,6 +56,7 @@ function loadNewspaperIDs() {
 
 
 function loadYearsForNewspaper(avisID, year) {
+    $.getJSON("api/config.json").done((data)=>configJson = data)
     const url = `api/years/${avisID}`;
     $.getJSON(url)
         .done(function (years) {
@@ -183,6 +185,7 @@ function renderNewspaperForYear(years, currentyear, url) {
     // var url = 'api/dates/' + newspaper + '/' + currentyear;
     $.getJSON(url)
         .done(function (dates) {
+            console.log(dates)
         let datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
@@ -226,7 +229,6 @@ function buildCalendar(year, month, availableDates) {
     let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
     let daysInMonth = [];
     let firstWeekdayOfMonth = firstDayOfThisMonth.weekday();
-
     let d = moment(firstDayOfThisMonth);
     for (let i = 0; i < firstDayOfThisMonth.daysInMonth(); i++) {
         //Fill in all dates in the calender

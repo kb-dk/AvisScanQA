@@ -35,20 +35,42 @@ avischk-web-qa:
     batch:
       stateButtonOptions:
         APPROVED:
+          name: "Accepted"
           description: "The batch contains no or acceptable errors"
           styling:
             backgroundColor: "#1e7e34"
             borderColor: "#1e7e34"
         REJECTED:
+          name: "Rejected"
           description: "The batch contains contains errors, that a new roundtrip is needed"
           styling:
             backgroundColor: "#cf1d1d"
             borderColor: "#cf1d1d"
-        CHECKED:
+        1IN_PROGRESS:
+          name: "Received, not checked"
+          description: "The batch has yet to go through the automated checkers"
+          styling:
+            backgroundColor: "#007bff"
+            borderColor: "#007bff"
+        2IN_PROGRESS:
+          name: "Checked"
           description: "The batch has gone through automated checkers"
           styling:
             backgroundColor: "#007bff"
             borderColor: "#007bff"
+        3IN_PROGRESS:
+          name: "Missing Dates Verified"
+          description: "The batch has gone through automated checkers"
+          styling:
+            backgroundColor: "#007bff"
+            borderColor: "#007bff"
+        4IN_PROGRESS:
+          name: "OCR verified"
+          description: "The batch has gone through automated checkers"
+          styling:
+            backgroundColor: "#007bff"
+            borderColor: "#007bff"
+
     edition:
       dropDownStandardMessage:
         dayDropDown:

@@ -30,21 +30,22 @@ function loadBatchForNewspaper(batchID) {
                 $("#stateFormBatchID").val(batch.batchid);
                 const $stateForm = $("#stateForm");
                 let $dropDownState = $("#dropDownState");
-                $dropDownState.text(batch.state)
+                $dropDownState.text(batchConfig.stateButtonOptions[batch.state].name)
                 let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
                 $dropDownState.css(stateButtonColors);
 
                 for (let [option, val] of Object.entries(batchConfig.stateButtonOptions)) {
-                    $stateDropDownMenu.append($("<input/>", {
+                    $stateDropDownMenu.append($("<button/>", {
                         type: "submit",
                         class: "dropdown-item",
                         title: val.description,
                         form: "stateForm",
-                        value: `${option}`
+
+                        value: `${option}`,
+                        html: `${val.name}`,
                     }));
 
                 }
-                //TODO colors of dropDownState. https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-29
 
                 $(`[value="${batch.state}"`).css("font-weight", "Bold");
 
@@ -217,6 +218,12 @@ function renderBatchTable(filter) {
             field: 'state',
             sortable: true,
             filterControl: "select",
+            searchFormatter: false, //Use this to have the select use the basic value, rather than the formatted value
+            formatter: function (value, row) {
+                // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
+                return "<div title='"+batchConfig.stateButtonOptions[value].description+"'>" + batchConfig.stateButtonOptions[value].name + "</div>";
+
+            },
         }, {
             title: 'Problem Count',
             field: 'numProblems',
