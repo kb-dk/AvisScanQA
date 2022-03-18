@@ -36,7 +36,7 @@ public class Main {
         
         ResultCollector simpleResultCollector = runSimpleChecks(batch);
         
-        
+        //TODO merge result coleectors
         System.out.println(simpleResultCollector.toReport());
         
         if (simpleResultCollector.isSuccess()) {
