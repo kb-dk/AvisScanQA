@@ -1,5 +1,6 @@
-package dk.kb.kula190.checkers.crosscheckers;
+package dk.kb.kula190.checkers.pagecheckers.xpath;
 
+import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.util.yaml.YAML;
 

@@ -1,4 +1,4 @@
-package dk.kb.kula190.checkers.simplecheckers;
+package dk.kb.kula190.checkers.filecheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.FailureType;

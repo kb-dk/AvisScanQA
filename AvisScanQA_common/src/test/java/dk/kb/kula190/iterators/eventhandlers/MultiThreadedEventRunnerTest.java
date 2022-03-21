@@ -4,11 +4,8 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.DecoratedRunnableComponent;
-import dk.kb.kula190.checkers.crosscheckers.MetsChecker;
-import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
-import dk.kb.kula190.checkers.singlecheckers.*;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
+import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -39,21 +36,22 @@ class MultiThreadedEventRunnerTest {
                         // new TiffAnalyzerExiv2(resultCollector),
                         // new TiffCheckerExiv2(resultCollector),
         
-                        new TiffAnalyzerImageMagick(resultCollector),
+                        // new TiffAnalyzerImageMagick(resultCollector),
                         // new TiffCheckerImageMagick(resultCollector),
         
                         new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector),
+                        // new MetsChecker(resultCollector)
         
                         //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
+                        new XmlSchemaChecker(resultCollector)
+                        
         
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
+                        // new XpathAltoChecker(resultCollector),
+                        // new XpathMixChecker(resultCollector),
                         //CrossCheckers
-                        new XpathCrossChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
+                        // new XpathCrossChecker(resultCollector),
+                        // new NoMissingMiddlePagesChecker(resultCollector),
+                        // new PageStructureChecker(resultCollector)
                 
                 
                               );

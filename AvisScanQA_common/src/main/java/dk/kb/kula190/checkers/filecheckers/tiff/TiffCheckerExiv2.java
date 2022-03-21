@@ -1,10 +1,9 @@
-package dk.kb.kula190.checkers.singlecheckers;
+package dk.kb.kula190.checkers.filecheckers.tiff;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
-import dk.kb.util.yaml.YAML;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

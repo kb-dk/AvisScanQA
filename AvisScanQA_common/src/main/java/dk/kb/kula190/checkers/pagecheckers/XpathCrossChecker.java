@@ -1,8 +1,14 @@
-package dk.kb.kula190.checkers.crosscheckers;
+package dk.kb.kula190.checkers.pagecheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerImageMagick;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathAlto;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMetsMix;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMetsMods;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMix;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMods;
+import dk.kb.kula190.checkers.pagecheckers.xpath.XpathTiff;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
@@ -10,7 +16,6 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 
 /**

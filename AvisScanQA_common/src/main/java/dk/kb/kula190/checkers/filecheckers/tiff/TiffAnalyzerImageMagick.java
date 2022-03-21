@@ -1,4 +1,4 @@
-package dk.kb.kula190.checkers.singlecheckers;
+package dk.kb.kula190.checkers.filecheckers.tiff;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.JsonNode;

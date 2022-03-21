@@ -3,9 +3,8 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.DecoratedRunnableComponent;
-import dk.kb.kula190.checkers.simplecheckers.ChecksumChecker;
-import dk.kb.kula190.checkers.simplecheckers.FileNamingChecker;
+import dk.kb.kula190.checkers.filecheckers.ChecksumChecker;
+import dk.kb.kula190.checkers.filecheckers.FileNamingChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;

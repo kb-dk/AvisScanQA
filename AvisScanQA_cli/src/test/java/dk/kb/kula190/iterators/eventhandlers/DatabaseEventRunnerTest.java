@@ -1,18 +1,18 @@
 package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.Batch;
+import dk.kb.kula190.DatabaseRegister;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.DecoratedRunnableComponent;
-import dk.kb.kula190.checkers.DatabaseRegister;
-import dk.kb.kula190.checkers.crosscheckers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.crosscheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.crosscheckers.XpathCrossChecker;
-import dk.kb.kula190.checkers.singlecheckers.TiffAnalyzerImageMagick;
-import dk.kb.kula190.checkers.singlecheckers.TiffCheckerImageMagick;
-import dk.kb.kula190.checkers.singlecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.singlecheckers.XpathAltoChecker;
-import dk.kb.kula190.checkers.singlecheckers.XpathMixChecker;
+import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
+import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
+import dk.kb.kula190.checkers.filecheckers.XpathAltoChecker;
+import dk.kb.kula190.checkers.filecheckers.XpathMixChecker;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.util.yaml.YAML;
 import org.junit.jupiter.api.Test;

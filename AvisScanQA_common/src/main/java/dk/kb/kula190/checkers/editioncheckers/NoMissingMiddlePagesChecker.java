@@ -1,4 +1,4 @@
-package dk.kb.kula190.checkers.crosscheckers;
+package dk.kb.kula190.checkers.editioncheckers;
 
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.FailureType;

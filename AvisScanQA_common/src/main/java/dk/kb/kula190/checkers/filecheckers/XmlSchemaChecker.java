@@ -1,6 +1,7 @@
-package dk.kb.kula190.checkers.singlecheckers;
+package dk.kb.kula190.checkers.filecheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;

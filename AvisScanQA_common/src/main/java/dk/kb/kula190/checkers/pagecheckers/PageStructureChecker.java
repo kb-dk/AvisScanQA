@@ -1,7 +1,7 @@
-package dk.kb.kula190.checkers.crosscheckers;
+package dk.kb.kula190.checkers.pagecheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.singlecheckers.MetsSplitter;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PageStructureChecker extends DecoratedEventHandler {
     private ThreadLocal<Set<String>> types = new ThreadLocal<>();
