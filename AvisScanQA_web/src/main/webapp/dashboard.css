@@ -101,18 +101,23 @@ body {
   font-weight: bold;
 }
 .approved{
-  background-color: rgba(37,138,37,0.54);
+  background-color: rgb(20 82 20 / 37%);
 }
 .userNotes{
   width: 20em;
   height: 2em;
   display: inline-block;
 }
-
 .notesButton {
-padding: 7px 15px;
-margin-right: 10px;
-  width: 100%;
+  padding: 7px 15px;
+  margin-right: 10px;
+  width: 20%;
+
+}
+#notesButtonDiv{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .showNotesDiv {

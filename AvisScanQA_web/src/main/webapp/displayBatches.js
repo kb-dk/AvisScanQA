@@ -72,27 +72,17 @@ function loadBatchForNewspaper(batchID) {
                                 2)));
                 }
             }
+            let $notesButtonDiv = $("<div/>",{id:"notesButtonDiv"});
             let $notesButton = $("<button/>", {
                 class: `notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`,
                 text: `${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and" : ""} create notes`
             });
             let $showNotesDiv = $("<div/>", {
                 visible: false,
-                class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`
+                class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
+                tabindex: "100"
             })
-            $notesButton.click(() => {
-
-                let visible = $showNotesDiv.attr('visible');
-                if (visible == 'false') {
-                    $showNotesDiv.attr('visible', true);
-                    $showNotesDiv.addClass("active")
-                } else {
-                    $showNotesDiv.attr('visible', false);
-                    $showNotesDiv.removeClass("active")
-                }
-
-                console.log(visible)
-            })
+            setShowNotesFocusInAndOut($notesButton,$showNotesDiv);
 
             let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
             const formRow1 = $("<div>", {class: "form-row"})
@@ -155,15 +145,48 @@ function loadBatchForNewspaper(batchID) {
                     $showNotesDiv.append($batchForm);
                 }
             }
-            $notice.append($notesButton);
+            //let childrenOfNotesDiv = Array.from($showNotesDiv.childNodes);
+
+            $notesButtonDiv.append($notesButton)
+            $notice.append($notesButtonDiv);
             $notice.append($showNotesDiv);
             renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
             renderBatchTable(batch.avisid);
 
         });
 }
+function setShowNotesFocusInAndOut(focusInEl, focusOutEl){
+    focusInEl.focusin((e) => {
+        focusOutEl.addClass("active");
+        focusOutEl.focus();
+    });
+    focusOutEl.focusout((e) => {
+        let bool = !e.relatedTarget;//if relatedTarget is null bool is true
+        if (bool){
+            focusOutEl.removeClass("active");
+        }else{
+            bool = focusOutEl[0] != e.relatedTarget
+            if (bool){
+                if (!htmlElementWithinCollection(focusOutEl[0].children,e.relatedTarget.form)){
+                    focusOutEl.removeClass("active");
+                }
+            }else{
+                focusOutEl.focus();
+            }
+
+        }
 
 
+    });
+}
+function htmlElementWithinCollection(collection,element){
+    for(let i = 0; i < collection.length; i++){
+        if(collection.item(i) == element){
+            return true
+        }
+    }
+    return false;
+}
 /**
  *
  * @param {int} start

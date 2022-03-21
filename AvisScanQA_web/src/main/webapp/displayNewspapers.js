@@ -69,19 +69,11 @@ function loadYearsForNewspaper(avisID, year) {
             const notesUrl = `api/${avisID}/notes`;
             $.getJSON(notesUrl)
                 .done(function (notes){
+                    let $notesButtonDiv = $("<div/>",{id:"notesButtonDiv"});
                     let $notesButton = $("<button/>",{class:`notesButton btn ${notes.length > 0 ? "btn-warning":"btn-primary"} btn-primary`, text:`${notes.length > 0 ? "Show " + notes.length + " notes and ": ""}create notes`});
-                    let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`})
-                    $notesButton.click(()=>{
+                    let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,tabindex:"100"})
 
-                        let visible = $showNotesDiv.attr('visible');
-                        if (visible == 'false'){
-                            $showNotesDiv.attr('visible',true);
-                            $showNotesDiv.addClass("active")
-                        }else{
-                            $showNotesDiv.attr('visible',false);
-                            $showNotesDiv.removeClass("active")
-                        }
-                    })
+                    setShowNotesFocusInAndOut($notesButton,$showNotesDiv)
 
                     let $newspaperNotesForm = $("<form/>",{id:"newspaperNotesForm",action:"",method:"post"});
                     const formRow1 = $("<div>", {class: "form-row"})
@@ -140,7 +132,8 @@ function loadYearsForNewspaper(avisID, year) {
                             $showNotesDiv.append($newspaperForm);
                         }
                     }
-                    $notice.append($notesButton);
+                    $notesButtonDiv.append($notesButton)
+                    $notice.append($notesButtonDiv);
                     $notice.append($showNotesDiv);
                 })
             /*
