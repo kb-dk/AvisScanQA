@@ -1,8 +1,14 @@
 #!/usr/bin/env bash
 
+#Started with
+# cd /home/avisscqa/data/avis-scanner-prod/_07-levering-fra-Ninestars/Shipment_2021-07-19
+# set -e; for dir in *_RT*; do echo "$dir"; pushd "$dir";  createChecksumsTxt.sh; popd; done  &> checksums.log &
+
 set -e
 set -x
 
+# Print current dir for debugging purposes
+echo "$PWD"
 
 #Must be in batch-dir
 
@@ -13,7 +19,7 @@ find . -name '*.md5' -print0 | xargs -0 -r -i rm '{}'
 rm -f checksums.txt
 
 # Generate new checksums.txt file
-find ./* \
+find ./ \
     -type f -o -type l \
     -not -name 'checksums.txt' \
     -print0  | \
