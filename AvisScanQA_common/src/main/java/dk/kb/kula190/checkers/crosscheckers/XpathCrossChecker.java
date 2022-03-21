@@ -10,6 +10,8 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * @see XpathAlto for how values are extracted from ALTO
@@ -36,6 +38,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
     private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
     private ThreadLocal<XpathMetsMix> MetsMix = new ThreadLocal<>();
+    private ThreadLocal<XpathMetsMods> MetsMods = new ThreadLocal<>();
+    private ThreadLocal<XpathMods> Mods = new ThreadLocal<>();
 
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
@@ -50,6 +54,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         Alto.set(new XpathAlto());
         Tiff.set(new XpathTiff());
         MetsMix.set(new XpathMetsMix());
+        Mods.set(new XpathMods());
     }
 
     @Override
@@ -83,6 +88,57 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
         XpathAlto xpathAlto = Alto.get();
         xpathAlto.setAltoXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+    }
+
+    @Override
+    public void modsFile(DecoratedAttributeParsingEvent event,
+                         String avis,
+                         String roundTrip,
+                         LocalDate startDate,
+                         LocalDate endDate) throws IOException {
+        XpathMods xpathMods = Mods.get();
+        xpathMods.setModsXpathData(event, avis, roundTrip, startDate, endDate);
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods digital origin should have been {expected} but was {actual}",
+                    xpathMods.getDigitalOrigin(),
+                    "digitized newspaper"
+                   );
+
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods internet media type should have been {expected} but was {actual}",
+                    xpathMods.getMediaType(),
+                    Set.of("text", "image/tif")
+                   );
+
+
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods physical description form should have been {expected} but was {actual}",
+                    xpathMods.getPhysicalDescription(),
+                    "electronic"
+                   );
+
+
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods start dates do not match date issued: {actual}, temporal: {expected}",
+                    xpathMods.getDateIssuedStart(),
+                    xpathMods.getTemporalStart());
+
+
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods end dates do not match date issued: {actual}, temporal: {expected}",
+                    xpathMods.getDateIssuedEnd(),
+                    xpathMods.getTemporalEnd());
+
+        checkEquals(event,
+                    FailureType.INVALID_MODS_ERROR,
+                    "Mods file family was incorrect should have been {expected} but was {actual}",
+                    xpathMods.getFileFamily(),
+                    event.getName().split("_")[0]);
     }
 
     @Override

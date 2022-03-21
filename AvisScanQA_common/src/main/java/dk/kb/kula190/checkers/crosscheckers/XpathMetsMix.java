@@ -29,7 +29,7 @@ public class XpathMetsMix {
                                            Integer pageNumber) throws IOException {
         Document document = EventHandlerUtils.handleDocument(decoratedEvent);
         XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
-        //    TODO extract stuff from injected MetsMix here
+
         String fileName = xpath.selectString(
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:ObjectIdentifier/mix:objectIdentifierValue");

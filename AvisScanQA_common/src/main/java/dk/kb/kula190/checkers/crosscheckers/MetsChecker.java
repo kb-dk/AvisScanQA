@@ -57,63 +57,6 @@ public class MetsChecker extends DecoratedEventHandler {
         }
     }
     
-    @Override
-    public void modsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
-                         String roundTrip,
-                         LocalDate startDate,
-                         LocalDate endDate) throws IOException {
-        
-        //        TODO check that this mods is in agreement with the mods from METS
-        
-        Document document = EventHandlerUtils.handleDocument(event);
-        XPathSelector xpath = XpathUtils.createXPathSelector("mods", "http://www.loc.gov/mods/v3");
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods digital origin should have been {expected} but was {actual}",
-                    xpath.selectString(document, "/mods:mods/mods:physicalDescription/mods:digitalOrigin"),
-                    "digitized newspaper"
-                   );
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods internet media type should have been {expected} but was {actual}",
-                    new HashSet<String>(xpath.selectStringList(document,
-                                                               "/mods:mods/mods:physicalDescription/mods:internetMediaType/text()")),
-                    Set.of("text", "image/tif")
-                   );
-    
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods physical description form should have been {expected} but was {actual}",
-                    xpath.selectString(document, "/mods:mods/mods:physicalDescription/mods:form/text()"),
-                    "electronic"
-                   );
-    
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods start dates do not match date issued: {actual}, temporal: {expected}",
-                    xpath.selectString(document,
-                                                                "/mods:mods/mods:originInfo/mods:dateIssued[@point='start']"),
-                    xpath.selectString(document, "/mods:mods/mods:subject/mods:temporal[@point='start']"));
-    
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods end dates do not match date issued: {actual}, temporal: {expected}",
-                    xpath.selectString(document, "/mods:mods/mods:originInfo/mods:dateIssued[@point='end']"),
-                    xpath.selectString(document, "/mods:mods/mods:subject/mods:temporal[@point='end']"));
-    
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods file family was incorrect should have been {expected} but was {actual}",
-                    xpath.selectString(document, "/mods:mods/mods:identifier[@type='title_family']"),
-                    event.getName().split("_")[0]);
-    }
-    
     private void handleMETS(DecoratedAttributeParsingEvent decoratedEvent,
                             String avis,
                             String roundTrip,

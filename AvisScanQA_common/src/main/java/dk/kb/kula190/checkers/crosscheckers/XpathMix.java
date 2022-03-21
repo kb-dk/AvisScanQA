@@ -52,6 +52,7 @@ public class XpathMix {
         ChecksumMix = xpath.selectString(
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest");
+
     }
 
     public Integer getMixImageHeight() {
