@@ -102,7 +102,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
                 //state
                 //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, "BEGUN");
+                preparedStatement.setString(param++, "1IN_PROGRESS");
                 
                 preparedStatement.setString(param++, System.getenv("USER"));
                 
@@ -152,7 +152,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, failuresMessage);
                 //state
                 //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, "CHECKED");
+                preparedStatement.setString(param++, "2IN_PROGRESS");
                 
                 preparedStatement.setInt(param++, checkerFailures.size());
     

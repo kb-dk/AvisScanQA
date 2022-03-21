@@ -35,6 +35,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     private ThreadLocal<XpathAlto> Alto = new ThreadLocal<>();
     private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
     private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
+    private ThreadLocal<XpathMetsMix> MetsMix = new ThreadLocal<>();
 
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
@@ -48,6 +49,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         Mix.set(new XpathMix());
         Alto.set(new XpathAlto());
         Tiff.set(new XpathTiff());
+        MetsMix.set(new XpathMetsMix());
     }
 
     @Override
@@ -87,7 +89,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis,
                              LocalDate editionDate, String udgave, String sectionName, Integer pageNumber)
             throws IOException {
-   
+
         switch (injectedType) {
             case TiffAnalyzerImageMagick.INJECTED_TYPE -> { // ImageMagick Output
                 XpathTiff xpathTiff = Tiff.get();
@@ -97,8 +99,14 @@ public class XpathCrossChecker extends DecoratedEventHandler {
             case MetsSplitter.INJECTED_TYPE_MIX -> { //MIX FROM METS FILE
                 //        This is the mix extracted from METS for a specific page
                 log.debug("Injected MIX event for {},{},{},{},{}", avis, editionDate, udgave, sectionName, pageNumber);
-                XpathMix xpathMix = Mix.get();
-                xpathMix.setMetsMixInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName, pageNumber);
+                XpathMetsMix xpathMetsMix = MetsMix.get();
+                xpathMetsMix.setMetsMixInjectedFileData(decoratedEvent,
+                                                        injectedType,
+                                                        avis,
+                                                        editionDate,
+                                                        udgave,
+                                                        sectionName,
+                                                        pageNumber);
             }
         }
     }
@@ -113,13 +121,14 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         XpathMix xpathMix = Mix.get();
         XpathTiff xpathTiff = Tiff.get();
         XpathAlto xpathAlto = Alto.get();
-
+        XpathMetsMix xpathMetsMix = MetsMix.get();
+        metsMixAndMixCheck(event, xpathMetsMix, xpathMix);
         boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
 
         checkTrue(event,
-                    FailureType.TIFF_ANALYZE_ERROR,
-                    "Imagemagick metadata for tiff not supplied",
-                    injectedDataSupplied);
+                  FailureType.TIFF_ANALYZE_ERROR,
+                  "Imagemagick metadata for tiff not supplied",
+                  injectedDataSupplied);
 
 
         checkEquals(event,
@@ -147,7 +156,8 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         if (injectedDataSupplied) {
             checkAllEquals(event,
                            FailureType.CROSS_ERROR,
-                           "mix metadata (image height: {val1}) tif metadata (image height: {val2}) alto metadata (image " +
+                           "mix metadata (image height: {val1}) tif metadata (image height: {val2}) alto metadata " +
+                           "(image " +
                            "height: {val3}) one does not match",
                            xpathTiff.getImageHeightTif(),
                            xpathMix.getMixImageHeight(),
@@ -155,12 +165,36 @@ public class XpathCrossChecker extends DecoratedEventHandler {
 
             checkAllEquals(event,
                            FailureType.CROSS_ERROR,
-                           "mix metadata (image width: {val1}) tif metadata (image width: {val2}) alto metadata (image " +
+                           "mix metadata (image width: {val1}) tif metadata (image width: {val2}) alto metadata " +
+                           "(image " +
                            "width: {val3}) one does not match",
                            xpathMix.getMixImageWidth(),
                            xpathTiff.getImageWidthTif(),
                            xpathAlto.getAltoImageWidth());
         }
 
+    }
+
+    private void metsMixAndMixCheck(DecoratedNodeParsingEvent event, XpathMetsMix metsMix, XpathMix mix) {
+        checkEquals(event,
+                    FailureType.CROSS_ERROR,
+                    "Mets mix filename was {actual}, mix filename was {expected}",
+                    metsMix.getMixFileName(),
+                    mix.getMixFileName());
+        checkEquals(event,
+                    FailureType.CROSS_ERROR,
+                    "Mets mix image height was {actual}, mix image height was {expected}",
+                    metsMix.getMixImageHeight(),
+                    mix.getMixImageHeight());
+        checkEquals(event,
+                    FailureType.CROSS_ERROR,
+                    "Mets mix image width was {actual}, mix image width was {expected}",
+                    metsMix.getMixImageWidth(),
+                    mix.getMixImageWidth());
+        checkEquals(event,
+                    FailureType.CROSS_ERROR,
+                    "Mets mix checksum was {actual}, mix checksum was {expected}",
+                    metsMix.getChecksumMix(),
+                    mix.getChecksumMix());
     }
 }

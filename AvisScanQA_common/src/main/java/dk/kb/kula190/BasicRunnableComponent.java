@@ -37,7 +37,8 @@ public abstract class BasicRunnableComponent {
         return getClass().getPackage().getImplementationVersion();
     }
     
-    public ResultCollector doWorkOnItem(Batch batch)
+    public ResultCollector
+    doWorkOnItem(Batch batch)
             throws
             Exception {
     

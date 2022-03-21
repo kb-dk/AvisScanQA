@@ -12,35 +12,29 @@ import java.time.LocalDate;
 import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
-public class XpathMix {
+public class XpathMetsMix {
     private Integer MixImageHeight;
     private Integer MixImageWidth;
     private String ChecksumMix;
     private String MixFileName;
-    private Integer TifSizePerMix;
+    public XpathMetsMix(){
 
-    public XpathMix() {
     }
-
-    public void setMixXpathData(DecoratedAttributeParsingEvent event,
-                                String avis,
-                                LocalDate editionDate,
-                                String udgave,
-                                String sectionName,
-                                Integer pageNumber) throws IOException {
-        Document document = EventHandlerUtils.handleDocument(event);
-
+    public void setMetsMixInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent,
+                                           String injectedType,
+                                           String avis,
+                                           LocalDate editionDate,
+                                           String udgave,
+                                           String sectionName,
+                                           Integer pageNumber) throws IOException {
+        Document document = EventHandlerUtils.handleDocument(decoratedEvent);
         XPathSelector xpath = XpathUtils.createXPathSelector("mix", "http://www.loc.gov/mix/v20");
-
+        //    TODO extract stuff from injected MetsMix here
         String fileName = xpath.selectString(
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:ObjectIdentifier/mix:objectIdentifierValue");
 
         MixFileName = removeExtension(lastName(fileName));
-
-        TifSizePerMix = xpath.selectInteger(
-                document,
-                "/mix:mix/mix:BasicDigitalObjectInformation/mix:fileSize");
 
         MixImageHeight = xpath.selectInteger(
                 document, "/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:imageHeight");
@@ -52,8 +46,8 @@ public class XpathMix {
         ChecksumMix = xpath.selectString(
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest");
-    }
 
+    }
     public Integer getMixImageHeight() {
         return MixImageHeight;
     }
@@ -70,7 +64,5 @@ public class XpathMix {
         return MixFileName;
     }
 
-    public Integer getTifSizePerMix() {
-        return TifSizePerMix;
-    }
 }
+
