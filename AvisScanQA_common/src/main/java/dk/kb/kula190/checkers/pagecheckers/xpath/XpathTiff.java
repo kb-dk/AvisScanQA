@@ -1,6 +1,6 @@
 package dk.kb.kula190.checkers.pagecheckers.xpath;
 
-import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.util.yaml.YAML;
 
@@ -13,7 +13,7 @@ import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
 import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 /**
- * @see XpathCrossChecker
+ * @see XpathPageChecker
  */
 public class XpathTiff {
 

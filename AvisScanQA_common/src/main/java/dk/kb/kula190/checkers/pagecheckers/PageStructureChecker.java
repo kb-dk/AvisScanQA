@@ -38,7 +38,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String udgave,
                          String sectionName,
                          Integer pageNumber) throws IOException {
-        checkEquals(event, FailureType.MISSING_FILE_ERROR,"Page does not contains all expected file {expected}. Files were {actual}", types.get(), Set.of("MIX", "ALTO", "TIFF", "MIX/METS") );
+        checkEquals(event, FailureType.MISSING_FILE_ERROR,"Appendix H – File structure: Page does not contains all expected file {expected}. Files were {actual}", types.get(), Set.of("MIX", "ALTO", "TIFF", "MIX/METS") );
     }
     
     

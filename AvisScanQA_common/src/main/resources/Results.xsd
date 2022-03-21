@@ -166,13 +166,18 @@
             <xs:enumeration value="MISSING_FILE_ERROR" />
             <xs:enumeration value="UNKNOWN_FILETYPE_ERROR"/>
 
+            <xs:enumeration value="CHECKSUM_MISSING_ERROR" />
             <xs:enumeration value="CHECKSUM_MISMATCH_ERROR" />
 
+
             <!--Related to file contents-->
+            <xs:enumeration value="INCONSISTENCY_ERROR" />
+
             <xs:enumeration value="SCHEMA_ERROR" />
+
             <xs:enumeration value="TIFF_ANALYZE_ERROR" />
-            <xs:enumeration value="TIFF_MIX_ERROR" />
-            <xs:enumeration value="CROSS_ERROR" />
+
+
             <xs:enumeration value="INVALID_MIX_ERROR" />
             <xs:enumeration value="INVALID_ALTO_ERROR" />
             <xs:enumeration value="INVALID_TIFF_ERROR" />

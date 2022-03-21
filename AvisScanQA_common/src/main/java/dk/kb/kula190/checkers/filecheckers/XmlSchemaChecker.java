@@ -58,16 +58,6 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
         
     }
     
-    private void addExceptionalFailure(ParsingEvent event, Exception e) {
-        addFailure(event,
-                   FailureType.EXCEPTION,
-                   this.getClass().getSimpleName(),
-                   FailureType.UNEXPECTED_ERROR.name() + "\n" + e,
-                   Arrays.stream(e.getStackTrace())
-                         .map(StackTraceElement::toString)
-                         .collect(Collectors.joining("\n")));
-    }
-    
     @Override
     public synchronized void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
                              String injectedType,
@@ -137,7 +127,6 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             public void error(SAXParseException exception) throws SAXException {
                 addFailure(parsingEvent.get(),
                            FailureType.SCHEMA_ERROR,
-                           XmlSchemaChecker.class.getSimpleName(),
                            name + " error encountered",
                            exception.getMessage());
             }

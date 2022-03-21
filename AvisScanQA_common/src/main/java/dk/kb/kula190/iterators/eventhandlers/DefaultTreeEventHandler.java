@@ -7,6 +7,7 @@ import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.common.NodeEndParsingEvent;
 import dk.kb.kula190.iterators.common.ParsingEvent;
+import org.apache.commons.text.ExtendedMessageFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,18 +51,27 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     }
     
     
+    private String asString(Object object) {
+        if (object == null) {
+            return "null"; //TODO...
+        } else {
+            return object.toString();
+        }
+    }
+    
     protected void checkEquals(ParsingEvent event,
                                FailureType type,
                                String description,
                                Object actual,
-                               Object expected) {
+                               Object expected,
+                               Object... extraValues) {
         String actualString = asString(actual);
         String expectedString = asString(expected);
         if (!Objects.equals(actual, expected) && !actualString.equalsIgnoreCase(expectedString)) {
             addFailure(event,
                        type,
-                       this.getClass().getSimpleName(),
-                       description.replace("{expected}", expectedString).replace("{actual}", actualString));
+                       description.replace("{expected}", expectedString).replace("{actual}", actualString),
+                       extraValues);
         }
     }
     
@@ -69,7 +79,8 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                   FailureType type,
                                   String description,
                                   String actual,
-                                  Pattern expected) {
+                                  Pattern expected,
+                                  Object... extraValues) {
         String actualString = asString(actual);
         String expectedString = asString(expected);
         Matcher matcher = null;
@@ -78,8 +89,8 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
             if (!expected.matcher(actual).matches()) {
                 addFailure(event,
                            type,
-                           this.getClass().getSimpleName(),
-                           description.replace("{expected}", expectedString).replace("{actual}", actualString));
+                           description.replace("{expected}", expectedString).replace("{actual}", actualString),
+                           extraValues);
             }
         }
         return matcher;
@@ -89,14 +100,15 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                               FailureType type,
                               String description,
                               Object actual,
-                              Set<?> set) {
+                              Set<?> set,
+                              Object... extraValues) {
         String actualString = asString(actual);
         String expectedString = asString(set);
         if (set == null || !set.contains(actual)) {
             addFailure(event,
                        type,
-                       this.getClass().getSimpleName(),
-                       description.replace("{expected}", expectedString).replace("{actual}", actualString));
+                       description.replace("{expected}", expectedString).replace("{actual}", actualString),
+                       extraValues);
         }
         
     }
@@ -107,37 +119,19 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                   Object... equals
                                  ) {
         if (Arrays.stream(equals).distinct().count() != 1) {
-            
-            String replace = description;
-            for (int i = 0; i < equals.length; i++) {
-                replace = replace.replace("{val" + i + "}", asString(equals[i]));
-            }
-            
-            addFailure(event,
-                       type,
-                       this.getClass().getSimpleName(),
-                       replace);
+            addFailure(event, type, description, equals);
         }
         
     }
     
-    private String asString(Object object) {
-        if (object == null) {
-            return "null"; //TODO...
-        } else {
-            return object.toString();
-        }
-    }
     
     protected void checkTrue(ParsingEvent event,
                              FailureType type,
                              String description,
-                             boolean bool) {
+                             boolean bool,
+                             Object... extraValues) {
         if (!bool) {
-            addFailure(event,
-                       type,
-                       this.getClass().getSimpleName(),
-                       description);
+            addFailure(event, type, description, extraValues);
         }
     }
     
@@ -145,12 +139,13 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 FailureType type,
                                 Double actual,
                                 Double required,
-                                String description) {
+                                String description,
+                                Object... extraValues) {
         if (actual < required) {
             addFailure(event,
                        type,
-                       this.getClass().getSimpleName(),
-                       description.replace("{required}", asString(required)).replace("{actual}", asString(actual)));
+                       description.replace("{required}", asString(required)).replace("{actual}", asString(actual)),
+                       extraValues);
         }
     }
     
@@ -159,15 +154,16 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                 LocalDate actual,
                                 LocalDate requiredMin,
                                 LocalDate requiredMax,
-                                String description) {
+                                String description,
+                                Object... extraValues) {
         
         if (actual.isBefore(requiredMin) || actual.isAfter(requiredMax)) {
             addFailure(event,
                        type,
-                       this.getClass().getSimpleName(),
                        description.replace("{requiredMin}", asString(requiredMin))
                                   .replace("{actual}", asString(actual))
-                                  .replace("{requiredMax}", asString(requiredMax)));
+                                  .replace("{requiredMax}", asString(requiredMax)),
+                       extraValues);
         }
     }
     
@@ -177,43 +173,47 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                     Double actual,
                                     Double requiredMin,
                                     Double requiredMax,
-                                    String description) {
+                                    String description,
+                                    Object... extraValues) {
         
         if (actual < requiredMin || actual > requiredMax) {
             addFailure(event,
                        type,
-                       this.getClass().getSimpleName(),
                        description.replace("{requiredMin}", asString(requiredMin))
                                   .replace("{actual}", asString(actual))
-                                  .replace("{requiredMax}", asString(requiredMax)));
+                                  .replace("{requiredMax}", asString(requiredMax)),
+                       extraValues);
         }
     }
     
-    protected void reportException(ParsingEvent event, Exception e) {
-        addFailure(event,
-                   FailureType.EXCEPTION,
-                   this.getClass().getSimpleName(),
-                   FailureType.UNEXPECTED_ERROR.name() + "\n" + e,
-                   Arrays.stream(e.getStackTrace())
-                         .map(StackTraceElement::toString)
-                         .collect(Collectors.joining("\n")));
-    }
-    
-    
     public void addFailure(ParsingEvent fileReference,
                            FailureType type,
-                           String component,
                            String description,
-                           String... details) {
+                           Object... values) {
         log.warn(
                 "Adding failure for " +
                 "resource '{}' " +
                 "of type '{}' " +
                 "from component '{}' " +
-                "with description '{}' " +
-                "and details '{}'", fileReference, type, component, description, String.join("\n", details));
+                "with description '{}' ",
+                fileReference,
+                type,
+                this.getClass().getSimpleName(),
+                ExtendedMessageFormat.format(description, values));
         
-        getResultCollector().addFailure(fileReference, type, component, description, details);
+        getResultCollector().addFailure(fileReference, type, this.getClass().getSimpleName(),
+                                        ExtendedMessageFormat.format(description, values));
+    }
+    
+    
+    public void addExceptionalFailure(ParsingEvent event, Exception e) {
+        getResultCollector().addFailure(event,
+                                        FailureType.EXCEPTION,
+                                        this.getClass().getSimpleName(),
+                                        FailureType.UNEXPECTED_ERROR.name() + "\n" + e,
+                                        Arrays.stream(e.getStackTrace())
+                                              .map(StackTraceElement::toString)
+                                              .collect(Collectors.joining("\n")));
     }
     
 }

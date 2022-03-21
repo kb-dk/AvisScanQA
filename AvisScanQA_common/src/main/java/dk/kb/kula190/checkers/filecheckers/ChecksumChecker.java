@@ -18,17 +18,21 @@ public class ChecksumChecker extends DefaultTreeEventHandler {
     @Override
     public void handleAttribute(AttributeParsingEvent event) {
         String computedMD5;
-        //if (event.getName().endsWith(".xml")) {
         try (InputStream data = event.getData()) {
             computedMD5 = DigestUtils.md5Hex(data);
             String givenMD5 = event.getChecksum();
-            checkEquals(event,
-                        FailureType.CHECKSUM_MISMATCH_ERROR,
-                        "File have checksum {actual} but should have checksum {expected}", computedMD5,
-                        givenMD5
-            );
+            if (givenMD5 == null){
+                addFailure(event, FailureType.CHECKSUM_MISSING_ERROR, "Appendix G – Checksums: File with missing checksum");
+            } else {
+                checkEquals(event,
+                            FailureType.CHECKSUM_MISMATCH_ERROR,
+                            "Appendix G – Checksums: File have checksum {actual} but should have checksum {expected}",
+                            computedMD5,
+                            givenMD5
+                           );
+            }
         } catch (IOException e) {
-            reportException(event, e);
+            addExceptionalFailure(event, e);
         }
     }
     

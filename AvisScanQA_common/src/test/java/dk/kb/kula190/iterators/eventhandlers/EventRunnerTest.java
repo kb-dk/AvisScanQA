@@ -5,7 +5,7 @@ import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
@@ -50,7 +50,7 @@ class EventRunnerTest {
                         new XpathAltoChecker(resultCollector),
                         new XpathMixChecker(resultCollector),
                         // CrossCheckers
-                        new XpathCrossChecker(resultCollector),
+                        new XpathPageChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
                         new PageStructureChecker(resultCollector)
                 

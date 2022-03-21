@@ -1,7 +1,7 @@
 package dk.kb.kula190.checkers.batchcheckers;
 
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.InjectedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
@@ -63,7 +63,7 @@ public class MetsSplitter extends InjectingTreeEventHandler {
      * Just trust that this works for MultiThreadedEventRunner
      *
      * @see MetsChecker
-     * @see XpathCrossChecker
+     * @see XpathPageChecker
      * @see dk.kb.kula190.iterators.eventhandlers.EventRunner
      * @see dk.kb.kula190.iterators.eventhandlers.MultiThreadedEventRunner
      *

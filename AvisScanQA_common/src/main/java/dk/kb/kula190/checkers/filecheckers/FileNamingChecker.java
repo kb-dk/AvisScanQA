@@ -60,7 +60,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         
         checkEquals(event,
                     FailureType.FILE_STRUCTURE_ERROR,
-                    "Parent dir {actual} should always be batch dir {expected}, i.e. only one level of " + "folders",
+                    "Appendix H – File structure: Parent dir {actual} should always be batch dir {expected}, i.e. only one level of " + "folders",
                     parentName,
                     batchName);
         
@@ -68,9 +68,10 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         //Only ALTO, METS, MIX, MODS, PDF, TIFF allowed here
         checkInSet(event,
                    FailureType.FILE_STRUCTURE_ERROR,
-                   "Folder name "+batchFolder+"/{actual} must be in one of {set}",
+                   "Appendix H – File structure: Folder name {0}/{actual} must be in one of {set}",
                    folderName,
-                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF"));
+                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF"),
+                   batchFolder);
     }
     
     @Override
@@ -93,14 +94,14 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         switch (extension) {
             case "mods", "mets" -> checkEquals(event,
                                                FailureType.FILE_STRUCTURE_ERROR,
-                                               "MODS/METS file '{actual}' must have same name as batch '{expected}'",
+                                               "Appendix H – File structure: MODS/METS file '{actual}' must have same name as batch '{expected}'",
                                                nameWithoutExtension,
                                                batchName);
-            case "mix", "pdf", "tif", "alto" -> {
+            case "mix", "pdf", "tif", "tiff", "alto" -> {
                 
                 Matcher matcher = checkRegExp(event,
                                               FailureType.FILE_STRUCTURE_ERROR,
-                                              "Page-file file {actual} must have same name as batch {expected}",
+                                              "Appendix B – File names: Page-file file {actual} must have same name as batch {expected}",
                                               nameWithoutExtension,
                                               fileNamePattern);
                 if (matcher.matches()) {
@@ -110,12 +111,12 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                                  date,
                                  batchStartDate,
                                  batchEndDate,
-                                 "Page have date {actual} outside of batch date interval {requiredMin} - {requiredMax}");
+                                 "Appendix B – File names: Page have date {actual} outside of batch date interval {requiredMin} - {requiredMax}");
                 }
                 
             }
-            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,this.getClass().getSimpleName(),
-                                     "Extension "+extension+" is not expected here");
+            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,
+                                  "Extension {0} is not expected here", extension);
         }
     }
     
@@ -123,60 +124,54 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
         switch (parentName.getName()) {
             case "ALTO" -> checkInSet(event,
                                       FailureType.FILE_STRUCTURE_ERROR,
-                                      "File in folder "
-                                      + parentName
-                                      + " must "
-                                      + "have one of these extensions "
+                                      "Appendix H – File structure: File in folder {0}"
+                                      + " must have one of these extensions "
                                       + "{expected} but has {actual}",
                                       extension,
-                                      Set.of("alto", "alto.xml"));
+                                      Set.of("alto", "alto.xml"),
+                                      parentName);
             case "METS" -> checkInSet(event,
                                       FailureType.FILE_STRUCTURE_ERROR,
-                                      "File in folder "
-                                      + parentName
-                                      + " must "
-                                      + "have one of these extensions "
+                                      "Appendix H – File structure: File in folder {0}"
+                                      + " must have one of these extensions "
                                       + "{expected} but has {actual}",
                                       extension,
-                                      Set.of("mets", "mets.xml"));
+                                      Set.of("mets", "mets.xml"),
+                                      parentName);
             case "MIX" -> checkInSet(event,
                                      FailureType.FILE_STRUCTURE_ERROR,
-                                     "File in folder "
-                                     + parentName
-                                     + " must "
-                                     + "have one of these extensions "
+                                     "Appendix H – File structure: File in folder {0}"
+                                     + " must have one of these extensions "
                                      + "{expected} but has {actual}",
                                      extension,
-                                     Set.of("mix", "mix.xml"));
+                                     Set.of("mix", "mix.xml"),
+                                     parentName);
             case "MODS" -> checkInSet(event,
                                       FailureType.FILE_STRUCTURE_ERROR,
-                                      "File in folder "
-                                      + parentName
-                                      + " must "
-                                      + "have one of these extensions "
+                                      "Appendix H – File structure: File in folder {0}"
+                                      + " must have one of these extensions "
                                       + "{expected} but has {actual}",
                                       extension,
-                                      Set.of("mods", "mods.xml"));
+                                      Set.of("mods", "mods.xml"),
+                                      parentName);
             case "PDF" -> checkInSet(event,
                                      FailureType.FILE_STRUCTURE_ERROR,
-                                     "File in folder "
-                                     + parentName
-                                     + " must "
-                                     + "have one of these extensions "
+                                     "Appendix H – File structure: File in folder {0}"
+                                     + " must have one of these extensions "
                                      + "{expected} but has {actual}",
                                      extension,
-                                     Set.of("pdf"));
+                                     Set.of("pdf"),
+                                     parentName);
             case "TIFF" -> checkInSet(event,
                                       FailureType.FILE_STRUCTURE_ERROR,
-                                      "File in folder "
-                                      + parentName
-                                      + " must "
-                                      + "have one of these extensions "
+                                      "Appendix H – File structure: File in folder {0}"
+                                      + " must have one of these extensions "
                                       + "{expected} but has {actual}",
                                       extension,
-                                      Set.of("tif"));
-            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR, this.getClass().getSimpleName(),
-                                  "File not allowed in folder "+batchFolder.getParent().relativize(Path.of(event.getLocation())).getParent());
+                                      Set.of("tif", "tiff"),
+                                      parentName);
+            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,
+                                  "Appendix H – File structure: File not allowed in folder {0}",batchFolder.getParent().relativize(Path.of(event.getLocation())).getParent());
         }
     }
 }

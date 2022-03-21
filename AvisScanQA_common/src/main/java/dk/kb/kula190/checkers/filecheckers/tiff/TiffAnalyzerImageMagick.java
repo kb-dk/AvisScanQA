@@ -16,6 +16,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,7 +30,7 @@ public class TiffAnalyzerImageMagick extends InjectingTreeEventHandler {
     
     @Override
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
-        if (FilenameUtils.isExtension(event.getName(), "tif")) {
+        if (Set.of("tif", "tiff").contains(FilenameUtils.getExtension(event.getName()))) {
             log.info("Analyzing {} with ImageMagick", event.getLocation());
             
             List<String> lines = runImageMagick(event);

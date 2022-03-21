@@ -48,7 +48,7 @@ public class TiffCheckerExiv2 extends DecoratedEventHandler {
         // ColorSpace -> Uncalibrated
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "Exiv2 reports invalid PhotometricInterpretation {actual}. Should have been {expected}",
+                    "Appendix I – TIF specifications: Exiv2 reports invalid PhotometricInterpretation {actual}. Should have been {expected}",
                     properties.getProperty("PhotometricInterpretation"),
                     "RGB"
                    );
@@ -56,7 +56,7 @@ public class TiffCheckerExiv2 extends DecoratedEventHandler {
         //SamplesPerPixel -> 3
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "Exiv2 reports invalid Bit depth {actual}. Should have been {expected}",
+                    "Appendix I – TIF specifications: Exiv2 reports invalid Bit depth {actual}. Should have been {expected}",
                     properties.getProperty("BitsPerSample"),
                     "8 8 8"
                    );

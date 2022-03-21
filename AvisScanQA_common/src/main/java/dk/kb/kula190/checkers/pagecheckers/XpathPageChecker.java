@@ -5,9 +5,7 @@ import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathAlto;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMetsMix;
-import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMetsMods;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMix;
-import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMods;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathTiff;
 import dk.kb.kula190.generated.FailureType;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
@@ -16,36 +14,34 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Set;
 
 /**
  * @see XpathAlto for how values are extracted from ALTO
  * @see XpathMix for how values are extracted from MIX
  * @see XpathTiff for how values are extracted from TIFF
  */
-public class XpathCrossChecker extends DecoratedEventHandler {
-    public XpathCrossChecker(ResultCollector resultCollector) {
+public class XpathPageChecker extends DecoratedEventHandler {
+    public XpathPageChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
-
-
+    
+    
     //The design:
     //A page consist of
     //with objects instead (at least) a tiff and a mix file
-
+    
     //On page begin, we clear the state
     //We will then get a mixFileEvent and a tiffFileEvent. We do NOT know the order of these
     //When we have the relevant file, we extract the interesting properties
     //On page end, we KNOW we have visited both files
     //It is here we compare values between them
-
+    
     private ThreadLocal<XpathAlto> Alto = new ThreadLocal<>();
     private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
     private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
     private ThreadLocal<XpathMetsMix> MetsMix = new ThreadLocal<>();
-    private ThreadLocal<XpathMetsMods> MetsMods = new ThreadLocal<>();
-    private ThreadLocal<XpathMods> Mods = new ThreadLocal<>();
 
+    
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
                            String avis,
@@ -53,15 +49,14 @@ public class XpathCrossChecker extends DecoratedEventHandler {
                            String udgave,
                            String sectionName,
                            Integer pageNumber) throws IOException {
-
+        
         //clear state
         Mix.set(new XpathMix());
         Alto.set(new XpathAlto());
         Tiff.set(new XpathTiff());
         MetsMix.set(new XpathMetsMix());
-        Mods.set(new XpathMods());
     }
-
+    
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
                         String avis,
@@ -72,9 +67,26 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         //object
         XpathMix xpathMix = Mix.get();
         xpathMix.setMixXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
-
+        
+        //Perform MIX-only checks here
+    
+        //All pages stand up, so height > width.
+        //TODO not true
+        checkAtLeast(event,
+                     FailureType.INVALID_MIX_ERROR,
+                     xpathMix.getMixImageHeight().doubleValue(),
+                     xpathMix.getMixImageWidth().doubleValue(),
+                     "Appendix E – metadata per page MIX: MIX image height: {required} was less than width: {actual}"); //`${height}` not supported in this java version?
+    
+        checkEquals(event,
+                    FailureType.INVALID_MIX_ERROR,
+                    "Appendix E – metadata per page MIX: MIX colorspace should have been {expected} but was {actual}",
+                    xpathMix.getColorSpace(),
+                    "RGB"
+                   );
+    
     }
-
+    
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
@@ -85,72 +97,68 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         //object
         XpathTiff xpathTiff = Tiff.get();
         xpathTiff.setTiffXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+    
+        //Perform TIFF-only checks here
     }
-
+    
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate, String udgave,
                          String sectionName, Integer pageNumber) throws IOException {
-
+        
         XpathAlto xpathAlto = Alto.get();
         xpathAlto.setAltoXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+        
+        
+        //TODO configurable https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
+        //TODO should this check actually be there?
+        checkAtLeast(event,
+                     FailureType.INVALID_ALTO_ERROR,
+                     xpathAlto.getAccuracy(),
+                     10.0,
+                     "Appendix F – metadata per page ALTO: ALTO OCR accurary {actual} is lower than {required}");
+    
+        checkEquals(event,
+                    FailureType.INVALID_ALTO_ERROR,
+                    "Appendix F – metadata per page ALTO: ALTO quality should have been {expected} but was {actual}",
+                    xpathAlto.getQuality(),
+                    "OK"
+                   );
+        
+        
+        //TODO compare against acceptable levels
+        //Checks page Height is within range. what was meant with acceptable levels?
+        checkWithinRange(event,
+                         FailureType.INVALID_ALTO_ERROR,
+                         xpathAlto.getPageHeight(),
+                         10000.0,
+                         50000.0,
+                         "Appendix F – metadata per page ALTO: ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: " +
+                         "{actual}");
+        
+        //Checks page Width is within range
+        checkWithinRange(event,
+                         FailureType.INVALID_ALTO_ERROR,
+                         xpathAlto.getPageWidth(),
+                         4000.0,
+                         50000.0,
+                         "Appendix F – metadata per page ALTO: ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
+        
+        //Checks page ID is corresponding with filename.
+        checkEquals(event,
+                    FailureType.INVALID_ALTO_ERROR,
+                    "Appendix F – metadata per page ALTO: ALTO Page ID is not {required} but was {actual}",
+                    xpathAlto.getPageID(),
+                    "P" + pageNumber
+                   );
     }
-
-    @Override
-    public void modsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
-                         String roundTrip,
-                         LocalDate startDate,
-                         LocalDate endDate) throws IOException {
-        XpathMods xpathMods = Mods.get();
-        xpathMods.setModsXpathData(event, avis, roundTrip, startDate, endDate);
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods digital origin should have been {expected} but was {actual}",
-                    xpathMods.getDigitalOrigin(),
-                    "digitized newspaper"
-                   );
-
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods internet media type should have been {expected} but was {actual}",
-                    xpathMods.getMediaType(),
-                    Set.of("text", "image/tif")
-                   );
-
-
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods physical description form should have been {expected} but was {actual}",
-                    xpathMods.getPhysicalDescription(),
-                    "electronic"
-                   );
-
-
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods start dates do not match date issued: {actual}, temporal: {expected}",
-                    xpathMods.getDateIssuedStart(),
-                    xpathMods.getTemporalStart());
-
-
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods end dates do not match date issued: {actual}, temporal: {expected}",
-                    xpathMods.getDateIssuedEnd(),
-                    xpathMods.getTemporalEnd());
-
-        checkEquals(event,
-                    FailureType.INVALID_MODS_ERROR,
-                    "Mods file family was incorrect should have been {expected} but was {actual}",
-                    xpathMods.getFileFamily(),
-                    event.getName().split("_")[0]);
-    }
-
+    
+ 
+    
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis,
                              LocalDate editionDate, String udgave, String sectionName, Integer pageNumber)
             throws IOException {
-
+        
         switch (injectedType) {
             case TiffAnalyzerImageMagick.INJECTED_TYPE -> { // ImageMagick Output
                 XpathTiff xpathTiff = Tiff.get();
@@ -171,7 +179,7 @@ public class XpathCrossChecker extends DecoratedEventHandler {
             }
         }
     }
-
+    
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
                          String avis,
@@ -183,78 +191,88 @@ public class XpathCrossChecker extends DecoratedEventHandler {
         XpathTiff xpathTiff = Tiff.get();
         XpathAlto xpathAlto = Alto.get();
         XpathMetsMix xpathMetsMix = MetsMix.get();
-        metsMixAndMixCheck(event, xpathMetsMix, xpathMix);
-        boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
 
+        metsMixAndMixCheck(event, xpathMetsMix, xpathMix);
+
+        boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
+        
         checkTrue(event,
                   FailureType.TIFF_ANALYZE_ERROR,
                   "Imagemagick metadata for tiff not supplied",
                   injectedDataSupplied);
-
-
-        checkEquals(event,
-                    FailureType.TIFF_MIX_ERROR,
-                    "mix metadata (file size: {expected}) does not match actual tif file " +
-                    "size {actual}",
-                    xpathTiff.getTifSizeActual(),
-                    xpathMix.getTifSizePerMix());
-
-        checkEquals(event,
-                    FailureType.TIFF_MIX_ERROR,
-                    "mix metadata (checksum {expected}) does not match actual tif file " +
-                    "checksum {actual}",
-                    xpathTiff.getChecksumTif(),
-                    xpathMix.getChecksumMix());
-
+        if (injectedDataSupplied) {
+            
+            
+            checkTiffMix(event, xpathMix, xpathTiff);
+    
+            checkTiffMixAlto(event, xpathMix, xpathTiff, xpathAlto);
+        }
+        
+    }
+    
+    private void checkTiffMixAlto(DecoratedNodeParsingEvent event,
+                           XpathMix xpathMix,
+                           XpathTiff xpathTiff,
+                           XpathAlto xpathAlto) {
         checkAllEquals(event,
-                       FailureType.CROSS_ERROR,
-                       "mix metadata (filename: {val1}) tif metadata (filename: {val2}) alto " +
-                       "metadata (filename: {val3}) one does not match",
+                       FailureType.INCONSISTENCY_ERROR,
+                       "MIX/TIFF/ALTO: Mix metadata (filename: {0}), tif metadata (filename: {1}), alto metadata (filename: {2}). One is not like the others",
                        xpathMix.getMixFileName(),
                        xpathTiff.getTifFileName(),
-                       xpathAlto.getAltoFileName());
-
-        if (injectedDataSupplied) {
-            checkAllEquals(event,
-                           FailureType.CROSS_ERROR,
-                           "mix metadata (image height: {val1}) tif metadata (image height: {val2}) alto metadata " +
-                           "(image " +
-                           "height: {val3}) one does not match",
-                           xpathTiff.getImageHeightTif(),
-                           xpathMix.getMixImageHeight(),
-                           xpathAlto.getAltoImageHeight());
-
-            checkAllEquals(event,
-                           FailureType.CROSS_ERROR,
-                           "mix metadata (image width: {val1}) tif metadata (image width: {val2}) alto metadata " +
-                           "(image " +
-                           "width: {val3}) one does not match",
-                           xpathMix.getMixImageWidth(),
-                           xpathTiff.getImageWidthTif(),
-                           xpathAlto.getAltoImageWidth());
-        }
-
+                       xpathAlto.getFileName());
+        
+        checkAllEquals(event,
+                       FailureType.INCONSISTENCY_ERROR,
+                       "MIX/TIFF/ALTO: Mix metadata (image height: {0}), tif metadata (image height: {1}), alto metadata "
+                       +
+                       "(image height: {2}). One is not like the others",
+                       xpathTiff.getImageHeightTif(),
+                       xpathMix.getMixImageHeight(),
+                       xpathAlto.getImageHeight());
+        
+        checkAllEquals(event,
+                       FailureType.INCONSISTENCY_ERROR,
+                       "MIX/TIFF/ALTO: Mix metadata (image width: {0}), tif metadata (image width: {1}), alto metadata " +
+                       "(image " +
+                       "width: {2}). One is not like the others",
+                       xpathMix.getMixImageWidth(),
+                       xpathTiff.getImageWidthTif(),
+                       xpathAlto.getImageWidth());
     }
-
+    
+    private void checkTiffMix(DecoratedNodeParsingEvent event, XpathMix xpathMix, XpathTiff xpathTiff) {
+        checkEquals(event,
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MIX/TIFF: Mix metadata (file size: {expected}) does not match actual tif file size {actual}",
+                    xpathTiff.getTifSizeActual(),
+                    xpathMix.getTifSizePerMix());
+        
+        checkEquals(event,
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MIX/TIFF: metadata (checksum {expected}) does not match actual tif file checksum {actual}",
+                    xpathTiff.getChecksumTif(),
+                    xpathMix.getChecksumMix());
+    }
+    
     private void metsMixAndMixCheck(DecoratedNodeParsingEvent event, XpathMetsMix metsMix, XpathMix mix) {
         checkEquals(event,
-                    FailureType.CROSS_ERROR,
-                    "Mets mix filename was {actual}, mix filename was {expected}",
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MetsMIX/MIX: Mets mix filename was {actual}, mix filename was {expected}",
                     metsMix.getMixFileName(),
                     mix.getMixFileName());
         checkEquals(event,
-                    FailureType.CROSS_ERROR,
-                    "Mets mix image height was {actual}, mix image height was {expected}",
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MetsMIX/MIX: Mets mix image height was {actual}, mix image height was {expected}",
                     metsMix.getMixImageHeight(),
                     mix.getMixImageHeight());
         checkEquals(event,
-                    FailureType.CROSS_ERROR,
-                    "Mets mix image width was {actual}, mix image width was {expected}",
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MetsMIX/MIX: Mets mix image width was {actual}, mix image width was {expected}",
                     metsMix.getMixImageWidth(),
                     mix.getMixImageWidth());
         checkEquals(event,
-                    FailureType.CROSS_ERROR,
-                    "Mets mix checksum was {actual}, mix checksum was {expected}",
+                    FailureType.INCONSISTENCY_ERROR,
+                    "MetsMIX/MIX: Mets mix checksum was {actual}, mix checksum was {expected}",
                     metsMix.getChecksumMix(),
                     mix.getChecksumMix());
     }

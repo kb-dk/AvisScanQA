@@ -18,7 +18,8 @@ public class XpathMix {
     private String ChecksumMix;
     private String MixFileName;
     private Integer TifSizePerMix;
-
+    private String colorSpace;
+    
     public XpathMix() {
     }
 
@@ -52,7 +53,9 @@ public class XpathMix {
         ChecksumMix = xpath.selectString(
                 document,
                 "/mix:mix/mix:BasicDigitalObjectInformation/mix:Fixity/mix:messageDigest");
-
+        colorSpace = xpath.selectString(document,"/mix:mix/mix:BasicImageInformation/mix:BasicImageCharacteristics/mix:PhotometricInterpretation/mix:colorSpace");
+    
+    
     }
 
     public Integer getMixImageHeight() {
@@ -73,5 +76,9 @@ public class XpathMix {
 
     public Integer getTifSizePerMix() {
         return TifSizePerMix;
+    }
+    
+    public String getColorSpace() {
+        return colorSpace;
     }
 }

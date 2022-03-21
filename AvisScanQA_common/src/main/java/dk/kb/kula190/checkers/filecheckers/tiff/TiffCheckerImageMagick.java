@@ -47,21 +47,21 @@ public class TiffCheckerImageMagick extends DecoratedEventHandler {
 
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid format {actual}. Should have been {expected}",
+                    "Appendix I – TIF specifications: ImageMagick reports invalid format {actual}. Should have been {expected}",
                     yaml.getString("Image.Format"),
                     "TIFF (Tagged Image File Format)"
                    );
 
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid Colorspace {actual}. Should have been {expected}",
+                    "Appendix I – TIF specifications: ImageMagick reports invalid Colorspace {actual}. Should have been {expected}",
                     yaml.getString("Image.Colorspace"),
                     "sRGB"
                    );
 
         checkEquals(event,
                     FailureType.INVALID_TIFF_ERROR,
-                    "ImageMagick reports invalid Bit depth {actual}. Should have been {expected}",
+                    "Appendix I – TIF specifications: ImageMagick reports invalid Bit depth {actual}. Should have been {expected}",
                     yaml.getString("Image.Depth"),
                     "8-bit"
                    );

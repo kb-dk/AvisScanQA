@@ -2,20 +2,22 @@ package dk.kb.kula190.cli;
 
 import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
+import dk.kb.kula190.DatabaseRegister;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.DecoratedRunnableComponent;
-import dk.kb.kula190.DatabaseRegister;
+import dk.kb.kula190.checkers.batchcheckers.MetsChecker;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.pagecheckers.XpathCrossChecker;
 import dk.kb.kula190.checkers.filecheckers.ChecksumChecker;
 import dk.kb.kula190.checkers.filecheckers.FileNamingChecker;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathAltoChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathMixChecker;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerExiv2;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerExiv2;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
+import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 import dk.kb.util.yaml.YAML;
@@ -105,20 +107,24 @@ public class Main {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
-                        //Simple Checkers
-//                        new ChecksumChecker(resultCollector),
+                        new TiffAnalyzerExiv2(resultCollector),
+                        new TiffCheckerExiv2(resultCollector),
+                        
+                        new TiffAnalyzerImageMagick(resultCollector),
+                        new TiffCheckerImageMagick(resultCollector),
+                        
+                        new MetsSplitter(resultCollector),
+                        new MetsChecker(resultCollector),
                         
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
-                        new TiffAnalyzerImageMagick(resultCollector),
-                        new TiffCheckerImageMagick(resultCollector),
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
                         
                         //CrossCheckers
-                        new XpathCrossChecker(resultCollector),
+                        new XpathPageChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector));
+                        new PageStructureChecker(resultCollector)
+                              );
+                
             }
         };
         

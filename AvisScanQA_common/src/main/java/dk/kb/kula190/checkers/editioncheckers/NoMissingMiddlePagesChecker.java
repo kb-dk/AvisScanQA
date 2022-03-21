@@ -41,13 +41,14 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     @Override
     public void sectionEnds(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
             throws IOException {
-        List<Integer> sortedPages = pages.get().stream().sorted().toList();
+        List<Integer> integers = pages.get();
+        List<Integer> sortedPages = integers.stream().sorted().toList();
         for (int i = 0; i < sortedPages.size() - 1; i++) {
             if (sortedPages.get(i) + 1 != sortedPages.get(i + 1)) {
                 resultCollector.addFailure(event,
                                            FailureType.MISSING_FILE_ERROR,
                                            this.getClass().getSimpleName(),
-                                           "Section have gaps in page sequence",
+                                           "Appendix H – File structure: Section have gaps in page sequence",
                                            sortedPages.stream().map(x -> "" + x).collect(Collectors.joining(",")));
             }
         }

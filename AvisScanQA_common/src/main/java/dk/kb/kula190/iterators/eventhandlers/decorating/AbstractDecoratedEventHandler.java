@@ -175,7 +175,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                       decoratedEvent.getUdgave(),
                                       decoratedEvent.getSectionName(),
                                       decoratedEvent.getPageNumber());
-                case "tif" -> tiffFile(decoratedEvent,
+                case "tif","tiff" -> tiffFile(decoratedEvent,
                                        decoratedEvent.getAvis(),
                                        decoratedEvent.getEditionDate(),
                                        decoratedEvent.getUdgave(),
@@ -199,11 +199,10 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                 }
                 default -> addFailure(event,
                                       FailureType.UNKNOWN_FILETYPE_ERROR,
-                                      this.getClass().getSimpleName(),
                                       "Encountered unexpected file");
             }
         } catch (IOException e) {
-            reportException(event, e);
+            addExceptionalFailure(event, e);
         }
     }
 
@@ -216,7 +215,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     }
 
     boolean isSection(ParsingEvent event) {
-        return getLevel(event) == 4;
+        return getLevel(event) == 4 && !EventHandlerUtils.lastName(event.getName()).equals(batchName.get());
     }
 
     boolean isPage(ParsingEvent event) {
