@@ -9,8 +9,6 @@ import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathAltoChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathMixChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -47,8 +45,6 @@ class EventRunnerTest {
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
                         
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
                         // CrossCheckers
                         new XpathPageChecker(resultCollector),
                         new NoMissingMiddlePagesChecker(resultCollector),

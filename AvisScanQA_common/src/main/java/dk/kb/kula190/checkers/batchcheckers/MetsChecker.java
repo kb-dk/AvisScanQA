@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.batchcheckers;
 
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.Utils;
 import dk.kb.kula190.checkers.batchcheckers.xpath.XpathDC;
 import dk.kb.kula190.checkers.batchcheckers.xpath.XpathMarc;
 import dk.kb.kula190.checkers.batchcheckers.xpath.XpathMods;
@@ -9,14 +10,13 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
+import dk.kb.util.json.JSON;
 import dk.kb.util.xml.XML;
 import dk.kb.util.xml.XPathSelector;
 import dk.kb.util.xml.XpathUtils;
 import org.w3c.dom.Document;
-import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.IOException;
@@ -36,26 +36,13 @@ public class MetsChecker extends DecoratedEventHandler {
     private Set<String> tiffFilesFromMets = Collections.synchronizedSet(new HashSet<>());
     private Set<String> altoFilesFromMets = Collections.synchronizedSet(new HashSet<>());
     
-    private ThreadLocal<XpathMods> xpathMetsMods = new ThreadLocal<>();
-    private ThreadLocal<XpathDC> xpathMetsDC = new ThreadLocal<>();
-    private ThreadLocal<XpathMarc> xpathMetsMarc = new ThreadLocal<>();
-    private ThreadLocal<XpathMods> xpathMods = new ThreadLocal<>();
+    private ThreadLocal<XpathMods> metsMODS = new ThreadLocal<>();
+    private ThreadLocal<XpathMods> standaloneMODS = new ThreadLocal<>();
     
     public MetsChecker(ResultCollector resultCollector) {
         super(resultCollector);
     }
     
-    @Override
-    public void batchBegins(DecoratedNodeParsingEvent event,
-                            String avis,
-                            String roundTrip,
-                            LocalDate startDate,
-                            LocalDate endDate) throws IOException {
-        xpathMods.set(new XpathMods());
-        xpathMetsMods.set(new XpathMods());
-        xpathMetsDC.set(new XpathDC());
-        xpathMetsMarc.set(new XpathMarc());
-    }
     
     @Override
     public void modsFile(DecoratedAttributeParsingEvent event,
@@ -63,40 +50,45 @@ public class MetsChecker extends DecoratedEventHandler {
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
-        XpathMods xpathMods = this.xpathMods.get();
-        xpathMods.setModsDAta(event, EventHandlerUtils.handleDocument(event), avis, roundTrip, startDate, endDate);
+        final XpathMods mods = new XpathMods(event,
+                                             EventHandlerUtils.handleDocument(event),
+                                             avis,
+                                             roundTrip,
+                                             startDate,
+                                             endDate);
+        this.standaloneMODS.set(mods);
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods digital origin should have been {expected} but was {actual}",
-                    xpathMods.getDigitalOrigin(),
+                    mods.getDigitalOrigin(),
                     "digitized newspaper");
         
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods internet media type should have been {expected} but was {actual}",
-                    xpathMods.getMimetypes(),
+                    mods.getMimetypes(),
                     Set.of("text", "image/tif"));
         
         
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods physical description form should have been {expected} but was {actual}",
-                    xpathMods.getForm(),
+                    mods.getForm(),
                     "electronic");
         
         
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods start dates do not match date issued: {actual}, temporal: {expected}",
-                    xpathMods.getOriginDayIssuedStart(),
-                    xpathMods.getTemporalStart());
+                    mods.getOriginDayIssuedStart(),
+                    mods.getTemporalStart());
         
         
         checkEquals(event,
                     FailureType.INVALID_MODS_ERROR,
                     "Mods end dates do not match date issued: {actual}, temporal: {expected}",
-                    xpathMods.getOriginDayIssuedEnd(),
-                    xpathMods.getTemporalEnd());
+                    mods.getOriginDayIssuedEnd(),
+                    mods.getTemporalEnd());
         
     }
     
@@ -129,7 +121,7 @@ public class MetsChecker extends DecoratedEventHandler {
                 XpathUtils.createXPathSelector(
                         "mets", "http://www.loc.gov/METS/",
                         "xlink", "http://www.w3.org/1999/xlink"
-                        );
+                                              );
         
         try (InputStream data = decoratedEvent.getData()) {
             Document metsDoc = XML.fromXML(data, true);
@@ -153,45 +145,42 @@ public class MetsChecker extends DecoratedEventHandler {
             
             //TODO is the Type2DMD_Num always the same? Is Mods always DMD1?
             
-            XpathMods metsMods = this.xpathMetsMods.get();
-            metsMods.setModsDAta(decoratedEvent,
-                                 asSeparateXML(xpath.selectNode(metsDoc,
-                                                                "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*")),
-                                 avis,
-                                 roundTrip,
-                                 startDate,
-                                 endDate);
+            XpathMods mods = new XpathMods(decoratedEvent,
+                                           Utils.asSeparateXML(xpath.selectNode(metsDoc,
+                                                                                "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*")),
+                                           avis,
+                                           roundTrip,
+                                           startDate,
+                                           endDate);
+            metsMODS.set(mods);
+            
+            XpathDC dc = new XpathDC().data(decoratedEvent,
+                                            Utils.asSeparateXML(xpath.selectNode(metsDoc,
+                                                                                 "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*")),
+                                            avis,
+                                            roundTrip,
+                                            startDate,
+                                            endDate);
             
             
-            XpathDC dc = this.xpathMetsDC.get();
-            dc.setMetsDCInjectedFileData(decoratedEvent,
-                                         asSeparateXML(xpath.selectNode(metsDoc,
-                                                                        "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*")),
-                                         avis,
-                                         roundTrip,
-                                         startDate,
-                                         endDate);
+            XpathMarc marc = new XpathMarc().data(decoratedEvent,
+                                                  Utils.asSeparateXML(xpath.selectNode(metsDoc,
+                                                                                       "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*")),
+                                                  avis,
+                                                  roundTrip,
+                                                  startDate,
+                                                  endDate);
             
-            
-            XpathMarc marc = this.xpathMetsMarc.get();
-            marc.setMetsMarcInjectedFileData(decoratedEvent,
-                                             asSeparateXML(xpath.selectNode(metsDoc,
-                                                                            "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*")),
-                                             avis,
-                                             roundTrip,
-                                             startDate,
-                                             endDate);
-            //Node metadataMix = asSeparateXML(xpath.selectNode(metsDoc,"/mets:mets/mets:amdSec[]"));
-            
-            checkMods(decoratedEvent, metsMods);
+            //Checks of "static" values
+            checkMods(decoratedEvent, mods);
             
             checkDC(decoratedEvent, xpath, dc);
             
             checkMarc(decoratedEvent, marc);
             
-            checkMarcMods(decoratedEvent, metsMods, marc);
-            
-            checkMarcModsDC(decoratedEvent, metsMods, dc, marc);
+            //Check of cross values between documents
+            checkMarcMods(decoratedEvent, mods, marc);
+            checkMarcModsDC(decoratedEvent, mods, dc, marc);
             
         } catch (ParserConfigurationException | SAXException e) {
             throw new IOException("Failed to parse METS data from " + decoratedEvent.getLocation(), e);
@@ -207,7 +196,6 @@ public class MetsChecker extends DecoratedEventHandler {
         Set<String> dcTitles = metadataDC.getTitles();
         Set<String> marcTitles = Set.of(metadataMarc.getMarc245a(), metadataMarc.getMarc130a());
         Set<String> modsTitles = metadataMods.getTitles();
-        
         
         checkAllEquals(decoratedEvent,
                        FailureType.INVALID_METS_ERROR,
@@ -227,17 +215,18 @@ public class MetsChecker extends DecoratedEventHandler {
                                XpathMarc metadataMarc) {
         checkAllEquals(decoratedEvent,
                        FailureType.INVALID_METS_ERROR,
-                       "Mets date start do not match throughout mets file  {0}, {1}, {2}",
+                       "Date start do not match throughout mets file  {0}, {1}, {2}",
                        metadataMarc.getMarc650a(),
                        metadataMods.getOriginDayIssuedStart(),
                        metadataMods.getTemporalStart());
         
         checkAllEquals(decoratedEvent,
                        FailureType.INVALID_METS_ERROR,
-                       "Mets date start do not match throughout mets file  {0}, {1}, {2}",
+                       "Date start do not match throughout mets file  {0}, {1}, {2}",
                        metadataMarc.getMarc650y(),
                        metadataMods.getOriginDayIssuedEnd(),
                        metadataMods.getTemporalEnd());
+        
         checkEquals(decoratedEvent,
                     FailureType.INVALID_METS_ERROR,
                     "Mets issuance should have been {expected} but was {actual}",
@@ -321,11 +310,16 @@ public class MetsChecker extends DecoratedEventHandler {
                     metadataMods.getTemporalEnd());
     }
     
-    private Node asSeparateXML(Node metadataMods) throws ParserConfigurationException {
-        Document document = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
-        Node mods = document.appendChild(document.adoptNode(metadataMods));
-        return document.getDocumentElement();
+    private void checkModsVsMods(DecoratedNodeParsingEvent event, XpathMods modsFromMets, XpathMods modsStandalone) {
+        final String actual = JSON.toJson(metsMODS.get(), true);
+        final String expected = JSON.toJson(standaloneMODS.get(), true);
+        checkEquals(event,
+                    FailureType.INCONSISTENCY_ERROR,
+                    "Mets-Mods data and Mods-file data is in disagreement. {actual}\nvs\n{expected}",
+                    actual,
+                    expected);
     }
+    
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
@@ -354,35 +348,33 @@ public class MetsChecker extends DecoratedEventHandler {
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
         
+        checkModsVsMods(event, metsMODS.get(), standaloneMODS.get());
+        
+        
         checkEquals(event,
                     FailureType.MISSING_FILE_ERROR,
                     "METS reference missing files not in batch: \n{actual}",
-                    fromAnotInB(altoFilesFromMets, altoFilesVisited),
+                    Utils.fromAnotInB(altoFilesFromMets, altoFilesVisited),
                     Set.of());
         checkEquals(event,
                     FailureType.MISSING_FILE_ERROR,
                     "Batch contains files not referenced in METS: \n{actual}",
-                    fromAnotInB(altoFilesVisited, altoFilesFromMets),
+                    Utils.fromAnotInB(altoFilesVisited, altoFilesFromMets),
                     Set.of());
         
         checkEquals(event,
                     FailureType.MISSING_FILE_ERROR,
                     "METS reference missing files: \n{actual}",
-                    fromAnotInB(tiffFilesFromMets, tiffFilesVisited),
+                    Utils.fromAnotInB(tiffFilesFromMets, tiffFilesVisited),
                     Set.of());
         checkEquals(event,
                     FailureType.MISSING_FILE_ERROR,
                     "Batch contains files not referenced in METS: \n{actual}",
-                    fromAnotInB(tiffFilesVisited, tiffFilesFromMets),
+                    Utils.fromAnotInB(tiffFilesVisited, tiffFilesFromMets),
                     Set.of());
         
         
     }
     
-    private Set<String> fromAnotInB(Set<String> altoFilesFromMets, Set<String> altoFilesVisited) {
-        HashSet<String> diff = new HashSet<>(altoFilesFromMets);
-        diff.removeAll(altoFilesVisited);
-        return diff;
-    }
     
 }

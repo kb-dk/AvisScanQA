@@ -8,6 +8,7 @@ import org.w3c.dom.Node;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 public class XpathMods {
@@ -42,16 +43,14 @@ public class XpathMods {
     private String subjectGeographicCode;
     
     
-    public XpathMods() {
-    
-    }
-    
-    public void setModsDAta(DecoratedAttributeParsingEvent decoratedEvent,
+    public XpathMods(DecoratedAttributeParsingEvent decoratedEvent,
                             Node metadataMods,
                             String avis,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
+        
+        
         XPathSelector xpath = XpathUtils.createXPathSelector("mods", "http://www.loc.gov/mods/v3");
         
         
@@ -104,7 +103,7 @@ public class XpathMods {
         //mods:recordInfo
         catalogLanguage = xpath.selectString(metadataMods,
                                              "/mods:mods/mods:recordInfo/mods:languageOfCataloging/mods:languageTerm");
-        
+     
         
     }
     
@@ -232,6 +231,60 @@ public class XpathMods {
     
     public String getCatalogLanguage() {
         return catalogLanguage;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        XpathMods xpathMods = (XpathMods) o;
+        return Objects.equals(getTitles(), xpathMods.getTitles())
+               && Objects.equals(getOriginPlace(),
+                                 xpathMods.getOriginPlace())
+               && Objects.equals(getOriginDayIssuedStart(), xpathMods.getOriginDayIssuedStart())
+               && Objects.equals(getOriginDayIssuedEnd(), xpathMods.getOriginDayIssuedEnd())
+               && Objects.equals(getOriginIssuance(), xpathMods.getOriginIssuance())
+               && Objects.equals(getGenre(), xpathMods.getGenre())
+               && Objects.equals(getTypeOfResource(), xpathMods.getTypeOfResource())
+               && Objects.equals(getIdentifiers(), xpathMods.getIdentifiers())
+               && Objects.equals(getDigitalOrigin(), xpathMods.getDigitalOrigin())
+               && Objects.equals(getMimetypes(), xpathMods.getMimetypes())
+               && Objects.equals(getForm(), xpathMods.getForm())
+               && Objects.equals(getLanguage(), xpathMods.getLanguage())
+               && Objects.equals(getTemporalStart(), xpathMods.getTemporalStart())
+               && Objects.equals(getTemporalEnd(), xpathMods.getTemporalEnd())
+               && Objects.equals(getCatalogLanguage(), xpathMods.getCatalogLanguage())
+               && Objects.equals(getSubjectCountry(), xpathMods.getSubjectCountry())
+               && Objects.equals(getSubjectArea(), xpathMods.getSubjectArea())
+               && Objects.equals(getSubjectCity(), xpathMods.getSubjectCity())
+               && Objects.equals(getSubjectGeographicCode(), xpathMods.getSubjectGeographicCode());
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(getTitles(),
+                            getOriginPlace(),
+                            getOriginDayIssuedStart(),
+                            getOriginDayIssuedEnd(),
+                            getOriginIssuance(),
+                            getGenre(),
+                            getTypeOfResource(),
+                            getIdentifiers(),
+                            getDigitalOrigin(),
+                            getMimetypes(),
+                            getForm(),
+                            getLanguage(),
+                            getTemporalStart(),
+                            getTemporalEnd(),
+                            getCatalogLanguage(),
+                            getSubjectCountry(),
+                            getSubjectArea(),
+                            getSubjectCity(),
+                            getSubjectGeographicCode());
     }
 }
 

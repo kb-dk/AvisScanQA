@@ -17,12 +17,12 @@ public class XpathMarc {
     private String marc650y;
     
     
-    public void setMetsMarcInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent,
-                                            Node metadataMarc,
-                                            String avis,
-                                            String roundTrip,
-                                            LocalDate startDate,
-                                            LocalDate endDate) {
+    public XpathMarc data(DecoratedAttributeParsingEvent decoratedEvent,
+                            Node metadataMarc,
+                            String avis,
+                            String roundTrip,
+                            LocalDate startDate,
+                            LocalDate endDate) {
         
         XPathSelector xpath = XpathUtils.createXPathSelector(
                 "marc", "http://www.loc.gov/MARC21/slim");
@@ -47,7 +47,9 @@ public class XpathMarc {
     
         marc650y = xpath.selectString(metadataMarc,
                                       "/marc:record/marc:datafield[@tag='650']/marc:subfield[@code='y']");
-        //TODO whatever should be validated here???
+        
+        return this;
+        
     }
     
     /*

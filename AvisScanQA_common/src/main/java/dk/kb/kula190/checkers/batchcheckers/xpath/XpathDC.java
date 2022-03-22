@@ -19,12 +19,12 @@ public class XpathDC {
     private Set<String> coverages;
     
     
-    public void setMetsDCInjectedFileData(DecoratedAttributeParsingEvent decoratedEvent,
-                                          Node metadataDC,
-                                          String avis,
-                                          String roundTrip,
-                                          LocalDate startDate,
-                                          LocalDate endDate) {
+    public XpathDC data(DecoratedAttributeParsingEvent decoratedEvent,
+                          Node metadataDC,
+                          String avis,
+                          String roundTrip,
+                          LocalDate startDate,
+                          LocalDate endDate) {
         
         XPathSelector xpath = XpathUtils.createXPathSelector("dc", "http://purl.org/dc/elements/1.1/",
                                                              "oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
@@ -42,6 +42,7 @@ public class XpathDC {
         language = xpath.selectString(metadataDC, "/oai_dc:dc/dc:language");
     
         coverages = new HashSet<>(xpath.selectStringList(metadataDC, "/oai_dc:dc/dc:coverage/text()"));
+        return this;
     }
     /*
     <oai_dc:dc xmlns:oai_dc="http://www.openarchives.org/OAI/2.0/oai_dc/"
