@@ -173,10 +173,7 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl){
             }else{
                 focusOutEl.focus();
             }
-
         }
-
-
     });
 }
 function htmlElementWithinCollection(collection,element){

@@ -1,4 +1,5 @@
 let configJson;
+$.getJSON("api/config.json").done((data)=>configJson = data)
 function noteNewspaperSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
@@ -56,7 +57,6 @@ function loadNewspaperIDs() {
 
 
 function loadYearsForNewspaper(avisID, year) {
-    $.getJSON("api/config.json").done((data)=>configJson = data)
     const url = `api/years/${avisID}`;
     $.getJSON(url)
         .done(function (years) {
@@ -193,27 +193,19 @@ function renderNewspaperForYear(years, currentyear, url) {
 }
 
 function determineColor(dayInMonth) {
-    //Button styles: https://getbootstrap.com/docs/4.0/components/buttons/
-    //primary = blue
-    //secondary = dark grey
-    //success = green
-    //danger = red
-    //warning = yellow
-    //info = light blue
-    //light = light grey
-    //dark = black
-    //link = link
     if (!dayInMonth.available) {
-        return "btn-light";
-    } else if (dayInMonth.state == "APPROVED") { //TODO https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-30
-        return "approved";
-    } else if (dayInMonth.problems.length > 0) {
-        return "btn-warning";
-    } else if (dayInMonth.count > 0) {
-        return "btn-success";
-    } else {
-        return "btn-secondary";
+        return configJson.global.calendarStyling.notWithinBatch;
+    }  else if (dayInMonth.problems.length > 0) {
+        return configJson.global.calendarStyling.error;
+    } else if(dayInMonth.count == 0){
+        return configJson.global.calendarStyling.noPageWithin;
+    }else if(dayInMonth.state != "APPROVED"){
+        return configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling;
+    }else{
+        return configJson.global.calendarStyling.default
     }
+
+
 
 }
 
@@ -294,10 +286,17 @@ function buildCalendar(year, month, availableDates) {
             });
         }
         button.attr("style", 'padding-left: 0; padding-right: 0')
-            .addClass("btn btn-sm " + determineColor(dayInMonth))
-            .text(date);
+            .text(date)
+            .addClass("btn btn-sm")
+            .css(determineColor(dayInMonth));
+
+        if(dayInMonth.state == "APPROVED"){
+            button.css(configJson.batch.stateButtonOptions.APPROVED.calendarStyling);
+        }
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
+
+
     }
 
     calHtml += "</div>";
