@@ -153,3 +153,6 @@ body {
 #stateDropDownMenu{
   max-width: max-content;
 }
+#primary-show{
+  margin-bottom: 0.5em;
+}
