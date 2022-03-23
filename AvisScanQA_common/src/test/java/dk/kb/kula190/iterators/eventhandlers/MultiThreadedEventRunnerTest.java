@@ -40,17 +40,17 @@ class MultiThreadedEventRunnerTest {
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
                 return List.of(
                         
-                        // new TiffAnalyzerExiv2(resultCollector),
-                        // new TiffCheckerExiv2(resultCollector),
+                         new TiffAnalyzerExiv2(resultCollector),
+                         new TiffCheckerExiv2(resultCollector),
                         //
-                        // new TiffAnalyzerImageMagick(resultCollector),
-                        // new TiffCheckerImageMagick(resultCollector),
+                         new TiffAnalyzerImageMagick(resultCollector),
+                         new TiffCheckerImageMagick(resultCollector)
                         //
-                        new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector),
+//                        new MetsSplitter(resultCollector),
+//                        new MetsChecker(resultCollector),
                         
                         //Per file- checkers
-                        new XmlSchemaChecker(resultCollector)
+//                        new XmlSchemaChecker(resultCollector)
                         
                         
                         //CrossCheckers

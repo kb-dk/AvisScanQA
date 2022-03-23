@@ -311,8 +311,8 @@ public class MetsChecker extends DecoratedEventHandler {
     }
     
     private void checkModsVsMods(DecoratedNodeParsingEvent event, XpathMods modsFromMets, XpathMods modsStandalone) {
-        final String actual = JSON.toJson(metsMODS.get(), true);
-        final String expected = JSON.toJson(standaloneMODS.get(), true);
+        final XpathMods actual = metsMODS.get();
+        final XpathMods expected = standaloneMODS.get();
         checkEquals(event,
                     FailureType.INCONSISTENCY_ERROR,
                     "Mets-Mods data and Mods-file data is in disagreement. {actual}\nvs\n{expected}",

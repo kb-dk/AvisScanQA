@@ -125,6 +125,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             
             @Override
             public void error(SAXParseException exception) throws SAXException {
+                //TODO Give the right Appendic name here
                 addFailure(parsingEvent.get(),
                            FailureType.SCHEMA_ERROR,
                            name + " error encountered",

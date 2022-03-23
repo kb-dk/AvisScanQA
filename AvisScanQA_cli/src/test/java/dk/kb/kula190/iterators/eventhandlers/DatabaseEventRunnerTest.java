@@ -11,8 +11,7 @@ import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathAltoChecker;
-import dk.kb.kula190.checkers.filecheckers.XpathMixChecker;
+
 import dk.kb.kula190.generated.Failure;
 import dk.kb.util.yaml.YAML;
 import org.junit.jupiter.api.Test;
@@ -46,8 +45,6 @@ class DatabaseEventRunnerTest {
                         new XmlSchemaChecker(resultCollector),
                         new TiffAnalyzerImageMagick(resultCollector),
                         new TiffCheckerImageMagick(resultCollector),
-                        new XpathAltoChecker(resultCollector),
-                        new XpathMixChecker(resultCollector),
                     
                         //CrossCheckers
                         new XpathPageChecker(resultCollector),

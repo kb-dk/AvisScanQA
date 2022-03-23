@@ -25,7 +25,8 @@ public class XpathDC {
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) {
-        
+
+        //TODO all the other DC terms from http://www.openarchives.org/OAI/2.0/oai_dc.xsd
         XPathSelector xpath = XpathUtils.createXPathSelector("dc", "http://purl.org/dc/elements/1.1/",
                                                              "oai_dc", "http://www.openarchives.org/OAI/2.0/oai_dc/");
         

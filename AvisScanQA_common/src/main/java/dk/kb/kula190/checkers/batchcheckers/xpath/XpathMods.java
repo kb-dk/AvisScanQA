@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.batchcheckers.xpath;
 
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
+import dk.kb.util.json.JSON;
 import dk.kb.util.xml.XPathSelector;
 import dk.kb.util.xml.XpathUtils;
 import org.w3c.dom.Node;
@@ -232,9 +233,8 @@ public class XpathMods {
     public String getCatalogLanguage() {
         return catalogLanguage;
     }
-    
-    @Override
-    public boolean equals(Object o) {
+
+    @Override public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
@@ -242,49 +242,53 @@ public class XpathMods {
             return false;
         }
         XpathMods xpathMods = (XpathMods) o;
-        return Objects.equals(getTitles(), xpathMods.getTitles())
-               && Objects.equals(getOriginPlace(),
-                                 xpathMods.getOriginPlace())
-               && Objects.equals(getOriginDayIssuedStart(), xpathMods.getOriginDayIssuedStart())
-               && Objects.equals(getOriginDayIssuedEnd(), xpathMods.getOriginDayIssuedEnd())
-               && Objects.equals(getOriginIssuance(), xpathMods.getOriginIssuance())
-               && Objects.equals(getGenre(), xpathMods.getGenre())
-               && Objects.equals(getTypeOfResource(), xpathMods.getTypeOfResource())
-               && Objects.equals(getIdentifiers(), xpathMods.getIdentifiers())
-               && Objects.equals(getDigitalOrigin(), xpathMods.getDigitalOrigin())
-               && Objects.equals(getMimetypes(), xpathMods.getMimetypes())
-               && Objects.equals(getForm(), xpathMods.getForm())
-               && Objects.equals(getLanguage(), xpathMods.getLanguage())
-               && Objects.equals(getTemporalStart(), xpathMods.getTemporalStart())
-               && Objects.equals(getTemporalEnd(), xpathMods.getTemporalEnd())
-               && Objects.equals(getCatalogLanguage(), xpathMods.getCatalogLanguage())
-               && Objects.equals(getSubjectCountry(), xpathMods.getSubjectCountry())
-               && Objects.equals(getSubjectArea(), xpathMods.getSubjectArea())
-               && Objects.equals(getSubjectCity(), xpathMods.getSubjectCity())
-               && Objects.equals(getSubjectGeographicCode(), xpathMods.getSubjectGeographicCode());
+        return Objects.equals(titles, xpathMods.titles) &&
+               Objects.equals(originPlace,
+                              xpathMods.originPlace) &&
+               Objects.equals(originDayIssuedStart, xpathMods.originDayIssuedStart) &&
+               Objects.equals(originDayIssuedEnd, xpathMods.originDayIssuedEnd) &&
+               Objects.equals(originIssuance, xpathMods.originIssuance) &&
+               Objects.equals(genre, xpathMods.genre) &&
+               Objects.equals(typeOfResource, xpathMods.typeOfResource) &&
+               Objects.equals(identifiers, xpathMods.identifiers) &&
+               Objects.equals(digitalOrigin, xpathMods.digitalOrigin) &&
+               Objects.equals(mimetypes, xpathMods.mimetypes) &&
+               Objects.equals(form, xpathMods.form) &&
+               Objects.equals(language, xpathMods.language) &&
+               Objects.equals(temporalStart, xpathMods.temporalStart) &&
+               Objects.equals(temporalEnd, xpathMods.temporalEnd) &&
+               Objects.equals(catalogLanguage, xpathMods.catalogLanguage) &&
+               Objects.equals(subjectCountry, xpathMods.subjectCountry) &&
+               Objects.equals(subjectArea, xpathMods.subjectArea) &&
+               Objects.equals(subjectCity, xpathMods.subjectCity) &&
+               Objects.equals(subjectGeographicCode, xpathMods.subjectGeographicCode);
     }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(getTitles(),
-                            getOriginPlace(),
-                            getOriginDayIssuedStart(),
-                            getOriginDayIssuedEnd(),
-                            getOriginIssuance(),
-                            getGenre(),
-                            getTypeOfResource(),
-                            getIdentifiers(),
-                            getDigitalOrigin(),
-                            getMimetypes(),
-                            getForm(),
-                            getLanguage(),
-                            getTemporalStart(),
-                            getTemporalEnd(),
-                            getCatalogLanguage(),
-                            getSubjectCountry(),
-                            getSubjectArea(),
-                            getSubjectCity(),
-                            getSubjectGeographicCode());
+
+    @Override public int hashCode() {
+        return Objects.hash(titles,
+                            originPlace,
+                            originDayIssuedStart,
+                            originDayIssuedEnd,
+                            originIssuance,
+                            genre,
+                            typeOfResource,
+                            identifiers,
+                            digitalOrigin,
+                            mimetypes,
+                            form,
+                            language,
+                            temporalStart,
+                            temporalEnd,
+                            catalogLanguage,
+                            subjectCountry,
+                            subjectArea,
+                            subjectCity,
+                            subjectGeographicCode);
+    }
+
+
+    public String toString(){
+        return JSON.toJson(this,true);
     }
 }
 

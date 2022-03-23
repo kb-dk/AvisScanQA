@@ -171,12 +171,12 @@
 
 
             <!--Related to file contents-->
-            <xs:enumeration value="INCONSISTENCY_ERROR" />
 
-            <xs:enumeration value="SCHEMA_ERROR" />
+            <xs:enumeration value="INCONSISTENCY_ERROR" />
 
             <xs:enumeration value="TIFF_ANALYZE_ERROR" />
 
+            <xs:enumeration value="SCHEMA_ERROR" />
 
             <xs:enumeration value="INVALID_MIX_ERROR" />
             <xs:enumeration value="INVALID_ALTO_ERROR" />

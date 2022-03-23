@@ -103,6 +103,7 @@ public class Main {
     }
     
     private static ResultCollector runChecks(Batch batch) throws Exception {
+        //TODO configurable number of threads
         DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
             @Override
             protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {

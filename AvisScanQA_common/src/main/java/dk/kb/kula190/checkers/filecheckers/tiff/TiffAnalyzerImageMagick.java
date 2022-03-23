@@ -5,14 +5,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.Utils;
 import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.InjectingTreeEventHandler;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -32,8 +31,9 @@ public class TiffAnalyzerImageMagick extends InjectingTreeEventHandler {
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
         if (Set.of("tif", "tiff").contains(FilenameUtils.getExtension(event.getName()))) {
             log.info("Analyzing {} with ImageMagick", event.getLocation());
-            
-            List<String> lines = runImageMagick(event);
+
+            List<String> lines1 = Utils.runTool("identify", event.getLocation(), "-verbose");
+            List<String> lines = lines1;
             final String yamlString = toYAML(lines);
             
             pushEvent(event, INJECTED_TYPE,
@@ -48,47 +48,8 @@ public class TiffAnalyzerImageMagick extends InjectingTreeEventHandler {
         String json = parseImagemagickOutput(lines);
         return json2Yaml(json);
     }
-    
-    private List<String> runImageMagick(AttributeParsingEvent event) throws IOException {
-        ProcessBuilder builder = new ProcessBuilder("identify", "-verbose", event.getLocation());
-        Process process = builder.start();
-        List<String> lines;
-        try {
-            int returnValue = process.waitFor();
-            if (returnValue != 0) {
-                throw new IOException("ImageMagick failed with return code "
-                                      + returnValue
-                                      + " on "
-                                      + event.getLocation()
-                                      + ". Stdout="
-                                      + readStdOut(process)
-                                      + "\n\nStdErr="
-                                      + readStdErr(process));
-            }
-        } catch (InterruptedException e) {
-            log.warn("Interrupted while waiting for ImageMagick on " + event.getLocation(), e);
-        }
-        lines = readStdOut(process);
-        return lines;
-    }
-    
-    private List<String> readStdOut(Process process) throws IOException {
-        List<String> lines;
-        try (BufferedReader stdOut = process.inputReader(StandardCharsets.UTF_8)) {
-            lines = IOUtils.readLines(stdOut);
-        }
-        return lines;
-    }
-    
-    
-    private List<String> readStdErr(Process process) throws IOException {
-        List<String> lines;
-        try (BufferedReader stdOut = process.errorReader(StandardCharsets.UTF_8)) {
-            lines = IOUtils.readLines(stdOut);
-        }
-        return lines;
-    }
-    
+
+
     public String json2Yaml(String jsonString) throws IOException {
         // parse JSON
         ObjectMapper objectMapper = new ObjectMapper();
