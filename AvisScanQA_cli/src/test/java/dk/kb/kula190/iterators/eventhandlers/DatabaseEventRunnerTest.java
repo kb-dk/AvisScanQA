@@ -79,6 +79,8 @@ class DatabaseEventRunnerTest {
                                              dbConfig.getString("jdbc.jdbc-connection-string"),
                                              dbConfig.getString("jdbc.jdbc-user"),
                                              dbConfig.getString("jdbc.jdbc-password"),
+                                             dbConfig.getString("jdbc.jdbc-initial-batch-state"),
+                                             dbConfig.getString("jdbc.jdbc-finished-batch-state"),
                                              failures)
                               );
             }

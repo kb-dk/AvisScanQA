@@ -33,26 +33,33 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String jdbcURL;
     private final String jdbcUser;
     private final String jdbcPassword;
+    private final String initialBatchState;
+    private final String finishedBatchState;
     private final List<Failure> checkerFailures;
-    
+
     private final List<Failure> registeredFailures;
     private BasicDataSource dataSource;
-    
+
     public DatabaseRegister(ResultCollector resultCollector,
                             Driver jdbcDriver,
                             String jdbcURL,
                             String jdbcUser,
                             String jdbcPassword,
-                            List<Failure> checkerFailures) {
+                            String initialBatchState,
+                            String finishedBatchState,
+                            List<Failure> checkerFailures
+                           ) {
         super(resultCollector);
-        this.jdbcDriver         = jdbcDriver;
-        this.jdbcURL            = jdbcURL;
-        this.jdbcUser           = jdbcUser;
-        this.jdbcPassword       = jdbcPassword;
-        this.checkerFailures    = checkerFailures;
+        this.jdbcDriver = jdbcDriver;
+        this.jdbcURL = jdbcURL;
+        this.jdbcUser = jdbcUser;
+        this.jdbcPassword = jdbcPassword;
+        this.checkerFailures = checkerFailures;
         this.registeredFailures = new ArrayList<>();
+        this.initialBatchState = initialBatchState;
+        this.finishedBatchState = finishedBatchState;
     }
-    
+
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
                             String avis,
@@ -60,28 +67,28 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
         dataSource = new BasicDataSource();
-        
+
         if (jdbcUser != null) {
             dataSource.setUsername(jdbcUser);
         }
-        
+
         if (jdbcPassword != null) {
             dataSource.setPassword(jdbcPassword);
         }
         dataSource.setUrl(jdbcURL);
-        
+
         dataSource.setDefaultReadOnly(false);
         dataSource.setDefaultAutoCommit(false);
-        
+
         dataSource.setRemoveAbandonedTimeout(60); // 60 sec
         dataSource.setMaxWaitMillis(60000); // 1 min
         dataSource.setMaxTotal(2); // Change to 10 when running as WAR
-        
+
         dataSource.setDriver(jdbcDriver);
-        
-        
+
+
         try (Connection connection = dataSource.getConnection()) {
-            
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, state, "
                     + "username, lastmodified) "
@@ -102,36 +109,36 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
                 //state
                 //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, "1IN_PROGRESS");
-                
+                preparedStatement.setString(param++, initialBatchState);
+
                 preparedStatement.setString(param++, System.getenv("USER"));
-                
+
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-            
+
         } catch (SQLException e) {
             //TODO
             throw new IOException(e);
         }
     }
-    
+
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
                           String avis,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-        
+
         try (Connection connection = dataSource.getConnection()) {
-            
+
             List<Failure> batchFailures = new ArrayList<>(checkerFailures);
             batchFailures.removeAll(registeredFailures);
-            
+
             String failuresMessage = batchFailures.stream()
                                                   .map(failure -> JSON.toJson(failure, false))
                                                   .collect(Collectors.joining("\n"));
-            
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, "
                     + "state, num_problems, username, lastmodified) VALUES (?,?,?,?,?,?,?,?,?,?,now()) ")) {
@@ -152,16 +159,16 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, failuresMessage);
                 //state
                 //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, "2IN_PROGRESS");
-                
+                preparedStatement.setString(param++, finishedBatchState);
+
                 preparedStatement.setInt(param++, checkerFailures.size());
-    
+
                 preparedStatement.setString(param++, System.getenv("USER"));
-    
+
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-            
+
         } catch (SQLException e) {
             //TODO
             throw new IOException(e);
@@ -170,24 +177,24 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 if (dataSource != null) {
                     dataSource.close();
                 }
-                
-                
+
+
             } catch (Exception e) {
                 // ignore errors during shutdown, we cant do anything about it anyway
                 log.error("shutdown failed", e);
             }
         }
     }
-    
+
     private boolean matchThisPage(Reference reference, DecoratedParsingEvent event) {
         return Objects.equals(event.getAvis(), reference.getAvis()) &&
                Objects.equals(event.getEditionDate().toString(), reference.getEditionDate()) &&
                Objects.equals(event.getUdgave(), reference.getUdgave()) &&
                Objects.equals(event.getSectionName(), reference.getSectionName()) &&
                Objects.equals(event.getPageNumber(), reference.getPageNumber());
-        
+
     }
-    
+
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String avis,
@@ -199,14 +206,16 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                                            .filter(failure -> matchThisPage(failure.getReference(),
                                                                                             event)).toList();
         registeredFailures.addAll(failuresForThisPage);
-        
+
         String failuresMessage = failuresForThisPage.stream()
                                                     .map(failure -> JSON.toJson(failure, false))
                                                     .collect(Collectors.joining("\n"));
         try (Connection connection = dataSource.getConnection()) {
-            
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, " +
+                    "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, " +
+                    "fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
@@ -235,17 +244,17 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, "");
                 //fraktur
                 preparedStatement.setBoolean(param++, true);
-                
+
                 //problems
                 preparedStatement.setString(param++, failuresMessage);
-                
+
                 //Batch-reference
                 preparedStatement.setString(param++, batchName.get());
-                
+
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-            
+
         } catch (SQLException e) {
             //TODO
             throw new IOException(e);
