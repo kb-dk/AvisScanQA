@@ -390,7 +390,7 @@ function renderEdition(entity, pageIndex) {
         const link = $("<a/>").attr({
             href: editPageIndexInHash(location.hash, i),
 
-            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-warning" : "")}`,
+            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-danger" : "")}`,
         }).text(i + 1);
         $pageNav.append(link);
     }

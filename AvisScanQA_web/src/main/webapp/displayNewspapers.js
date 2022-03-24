@@ -224,7 +224,7 @@ function buildCalendar(year, month, availableDates) {
             editionCount: 0,
             state: "",
             problems: "",
-            numNotes: 0,
+            notesCount: 0,
             avisid: "",
             batchid: ""
         });
