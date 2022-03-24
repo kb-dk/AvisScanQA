@@ -18,6 +18,9 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class MetsSplitter extends InjectingTreeEventHandler {
@@ -25,9 +28,7 @@ public class MetsSplitter extends InjectingTreeEventHandler {
     public static final String INJECTED_TYPE_MIX = "METS MIX";
     public static final String INJECTED_TYPE_METS = "METS REDUCED";
     
-    //These are inheritable as they should be preserved when the eventrunner is forked off in a new thread
-    private Node fileSec = null;
-    private Node amdSec = null;
+    private Map<String, byte[]> techMDMap = new HashMap<>();
     
     private static final ReentrantReadWriteLock metsLock = new ReentrantReadWriteLock();
     
@@ -103,21 +104,11 @@ public class MetsSplitter extends InjectingTreeEventHandler {
         metsReadLock.lock();
         try {
             
-            XPathSelector xpath = getXpath();
             String filename = EventHandlerUtils.lastName(event.getName());
-            //TODO perhaps better to have these as Maps?
+    
+    
+            byte[] techMD = techMDMap.get(filename);
             
-            String tifFileRef = "..\\TIFF\\" + filename;
-            Node fileNode = xpath.selectNode(fileSec,
-                                             "mets:fileGrp[@ID='TIFF']/mets:file[mets:FLocat/@xlink:href='"
-                                             + tifFileRef
-                                             + "']");
-            //            String id = fileNode.getAttributes().getNamedItem("ID").getNodeValue();
-            String admid = fileNode.getAttributes().getNamedItem("ADMID").getNodeValue();
-            
-            
-            Node techMD = xpath.selectNode(amdSec, "mets:techMD[@ID='" + admid + "']/mets:mdWrap/mets:xmlData/*");
-           
            /* String altoID = xpath.selectString(metsDoc,
                                                "/mets:mets/"
                                                + "mets:structMap[@TYPE='physical']/"
@@ -129,28 +120,40 @@ public class MetsSplitter extends InjectingTreeEventHandler {
                                                     "/mets:mets/mets:fileSec/mets:fileGrp[@ID='ALTO']/mets:file[@ID='"
                                                     + altoID
                                                     + "']/mets:FLocat/@xlink:href");*/
-            try {
-                pushEvent(event, INJECTED_TYPE_MIX, XML.domToString(techMD).getBytes(StandardCharsets.UTF_8));
-            } catch (TransformerException e) {
-                throw new IOException("Failed to extract MIX data from METS for file " + event.getLocation(), e);
-            }
+                pushEvent(event, INJECTED_TYPE_MIX, techMD);
+           
         } finally {
             metsReadLock.unlock();
         }
     }
     
     private void metsFile(AttributeParsingEvent event) throws IOException {
+        
         //Take a write lock to prevent any threads using amdSec or fileSec before we have completed them here
         ReentrantReadWriteLock.WriteLock metsWriteLock = metsLock.writeLock();
         metsWriteLock.lock();
         XPathSelector xpath = getXpath();
         try (InputStream data = event.getData()) {
             Document metsDoc = XML.fromXML(data, true);
+    
+            Node amdSec = xpath.selectNode(metsDoc, "/mets:mets")
+                               .removeChild(xpath.selectNode(metsDoc, "/mets:mets/mets:amdSec"));
+            Node fileSec = xpath.selectNode(metsDoc, "/mets:mets/mets:fileSec");
+    
+            List<Node> tiffFileNodes = xpath.selectNodeList(fileSec, "mets:fileGrp[@ID='TIFF']/mets:file");
+            for (Node tiffFileNode : tiffFileNodes) {
+                String id = tiffFileNode.getAttributes().getNamedItem("ID").getNodeValue();
+                String admid = tiffFileNode.getAttributes().getNamedItem("ADMID").getNodeValue();
+                String mimetype = tiffFileNode.getAttributes().getNamedItem("MIMETYPE").getNodeValue();
+    
+                String tiffRef = xpath.selectString(tiffFileNode, "mets:file/mets:FLocat/@xlink:href");
+    
+                Node techMD = xpath.selectNode(amdSec, "mets:techMD[@ID='" + admid + "']/mets:mdWrap/mets:xmlData/*");
+                techMDMap.put(EventHandlerUtils.lastName(tiffRef), XML.domToString(techMD).getBytes(StandardCharsets.UTF_8));
+            }
             
-            amdSec  = xpath.selectNode(metsDoc, "/mets:mets")
-                           .removeChild(xpath.selectNode(metsDoc, "/mets:mets/mets:amdSec"));
-            fileSec = xpath.selectNode(metsDoc, "/mets:mets/mets:fileSec");
             metsDoc.normalizeDocument();
+            
             pushEvent(event, INJECTED_TYPE_METS,
                       XML.domToString(metsDoc).getBytes(StandardCharsets.UTF_8));
             

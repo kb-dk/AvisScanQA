@@ -69,15 +69,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
         xpathMix.setMixXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
         
         //Perform MIX-only checks here
-    
-        //All pages stand up, so height > width.
-        //TODO not true
-        checkAtLeast(event,
-                     FailureType.INVALID_MIX_ERROR,
-                     xpathMix.getMixImageHeight().doubleValue(),
-                     xpathMix.getMixImageWidth().doubleValue(),
-                     "Appendix E – metadata per page MIX: MIX image height: {required} was less than width: {actual}"); //`${height}` not supported in this java version?
-    
+        
         checkEquals(event,
                     FailureType.INVALID_MIX_ERROR,
                     "Appendix E – metadata per page MIX: MIX colorspace should have been {expected} but was {actual}",
@@ -109,14 +101,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
         xpathAlto.setAltoXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
         
         
-        //TODO configurable https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
-        //TODO should this check actually be there?
-        checkAtLeast(event,
-                     FailureType.INVALID_ALTO_ERROR,
-                     xpathAlto.getAccuracy(),
-                     10.0,
-                     "Appendix F – metadata per page ALTO: ALTO OCR accurary {actual} is lower than {required}");
-    
+        //TODO better checks of actual values https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
         checkEquals(event,
                     FailureType.INVALID_ALTO_ERROR,
                     "Appendix F – metadata per page ALTO: ALTO quality should have been {expected} but was {actual}",
@@ -124,24 +109,6 @@ public class XpathPageChecker extends DecoratedEventHandler {
                     "OK"
                    );
         
-        
-        //TODO compare against acceptable levels
-        //Checks page Height is within range. what was meant with acceptable levels?
-        checkWithinRange(event,
-                         FailureType.INVALID_ALTO_ERROR,
-                         xpathAlto.getPageHeight(),
-                         10000.0,
-                         50000.0,
-                         "Appendix F – metadata per page ALTO: ALTO page height is not within range: {requiredMin}-{requiredMax} actual height is: " +
-                         "{actual}");
-        
-        //Checks page Width is within range
-        checkWithinRange(event,
-                         FailureType.INVALID_ALTO_ERROR,
-                         xpathAlto.getPageWidth(),
-                         4000.0,
-                         50000.0,
-                         "Appendix F – metadata per page ALTO: ALTO page width is not within range: {requiredMin}-{requiredMax} actual width is: {actual}");
         
         //Checks page ID is corresponding with filename.
         checkEquals(event,

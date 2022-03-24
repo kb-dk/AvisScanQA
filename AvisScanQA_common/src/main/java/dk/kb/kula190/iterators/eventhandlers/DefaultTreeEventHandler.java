@@ -53,7 +53,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
     
     private String asString(Object object) {
         if (object == null) {
-            return "null"; //TODO...
+            return "null";
         } else {
             return object.toString();
         }

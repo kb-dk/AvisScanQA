@@ -29,8 +29,6 @@ public class TiffCheckerExiv2 extends DecoratedEventHandler {
                              String sectionName,
                              Integer pageNumber) throws IOException {
 
-        //TODO this should probably be folded into XpathCrossChecker..
-
         if (!Objects.equals(injectedType, TiffAnalyzerExiv2.INJECTED_TYPE)) {
             return;
         }

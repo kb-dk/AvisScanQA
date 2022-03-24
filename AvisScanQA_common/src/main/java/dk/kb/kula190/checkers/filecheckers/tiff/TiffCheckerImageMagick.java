@@ -29,8 +29,6 @@ public class TiffCheckerImageMagick extends DecoratedEventHandler {
                              String sectionName,
                              Integer pageNumber) throws IOException {
 
-        //TODO this should probably be folded into XpathCrossChecker..
-
         if (!Objects.equals(injectedType, TiffAnalyzerImageMagick.INJECTED_TYPE)) {
             return;
         }
