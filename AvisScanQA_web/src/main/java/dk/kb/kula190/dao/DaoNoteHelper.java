@@ -31,25 +31,6 @@ public class DaoNoteHelper {
         }
     }
 
-    static List<Note> getAllBatchNotes(String batchID, Connection conn) throws SQLException {
-        try (PreparedStatement ps = conn.prepareStatement("""
-                                                          SELECT *
-                                                          from  notes
-                                                          where batchid = ?
-                                                          ORDER BY id desc 
-                                                          """)) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            List<Note> result = new ArrayList<>();
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    result.add(readNote(res));
-                }
-            }
-            return result;
-        }
-    }
-
     static List<Note> getBatchLevelNotes(String batchID, Connection conn) throws SQLException {
         String dayNotes = null;
         try (PreparedStatement ps = conn.prepareStatement("SELECT * "
