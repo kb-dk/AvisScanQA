@@ -178,7 +178,7 @@ function renderNewspaperForYear(years, currentyear, url) {
     // var url = 'api/dates/' + newspaper + '/' + currentyear;
     $.getJSON(url)
         .done(function (dates) {
-            console.log(dates)
+
         let datesInYear = splitDatesIntoMonths(dates);
         $("#year-show").load("calendarDisplay.html", function () {
             for (var i = 0; i < datesInYear.length; i++) {
@@ -224,6 +224,7 @@ function buildCalendar(year, month, availableDates) {
             editionCount: 0,
             state: "",
             problems: "",
+            numNotes: 0,
             avisid: "",
             batchid: ""
         });
@@ -237,6 +238,7 @@ function buildCalendar(year, month, availableDates) {
         element.editionCount = availableDate.editionCount;
         element.state = availableDate.state;
         element.problems = availableDate.problems;
+        element.notesCount = availableDate.notesCount;
         element.avisid = availableDate.avisid;
         element.batchid = availableDate.batchid;
     }
@@ -278,20 +280,23 @@ function buildCalendar(year, month, availableDates) {
         if (dayInMonth.available) {
             button = $("<a/>", {
                 href: "#/newspapers/" + dayInMonth.batchid + "/" + dayInMonth.avisid + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/",
-                title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)"
+                title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)\n"+dayInMonth.notesCount+" note(s)"
             });
         } else {
             button = $("<button/>", {
                 type: 'button'
             });
         }
+        console.log(dayInMonth)
         button.attr("style", 'padding-left: 0; padding-right: 0')
             .text(date)
             .addClass("btn btn-sm")
             .css(determineColor(dayInMonth));
-
         if(dayInMonth.state == "APPROVED"){
             button.css(configJson.batch.stateButtonOptions.APPROVED.calendarStyling);
+        }
+        if(dayInMonth.notesCount > 0){
+            button.css(configJson.global.calendarStyling.containsNotes);
         }
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
@@ -332,6 +337,7 @@ function splitDatesIntoMonths(dates) {
             "editionCount": NewspaperDate.editionCount,
             "state": NewspaperDate.state,
             "problems": NewspaperDate.problems,
+            "notesCount":NewspaperDate.notesCount,
             "batchid": NewspaperDate.batchid,
             "avisid": NewspaperDate.avisid
         });

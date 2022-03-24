@@ -269,8 +269,7 @@ public class NewspaperQADao {
                                                            .findFirst();
                         final LocalDate localDate = date.toLocalDate();
                         
-                        int noteCount = DaoNoteHelper.getDayLevelNotes(batchID, avisID, date.toLocalDate(), conn)
-                                                     .size();
+                        int noteCount = DaoNoteHelper.getAllNumNotesForDay(batchID, avisID, date.toLocalDate(), conn);
                         
                         NewspaperDate result = new NewspaperDate().date(localDate)
                                                                   .pageCount(pageCount)

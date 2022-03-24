@@ -48,6 +48,9 @@ avischk-web-qa:
           color: "white"
           backgroundColor: "#6c757d"
           borderColor: "#6c757d"
+        containsNotes:
+          color: "yellow"
+          fontWeight: "bold"
     newspaper: { }
     batch:
       stateButtonOptions:
