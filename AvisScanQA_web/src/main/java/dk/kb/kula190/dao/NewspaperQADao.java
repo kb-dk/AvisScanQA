@@ -224,6 +224,7 @@ public class NewspaperQADao {
                                                                            .pageCount(0)
                                                                            .problems("")
                                                                            .editionCount(0)
+                                                                           .notesCount(0)
                                                                            .batchid(batch.getBatchid())
                                                                            .avisid(batch.getAvisid())
                                                                            .roundtrip(batch.getRoundtrip())
@@ -234,24 +235,18 @@ public class NewspaperQADao {
             }
             
             
-            try (PreparedStatement ps = conn.prepareStatement("select edition_date, "
-                                                              +
-                                                              "         batchid, "
-                                                              +
-                                                              "         count(DISTINCT(edition_title)) as numEditions, "
-                                                              +
-                                                              "         count(*) as numPages, "
-                                                              +
-                                                              "         string_agg(newspaperarchive.problems, '\\n') " +
-                                                              "as allProblems "
-                                                              +
-                                                              " from newspaperarchive "
-                                                              +
-                                                              " where newspaperarchive.avisid = ? and "
-                                                              +
-                                                              "       EXTRACT(YEAR FROM edition_date) = ? "
-                                                              +
-                                                              " group by edition_date, batchid ")) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    """
+                    select edition_date,
+                           batchid,
+                           count(DISTINCT(edition_title)) as numEditions,
+                           count(*) as numPages,
+                           string_agg(newspaperarchive.problems, '\\n') as allProblems
+                    from newspaperarchive
+                    where newspaperarchive.avisid = ? and
+                      EXTRACT(YEAR FROM edition_date) = ?
+                    group by edition_date, batchid
+                    """)) {
                 //ascending sort ensures that the highest roundtrips are last
                 //last entry for a given date wins. So this way, the calender will show the latest roundtrips
                 
@@ -274,11 +269,15 @@ public class NewspaperQADao {
                                                            .findFirst();
                         final LocalDate localDate = date.toLocalDate();
                         
+                        int noteCount = DaoNoteHelper.getDayLevelNotes(batchID, avisID, date.toLocalDate(), conn)
+                                                     .size();
+                        
                         NewspaperDate result = new NewspaperDate().date(localDate)
                                                                   .pageCount(pageCount)
                                                                   .editionCount(editionCount)
                                                                   .problems(problems)
                                                                   .batchid(batchID)
+                                                                  .notesCount(noteCount)
                                                                   .avisid(avisID);
                         batch.ifPresent(val -> result.setAvisid(val.getAvisid()));
                         batch.ifPresent(val -> result.setBatchid(val.getBatchid()));

@@ -442,6 +442,8 @@ components:
           type: integer
         editionCount:
           type: integer
+        notesCount:
+          type: integer
         state:
           type: string
         problems:

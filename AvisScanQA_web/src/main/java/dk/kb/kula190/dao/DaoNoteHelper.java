@@ -2,12 +2,12 @@ package dk.kb.kula190.dao;
 
 import dk.kb.kula190.model.Note;
 
-import javax.annotation.Nonnull;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +16,110 @@ import java.util.Map;
 
 public class DaoNoteHelper {
     
+    static List<Note> getNotes(String batchID,
+                               String newspaperID,
+                               LocalDate date,
+                               String editionTitle,
+                               String sectionTitle,
+                               Integer pageNumber,
+                               Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                SELECT *
+                from  notes
+                where
+                    (?=1 or batchid = ? ) and
+                    (?=1 or avisid = ?) and
+                    (?=1 or edition_date = ?) and
+                    edition_title = ? and
+                    section_title = ? and
+                    page_number = ?
+                ORDER BY id desc""")) {
+            int param = 1;
+            
+            param = setString(ps, param, batchID);
+            param = setString(ps, param, newspaperID);
+            param = setDate(ps, param, date);
+            param = setString(ps, param, editionTitle);
+            param = setString(ps, param, sectionTitle);
+            param = setInteger(ps, param, pageNumber);
+            
+            try (ResultSet res = ps.executeQuery()) {
+                List<Note> notes = new ArrayList<>();
+                while (res.next()) {
+                    notes.add(readNote(res));
+                }
+                return notes;
+            }
+        }
+    }
+    
+    
+    static Integer getNoteCount(String batchID,
+                               String newspaperID,
+                               LocalDate date,
+                               String editionTitle,
+                               String sectionTitle,
+                               Integer pageNumber,
+                               Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                SELECT count(*)
+                from  notes
+                where
+                    batchid = ? and
+                    avisid = ? and
+                    edition_date = ? and
+                    edition_title = ? and
+                    section_title = ? and
+                    page_number = ?
+                ORDER BY id desc""")) {
+            int param = 1;
+            param = setString(ps, param, batchID);
+            param = setString(ps, param, newspaperID);
+            param = setDate(ps, param, date);
+            param = setString(ps, param, editionTitle);
+            param = setString(ps, param, sectionTitle);
+            param = setInteger(ps, param, pageNumber);
+            
+            try (ResultSet res = ps.executeQuery()) {
+                if (res.next()) {
+                   return res.getInt(0);
+                }
+            }
+        }
+        return null;
+    }
+    
+    private static int setInteger(PreparedStatement ps, int param, Integer value) throws SQLException {
+        if (value == null){
+            ps.setNull(param++,Types.INTEGER);
+        } else {
+            ps.setInt(param++, value);
+        }
+        return param;
+    }
+    
+    private static int setDate(PreparedStatement ps, int param, LocalDate value) throws SQLException {
+        if (value == null){
+            ps.setNull(param++,Types.DATE);
+        } else {
+            ps.setDate(param++, Date.valueOf(value));
+        }
+        return param;
+    }
+    
+    private static int setString(PreparedStatement ps, int param, String value) throws SQLException {
+        if (value == null){
+            ps.setNull(param++,Types.VARCHAR);
+        } else {
+            ps.setString(param++, value);
+        }
+        return param;
+    }
+    
     static List<Note> getAllNotes(String batchID, Connection conn) throws SQLException {
+        // return getNotes(batchID)
         try (PreparedStatement ps = conn.prepareStatement("SELECT * from notes where batchid = ?")) {
             int param = 1;
             ps.setString(param++, batchID);
@@ -30,80 +133,27 @@ public class DaoNoteHelper {
         }
     }
     
+    
+    
     static List<Note> getBatchLevelNotes(String batchID, Connection conn) throws SQLException {
-        String dayNotes = null;
-        try (PreparedStatement ps = conn.prepareStatement("SELECT * "
-                                                          + "from  notes "
-                                                          + "where "
-                                                          + " batchid = ? and "
-                                                          + " edition_date is null and "
-                                                          + " edition_title is null and "
-                                                          + " section_title is null and "
-                                                          + " page_number is null"
-                                                          + " ORDER BY id desc ")) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            List<Note> result = new ArrayList<>();
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    result.add(readNote(res));
-                }
-            }
-            return result;
-        }
+        return getNotes(batchID, null, null, null, null, null, conn);
     }
+    
+    
     static List<Note> getNewspaperLevelNotes(String avisID, Connection conn) throws SQLException {
-        String dayNotes = null;
-        try (PreparedStatement ps = conn.prepareStatement("SELECT * "
-                                                          + "FROM  notes "
-                                                          + "WHERE "
-                                                          + "avisid = ? AND"
-                                                          + " batchid IS NULL AND "
-                                                          + " edition_date IS NULL AND "
-                                                          + " edition_title IS NULL AND "
-                                                          + " section_title IS NULL AND "
-                                                          + " page_number IS NULL"
-                                                          + " ORDER BY id DESC ")) {
-            int param = 1;
-            ps.setString(param++, avisID);
-            List<Note> result = new ArrayList<>();
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    result.add(readNote(res));
-                }
-            }
-            return result;
-        }
+        return getNotes(null, avisID, null, null, null, null, conn);
     }
     
     static List<Note> getDayLevelNotes(String batchID, String newspaperID, LocalDate date, Connection conn)
             throws SQLException {
-        String dayNotes = null;
-        try (PreparedStatement ps = conn.prepareStatement("SELECT * "
-                                                          + "from notes "
-                                                          + "where batchid = ? and "
-                                                          + "      avisid = ? and "
-                                                          + "      edition_date = ? and "
-                                                          + "      edition_title is null and "
-                                                          + "      section_title is null and "
-                                                          + "      page_number is null"
-                                                          + " ORDER BY id desc ")) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            ps.setString(param++, newspaperID);
-            ps.setDate(param++, Date.valueOf(date));
-            List<Note> result = new ArrayList<>();
-            try (ResultSet res = ps.executeQuery()) {
-                while (res.next()) {
-                    result.add(readNote(res));
-                }
-            }
-            return result;
-        }
+        return getNotes(batchID, newspaperID,date, null, null, null, conn);
     }
     
     
-    static Map<String, List<Note>> getEditionLevelNotes(String batchID, String newspaperID, LocalDate date, Connection conn)
+    static Map<String, List<Note>> getEditionLevelNotes(String batchID,
+                                                        String newspaperID,
+                                                        LocalDate date,
+                                                        Connection conn)
             throws SQLException {
         Map<String, List<Note>> editionNotes = new HashMap<>();
         try (PreparedStatement ps = conn.prepareStatement("SELECT* "
@@ -179,23 +229,4 @@ public class DaoNoteHelper {
         return note;
     }
     
-    
-    public static Integer getNumNotes(@Nonnull String batchID, Connection conn) throws SQLException {
-        //TODO this should probably be included in the callers SQL statement, rather being a separate statement
-        try (PreparedStatement ps = conn.prepareStatement("SELECT count(*) as numNotes "
-                                                          + " from notes "
-                                                          + " where batchid = ? "
-                                                          + " limit 1")) {
-            int param = 1;
-            ps.setString(param++, batchID);
-            try (ResultSet res = ps.executeQuery()) {
-                if (res.next()) {
-                    return res.getInt("numNotes");
-                } else {
-                    return null;
-                }
-                
-            }
-        }
-    }
 }
