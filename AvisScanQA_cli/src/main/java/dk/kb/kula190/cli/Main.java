@@ -24,117 +24,22 @@ import dk.kb.util.yaml.YAML;
 import org.postgresql.Driver;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 public class Main {
     
-    public static void main(String[] args) throws Exception {
-        
-        Path batchPath = Path.of(args[0]).toAbsolutePath();
-        Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-        
-        ResultCollector simpleResultCollector = runSimpleChecks(batch);
-        
-        //TODO merge result coleectors
-        System.out.println(simpleResultCollector.toReport());
-        
-        if (simpleResultCollector.isSuccess()) {
-            ResultCollector resultCollector = runChecks(batch);
-            
-            System.out.println(resultCollector.toReport());
-            
-            
-            ResultCollector dbResultCollector = registerResultInDB(batch, resultCollector);
-            
-            
-            System.out.println(dbResultCollector.toReport());
-        }
-        
-        System.exit(0);
-    }
+    public static void main(String[] args) throws IOException, URISyntaxException {
     
-    private static ResultCollector runSimpleChecks(Batch batch) throws Exception {
-        BasicRunnableComponent component =
-                new BasicRunnableComponent() {
-                    //TODO Why both override and functional interface? Cleanup this mess
-                    @Override
-                    protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                        return List.of(
-                                //Simple Checkers
-                                new ChecksumChecker(resultCollector),
-                                new FileNamingChecker(resultCollector)
-                                      );
-                    }
-                };
-        
-        
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
-        return resultCollector;
-    }
+        AvisScanQATool tool = new AvisScanQATool();
     
-    private static ResultCollector registerResultInDB(Batch batch, ResultCollector resultCollector) throws Exception {
-        final List<Failure> failures = resultCollector.getFailures();
-        File configFolder = new File(Thread.currentThread()
-                                           .getContextClassLoader()
-                                           .getResource("dbconfig-behaviour.yaml")
-                                           .toURI()).getParentFile();
-        YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
+        ResultCollector resultCollector = tool.check(Path.of(args[0]).toAbsolutePath());
         
-        
-        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent() {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
-                        
-                        new DatabaseRegister(resultCollector,
-                                             new Driver(),
-                                             dbConfig.getString("jdbc.jdbc-connection-string"),
-                                             dbConfig.getString("jdbc.jdbc-user"),
-                                             dbConfig.getString("jdbc.jdbc-password"),
-                                             dbConfig.getString("jdbc.jdbc-initial-batch-state"),
-                                             dbConfig.getString("jdbc.jdbc-finished-batch-state"),
-                                             failures)
-                              );
-            }
-            
-        };
-        ResultCollector dbResultCollector = databaseComponent.doWorkOnItem(batch);
-        return dbResultCollector;
+        System.exit(resultCollector.getFailures().size());
     }
-    
-    private static ResultCollector runChecks(Batch batch) throws Exception {
-        //TODO configurable number of threads
-        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
-                        new TiffAnalyzerExiv2(resultCollector),
-                        new TiffCheckerExiv2(resultCollector),
-                        
-                        new TiffAnalyzerImageMagick(resultCollector),
-                        new TiffCheckerImageMagick(resultCollector),
-                        
-                        new MetsSplitter(resultCollector),
-                        new MetsChecker(resultCollector),
-                        
-                        //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
-                        
-                        //CrossCheckers
-                        new XpathPageChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
-                              );
-                
-            }
-        };
-        
-        
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
-        return resultCollector;
-    }
-    
     
 }

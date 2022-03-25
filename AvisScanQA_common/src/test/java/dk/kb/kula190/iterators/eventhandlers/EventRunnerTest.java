@@ -29,10 +29,7 @@ class EventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        DecoratedRunnableComponent component = new DecoratedRunnableComponent() {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
+        DecoratedRunnableComponent component = new DecoratedRunnableComponent(resultCollector -> List.of(
                         // new TiffAnalyzerExiv2(resultCollector),
                         // new TiffCheckerExiv2(resultCollector),
                         
@@ -50,12 +47,12 @@ class EventRunnerTest {
                         new NoMissingMiddlePagesChecker(resultCollector),
                         new PageStructureChecker(resultCollector)
                 
-                              );
-            }
-            
-        };
-        
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
+                              ));
+    
+        ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
+                                                              getClass().getPackage().getImplementationVersion(), null);
+    
+        component.doWorkOnItem(batch, resultCollector);
         
         System.out.println(resultCollector.toReport());
         

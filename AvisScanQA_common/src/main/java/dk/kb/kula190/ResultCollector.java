@@ -9,6 +9,7 @@ import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.generated.Result;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 
 import javax.xml.bind.JAXBContext;
@@ -19,6 +20,7 @@ import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
 import java.io.StringWriter;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -65,6 +67,25 @@ public class ResultCollector {
         this(tool, version, null);
     }
     
+    
+    /**
+     * Merge the failures from this ResultCollector into the given result collector. The maxResults specified in the
+     * "that" argument is respected.
+     *
+     * @param that the result collector to merge into
+     * @return that
+     */
+    public ResultCollector mergeInto(ResultCollector that) {
+        for (Failure failure : getFailures()) {
+            that.addFailure(failure);
+        }
+        if (that.getTimestamp().before(this.getTimestamp())) {
+            that.setTimestamp(this.getTimestamp());
+        }
+        return that;
+    }
+    
+    
     /**
      * This flag controls whether or not the result collecter contains results that should be preserved. Default
      * true. If set to false, the result will not be preserved and thus the event will never have happened in
@@ -101,6 +122,26 @@ public class ResultCollector {
         resultStructure.setOutcome(success ? "Success" : "Failure");
     }
     
+    
+    protected void addFailure(Failure failure) {
+        resultStructure.getFailures().getFailure().add(failure);
+        setSuccess(false);
+    }
+    
+    public void addExceptionalFailure(Exception e){
+        Failure failure = new Failure();
+        failure.setType(FailureType.EXCEPTION);
+        failure.setReference(null);
+        failure.setFilereference(null);
+        //TODO set the other details here
+        failure.setDescription(ExceptionUtils.getMessage(e));
+        Details details = new Details();
+        details.getContent().addAll(Arrays.asList(ExceptionUtils.getStackFrames(e)));
+        failure.setDetails(details);
+        addFailure(failure);
+        
+    }
+    
     /**
      * Add a specific failure to the result collector. All these parameters must be non-null and non-empty
      *
@@ -111,6 +152,7 @@ public class ResultCollector {
      */
     public void addFailure(ParsingEvent reference, FailureType type, String component, String description) {
         addFailure(reference, type, component, description, new String[]{});
+        setSuccess(false);
     }
     
     /**
@@ -130,7 +172,6 @@ public class ResultCollector {
                                         String... details) {
         resultCount++; //The count of the current failure, starting at 1.
         
-        List<Failure> list = resultStructure.getFailures().getFailure();
         Failure failure = new Failure();
         
         failure.setFilereference(fileReference.getName());
@@ -150,7 +191,7 @@ public class ResultCollector {
             failure.setDetails(xmlDetails);
         }
         if (maxResults == null || resultCount < maxResults) {
-            list.add(failure);
+            resultStructure.getFailures().getFailure().add(failure);
         } else {
             Details currentDetails = failure.getDetails();
             if (currentDetails == null) {

@@ -146,8 +146,9 @@ public class MetsSplitter extends InjectingTreeEventHandler {
                 String admid = tiffFileNode.getAttributes().getNamedItem("ADMID").getNodeValue();
                 String mimetype = tiffFileNode.getAttributes().getNamedItem("MIMETYPE").getNodeValue();
     
-                String tiffRef = xpath.selectString(tiffFileNode, "mets:file/mets:FLocat/@xlink:href");
+                String tiffRef = xpath.selectString(tiffFileNode, "*/@xlink:href");
     
+                
                 Node techMD = xpath.selectNode(amdSec, "mets:techMD[@ID='" + admid + "']/mets:mdWrap/mets:xmlData/*");
                 techMDMap.put(EventHandlerUtils.lastName(tiffRef), XML.domToString(techMD).getBytes(StandardCharsets.UTF_8));
             }
