@@ -230,5 +230,25 @@ public class DaoNoteHelper {
             }
         }
     }
+    public static Integer getAllNumNotesForNewspaper(@Nonnull String avis, Connection conn)
+            throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement("""
+                                                          SELECT count(*) AS numNotes 
+                                                          FROM notes 
+                                                          WHERE avisid = ?
+                                                          LIMIT 1
+                                                          """)) {
+            int param = 1;
+            ps.setString(param++, avis);
+            try (ResultSet res = ps.executeQuery()) {
+                if (res.next()) {
+                    return res.getInt("numNotes");
+                } else {
+                    return null;
+                }
+
+            }
+        }
+    }
 
 }

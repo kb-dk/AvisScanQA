@@ -390,8 +390,11 @@ function renderEdition(entity, pageIndex) {
         const link = $("<a/>").attr({
             href: editPageIndexInHash(location.hash, i),
 
-            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")} ${(nrOfProblems > 0 ? "btn-danger" : "")}`,
+            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")})}`
         }).text(i + 1);
+        if(i !== pageIndex) {
+            determineColor(pages[i], link, pages[i].notes.length)
+        }
         $pageNav.append(link);
     }
     if (pageIndex >= 0 && pageIndex < pages.length) {

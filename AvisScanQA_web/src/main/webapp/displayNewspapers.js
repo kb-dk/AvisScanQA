@@ -1,11 +1,12 @@
 let configJson;
-$.getJSON("api/config.json").done((data)=>configJson = data)
+$.getJSON("api/config.json").done((data) => configJson = data)
+
 function noteNewspaperSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
 
-    let parts = ["api",data.get('avis'),"notes"]
+    let parts = ["api", data.get('avis'), "notes"]
 
     let url = parts.join("/");
 
@@ -20,12 +21,13 @@ function noteNewspaperSubmitHandler(event) {
     // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
+
 function noteNewspaperDeleteHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
 
-    let parts = ["api",data.get('avis') ,"notes"]
+    let parts = ["api", data.get('avis'), "notes"]
     var query = new URLSearchParams();
 
     query.append("id", data.get('id'));
@@ -68,14 +70,21 @@ function loadYearsForNewspaper(avisID, year) {
             }
             const notesUrl = `api/${avisID}/notes`;
             $.getJSON(notesUrl)
-                .done(function (notes){
-                    let $notesButtonDiv = $("<div/>",{id:"notesButtonDiv"});
-                    let $notesButton = $("<button/>",{class:`notesButton btn ${notes.length > 0 ? "btn-warning":"btn-primary"} btn-primary`, text:`${notes.length > 0 ? "Show " + notes.length + " notes and ": ""}create notes`});
-                    let $showNotesDiv = $("<div/>",{visible:false, class:`showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,tabindex:"100"})
+                .done(function (notes) {
+                    let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
+                    let $notesButton = $("<button/>", {
+                        class: `notesButton btn ${notes.length > 0 ? "btn-warning" : "btn-primary"} btn-primary`,
+                        text: `${notes.length > 0 ? "Show " + notes.length + " notes and " : ""}create notes`
+                    });
+                    let $showNotesDiv = $("<div/>", {
+                        visible: false,
+                        class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
+                        tabindex: "100"
+                    })
 
-                    setShowNotesFocusInAndOut($notesButton,$showNotesDiv)
+                    setShowNotesFocusInAndOut($notesButton, $showNotesDiv)
 
-                    let $newspaperNotesForm = $("<form/>",{id:"newspaperNotesForm",action:"",method:"post"});
+                    let $newspaperNotesForm = $("<form/>", {id: "newspaperNotesForm", action: "", method: "post"});
                     const formRow1 = $("<div>", {class: "form-row"})
                     const formRow2 = $("<div>", {class: "form-row"})
                     $newspaperNotesForm.append(formRow1);
@@ -179,34 +188,37 @@ function renderNewspaperForYear(years, currentyear, url) {
     $.getJSON(url)
         .done(function (dates) {
 
-        let datesInYear = splitDatesIntoMonths(dates);
-        $("#year-show").load("calendarDisplay.html", function () {
-            for (var i = 0; i < datesInYear.length; i++) {
-                const calElem = "#month" + i;
-                let datesInYearElement = datesInYear[i];
-                let html = "<h3>" + datesInYearElement.name + "</h3>";
-                html += buildCalendar(currentyear, (i + 1), datesInYearElement.days);
-                $(calElem).html(html);
-            }
+            let datesInYear = splitDatesIntoMonths(dates);
+            $("#year-show").load("calendarDisplay.html", function () {
+                for (var i = 0; i < datesInYear.length; i++) {
+                    const calElem = "#month" + i;
+                    let datesInYearElement = datesInYear[i];
+                    let html = "<h3>" + datesInYearElement.name + "</h3>";
+                    html += buildCalendar(currentyear, (i + 1), datesInYearElement.days);
+                    $(calElem).html(html);
+                }
+            });
         });
-    });
 }
 
-function determineColor(dayInMonth) {
-    if (!dayInMonth.available) {
-        return configJson.global.calendarStyling.notWithinBatch;
-    }  else if (dayInMonth.problems.length > 0) {
-        return configJson.global.calendarStyling.error;
-    } else if(dayInMonth.count == 0){
-        return configJson.global.calendarStyling.noPageWithin;
-    }else if(dayInMonth.state != "APPROVED"){
-        return configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling;
+function determineColor(dayInMonth, element,noteCount) {
+    if (dayInMonth.state === "") {
+        element.css(configJson.global.calendarStyling.notWithinBatch);
+    } else if (dayInMonth.problems.length > 0) {
+        element.css(configJson.global.calendarStyling.error);
+    } else if (dayInMonth.count == 0) {
+        element.css(configJson.global.calendarStyling.noPageWithin);
+    } else if(dayInMonth.state){
+        if (dayInMonth.state === "APPROVED") {
+            element.css(configJson.global.calendarStyling.default);
+        }
+        element.css(configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling);
     }else{
-        return configJson.global.calendarStyling.default
+        element.css(configJson.global.calendarStyling.default);
     }
-
-
-
+    if(noteCount > 0){
+        element.css(configJson.global.calendarStyling.containsNotes);
+    }
 }
 
 function buildCalendar(year, month, availableDates) {
@@ -280,24 +292,17 @@ function buildCalendar(year, month, availableDates) {
         if (dayInMonth.available) {
             button = $("<a/>", {
                 href: "#/newspapers/" + dayInMonth.batchid + "/" + dayInMonth.avisid + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/",
-                title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)\n"+dayInMonth.notesCount+" note(s)"
+                title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)\n" + dayInMonth.notesCount + " note(s)"
             });
         } else {
             button = $("<button/>", {
                 type: 'button'
             });
         }
-        console.log(dayInMonth)
         button.attr("style", 'padding-left: 0; padding-right: 0')
             .text(date)
-            .addClass("btn btn-sm")
-            .css(determineColor(dayInMonth));
-        if(dayInMonth.state == "APPROVED"){
-            button.css(configJson.batch.stateButtonOptions.APPROVED.calendarStyling);
-        }
-        if(dayInMonth.notesCount > 0){
-            button.css(configJson.global.calendarStyling.containsNotes);
-        }
+            .addClass("btn btn-sm");
+        determineColor(dayInMonth,button,dayInMonth.notesCount)
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
 
@@ -337,7 +342,7 @@ function splitDatesIntoMonths(dates) {
             "editionCount": NewspaperDate.editionCount,
             "state": NewspaperDate.state,
             "problems": NewspaperDate.problems,
-            "notesCount":NewspaperDate.notesCount,
+            "notesCount": NewspaperDate.notesCount,
             "batchid": NewspaperDate.batchid,
             "avisid": NewspaperDate.avisid
         });
