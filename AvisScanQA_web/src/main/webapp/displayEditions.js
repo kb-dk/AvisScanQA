@@ -171,7 +171,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     formRow1.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
     formRow2.append($dayNotesTextArea);
     formRow2.append($("<input/>", {
-        id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm"
+        id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm", value:"Gem"
     }));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batch.batchid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.batch.avisid}));
@@ -229,7 +229,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
         formRow2.append($editionNotesTextArea);
         formRow2.append($("<input/>", {
-            id: "editionNotesFormSubmit", type: "submit", name: "submit", form: "editionNotesForm"
+            id: "editionNotesFormSubmit", type: "submit", name: "submit", form: "editionNotesForm", value:"Gem"
         }));
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
@@ -282,7 +282,7 @@ function renderSinglePage(page) {
         class: "userNotes", id: "pageNotes", type: "text", name: "notes"
     }));
     formRow2.append($("<input/>", {
-        id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm"
+        id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm", value:"Gem"
     }));
 
     $pageNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));

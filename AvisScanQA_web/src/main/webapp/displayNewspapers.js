@@ -101,7 +101,7 @@ function loadYearsForNewspaper(avisID, year) {
                         class: "userNotes", id: "batchNotes", type: "text", name: "notes"
                     }));
                     formRow2.append($("<input/>", {
-                        id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm"
+                        id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm",value:"Gem"
                     }));
                     $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
 

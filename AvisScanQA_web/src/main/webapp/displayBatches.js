@@ -101,7 +101,7 @@ function loadBatchForNewspaper(batchID) {
                 class: "userNotes", id: "batchNotes", type: "text", name: "notes"
             }));
             formRow2.append($("<input/>", {
-                id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm"
+                id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm", value:"Gem"
             }));
 
             $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
