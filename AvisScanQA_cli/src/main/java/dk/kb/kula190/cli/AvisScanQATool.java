@@ -22,6 +22,8 @@ import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 import dk.kb.util.yaml.YAML;
 import org.postgresql.Driver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -33,37 +35,46 @@ import java.util.function.Function;
 
 public class AvisScanQATool {
     
+    private final Logger log = LoggerFactory.getLogger(getClass());
+    
     public ResultCollector check(Path batchPath) throws IOException, URISyntaxException {
-
+        
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-    
+        
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
-                                                              getClass().getPackage().getImplementationVersion(), null);
-    
+                                                              getClass().getPackage().getImplementationVersion(),
+                                                              null);
+        
         try {
             try {
-                new BasicRunnableComponent(r -> List.of(new ChecksumChecker(r), new FileNamingChecker(r))).doWorkOnItem(
-                        batch,
-                        resultCollector);
-            
+                //Perform basic checks
+                final BasicRunnableComponent
+                        basicRunnableComponent
+                        = new BasicRunnableComponent(r -> List.of(new ChecksumChecker(r), new FileNamingChecker(r)));
+                
+                basicRunnableComponent.doWorkOnItem(batch, resultCollector);
+                
             } catch (Exception e) {
                 resultCollector.addExceptionalFailure(e);
             }
-        
+            
+            //If the basic checks worked, proceed
             if (resultCollector.isSuccess()) {
+                
                 try {
                     //TODO configurable number of threads
                     DecoratedRunnableComponent
-                            component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4),
-                                                                           checkerFactory());
-                
+                            component
+                            = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4), checkerFactory());
+                    
                     component.doWorkOnItem(batch, resultCollector);
-                
+                    
                 } catch (Exception e) {
                     resultCollector.addExceptionalFailure(e);
                 }
             } else {
                 //TODO what to do if we fail in the first checks??
+                log.error("Failed basic checks: \n{}", resultCollector.toReport());
             }
             //TODO check if we need this....
             registerResultInDB(batch, resultCollector);
@@ -98,6 +109,7 @@ public class AvisScanQATool {
     }
     
     private Function<ResultCollector, List<TreeEventHandler>> checkerFactory() {
+        //TODO ensure this is the current and correct list of checkers
         return r -> List.of(new TiffAnalyzerExiv2(r), new TiffCheckerExiv2(r),
         
                             new TiffAnalyzerImageMagick(r), new TiffCheckerImageMagick(r),
