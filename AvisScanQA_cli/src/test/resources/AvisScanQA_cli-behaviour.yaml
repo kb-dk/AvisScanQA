@@ -8,9 +8,13 @@
 # application config system.
 #
 #
+
+
 jdbc:
   jdbc-connection-string: "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel"
   jdbc-user: "avisscqa"
   jdbc-password: ""
-  jdbc-initial-batch-state: "1IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
-  jdbc-finished-batch-state: "2IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
+
+states:
+  initial-batch-state: "1IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
+  finished-batch-state: "2IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen

@@ -563,11 +563,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Note'
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/NewspaperSection'
+
+    NewspaperSection:
+      type: object
+      properties:
+        batchid:
+          type: string
+        avisid:
+          type: string
+        date:
+          type: string
+          format: date
+        edition:
+          type: string
+        section:
+          type: string
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Note'
         pages:
           type: array
           items:
             $ref: '#/components/schemas/NewspaperPage'
-  
+
     NewspaperPage:
       type: object
       properties:

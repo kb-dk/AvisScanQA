@@ -122,6 +122,9 @@ avischk-web-qa:
         udgDropDown:
           options:
             - "Ugyldig edition"
+        sectionDropDown:
+          options:
+            - "Ugyldig section"
         pageDropDown:
           options:
             - "Utydelig side"

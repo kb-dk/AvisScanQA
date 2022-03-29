@@ -8,7 +8,6 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,10 +135,45 @@ public class DaoNoteHelper {
         return editionNotes;
     }
 
+
+    public static Map<String, List<Note>> getSectionLevelNotes(String batchID,
+                                                               String newspaperID,
+                                                               LocalDate date,
+                                                               String editionTitle,
+                                                               Connection conn) throws SQLException {
+        Map<String, List<Note>> sectionNotes = new HashMap<>();
+        try (PreparedStatement ps = conn.prepareStatement("SELECT* "
+                                                          + " from  notes "
+                                                          + " where batchid = ? and "
+                                                          + "       avisid = ? and "
+                                                          + "       edition_date = ? and "
+                                                          + "       edition_title = ? and "
+                                                          + "       section_title is null and "
+                                                          + "       page_number is null"
+                                                          + " ORDER BY id desc ")) {
+            int param = 1;
+            ps.setString(param++, batchID);
+            ps.setString(param++, newspaperID);
+            ps.setDate(param++, Date.valueOf(date));
+            ps.setString(param++, editionTitle);
+
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    Note note = readNote(res);
+                    List<Note> sectionNoteList = sectionNotes.getOrDefault(note.getSectionTitle(), new ArrayList<>());
+                    sectionNoteList.add(note);
+                    sectionNotes.put(note.getSectionTitle(), sectionNoteList);
+                }
+            }
+        }
+        return sectionNotes;
+    }
+
     static Map<Integer, List<Note>> getPageLevelNotes(String batchID,
                                                       String newspaperID,
                                                       LocalDate date,
                                                       String editionTitle,
+                                                      String sectionTitle,
                                                       Connection conn) throws SQLException {
         Map<Integer, List<Note>> pageNotes = new HashMap<>();
         try (PreparedStatement ps = conn.prepareStatement(
@@ -149,7 +183,7 @@ public class DaoNoteHelper {
                 + "      avisid = ? and "
                 + "      edition_date = ? and "
                 + "      edition_title = ? and "
-                + "      section_title is not null and "
+                + "      section_title = ? and "
                 + "      page_number is not null"
                 + " ORDER BY id desc ")) {
             int param = 1;
@@ -157,6 +191,7 @@ public class DaoNoteHelper {
             ps.setString(param++, newspaperID);
             ps.setDate(param++, Date.valueOf(date));
             ps.setString(param++, editionTitle);
+            ps.setString(param++, sectionTitle);
 
             try (ResultSet res = ps.executeQuery()) {
                 while (res.next()) {
@@ -230,6 +265,7 @@ public class DaoNoteHelper {
             }
         }
     }
+
     public static Integer getAllNumNotesForNewspaper(@Nonnull String avis, Connection conn)
             throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("""
