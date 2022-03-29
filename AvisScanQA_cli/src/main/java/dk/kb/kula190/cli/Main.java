@@ -78,9 +78,9 @@ public class Main {
         final List<Failure> failures = resultCollector.getFailures();
         File configFolder = new File(Thread.currentThread()
                                            .getContextClassLoader()
-                                           .getResource("dbconfig-behaviour.yaml")
+                                           .getResource("AvisScanQA_cli-behaviour.yaml")
                                            .toURI()).getParentFile();
-        YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/dbconfig-*.yaml");
+        YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/AvisScanQA_cli-*.yaml");
         
         
         DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent() {
@@ -93,8 +93,8 @@ public class Main {
                                              dbConfig.getString("jdbc.jdbc-connection-string"),
                                              dbConfig.getString("jdbc.jdbc-user"),
                                              dbConfig.getString("jdbc.jdbc-password"),
-                                             dbConfig.getString("jdbc.jdbc-initial-batch-state"),
-                                             dbConfig.getString("jdbc.jdbc-finished-batch-state"),
+                                             dbConfig.getString("states.initial-batch-state"),
+                                             dbConfig.getString("states.finished-batch-state"),
                                              failures)
                               );
             }
