@@ -148,7 +148,6 @@ public class DaoNoteHelper {
                                                           + "       avisid = ? and "
                                                           + "       edition_date = ? and "
                                                           + "       edition_title = ? and "
-                                                          + "       section_title is null and "
                                                           + "       page_number is null"
                                                           + " ORDER BY id desc ")) {
             int param = 1;

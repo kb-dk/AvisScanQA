@@ -257,7 +257,7 @@ function renderSections(edition,editionIndex){
     let $pageDisplay = $("#contentRow");
     let $sectionCol = $("<div/>",{id:"sectionCol",class:"col"});
     $pageDisplay.append($sectionCol);
-    console.log(edition)
+    //console.log(edition)
     for (let i = 0; i < edition.sections.length; i++) {
         $sectionCol.append($("<a>",{class:`btn btn-sm btn-outline-secondary ${i === editionIndex ? "active" : ""}`,href:editEntityIndexInHash(location.hash,i),text:`section ${i + 1 }`,title:edition.sections[i].section}));
     }
@@ -294,8 +294,9 @@ function renderSections(edition,editionIndex){
     $sectionNotesForm.append($("<input/>", {type: "hidden", name: "section", value: edition.sections[editionIndex].section}));
     $sectionNotesForm.submit(noteSubmitHandler);
     $sectionCol.append($sectionNotesForm);
-
+    console.log((edition.sections))
     for (let i = 0; i < edition.sections[editionIndex].notes.length; i++) {
+
         $sectionCol.append(createDisplayNoteForm(edition.batchid,edition.sections[editionIndex].notes[i]));
     }
 }
