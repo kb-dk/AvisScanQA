@@ -210,8 +210,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
     boolean isEdition(ParsingEvent event) {
         return getLevel(event) == 3
                && !Set.of("METS", "MODS").contains(EventHandlerUtils.lastName(event.getName()))
-               && event.getName().matches( //TODO are all editions named thus??
-                                           ".*\\d{8}_udg\\d{2}$");
+               && event.getName().matches(".*\\d{8}_udg\\d{2}$");
     }
 
     boolean isSection(ParsingEvent event) {

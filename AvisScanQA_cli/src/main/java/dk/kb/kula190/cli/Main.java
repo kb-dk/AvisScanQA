@@ -35,7 +35,8 @@ public class Main {
     
     public static void main(String[] args) throws IOException, URISyntaxException {
     
-        AvisScanQATool tool = new AvisScanQATool();
+        //TODO get persistReport
+        AvisScanQATool tool = new AvisScanQATool(true);
     
         ResultCollector resultCollector = tool.check(Path.of(args[0]).toAbsolutePath());
         

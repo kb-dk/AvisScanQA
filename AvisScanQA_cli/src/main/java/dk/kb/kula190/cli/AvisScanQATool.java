@@ -37,6 +37,12 @@ public class AvisScanQATool {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     
+    private final boolean persistReport;
+    
+    public AvisScanQATool(boolean persistReport) {
+        this.persistReport = persistReport;
+    }
+    
     public ResultCollector check(Path batchPath) throws IOException, URISyntaxException {
         
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
@@ -47,6 +53,12 @@ public class AvisScanQATool {
         
         try {
             try {
+                
+                //Filename checker will cause all other checks to fail...
+                
+                //Checksum checker might not cause other failures. Checksum errors cause automatic return
+                //But we might want to report OTHER errors even when checksums fails...
+                
                 //Perform basic checks
                 final BasicRunnableComponent
                         basicRunnableComponent
@@ -76,8 +88,10 @@ public class AvisScanQATool {
                 //TODO what to do if we fail in the first checks??
                 log.error("Failed basic checks: \n{}", resultCollector.toReport());
             }
-            //TODO check if we need this....
-            registerResultInDB(batch, resultCollector);
+            if (persistReport) {
+    
+                registerResultInDB(batch, resultCollector);
+            }
         } finally {
             System.out.println(resultCollector.toReport());
         }
