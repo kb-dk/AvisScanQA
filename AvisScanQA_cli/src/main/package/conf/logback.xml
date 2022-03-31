@@ -8,7 +8,27 @@
         </encoder>
     </appender>
 
-<!--    <logger name="dk.kb" level="DEBUG"/>-->
+    <property name="LOGFILE" value="/home/avisscqa/AvisScanQA_cli/logs/AvisScanQA_cli.log"/>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOGFILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${LOGFILE}.%d{yyyy-MM-dd}</fileNamePattern>
+
+            <!-- keep 30 days' worth of history -->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <append>true</append>
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36}\(%file:%line\) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+
+    <logger name="dk.kb" level="DEBUG">
+        <appender-ref ref="FILE"/>
+    </logger>
+
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>

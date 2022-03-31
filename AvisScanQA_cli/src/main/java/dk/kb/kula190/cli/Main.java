@@ -26,7 +26,7 @@ public class Main {
         
         ResultCollector resultCollector = tool.check(Path.of(args[0]).toAbsolutePath());
         
-        if (config.getBoolean("jdbc.enable")) {
+        if (config.getBoolean("jdbc.enabled")) {
             //If we preserve the results in DB, just return a success
             System.exit(0);
         } else {

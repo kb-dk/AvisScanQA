@@ -1,0 +1,8 @@
+SHELL=/bin/bash
+
+#These two makes it possible to debug cron scripts
+@hourly crontab -l > crontab-running
+@hourly /usr/bin/env > cron-env
+
+# check for new uploaded batches and check them
+*/5 * * * *		source ~/.bash_profile; flock --nonblock --conflict-exit-code 0 "/tmp/AvisScanQA_cli.lockfile" /home/avisscqa/AvisScanQA_cli/bin/checkNewBatches.sh /home/avisscqa/data/avis-scanner-prod/_07-levering-fra-Ninestars/Shipment_2021-07-19 &>> /home/avisscqa/AvisScanQA_cli/logs/AvisScanQA_cli.out

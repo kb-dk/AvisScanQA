@@ -11,7 +11,7 @@
 
 
 jdbc:
-  enable: true
+  enabled: true
   jdbc-connection-string: "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel"
   jdbc-user: "avisscqa"
   jdbc-password: ""
