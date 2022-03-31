@@ -3,12 +3,9 @@ package dk.kb.kula190.dao;
 import dk.kb.kula190.model.Note;
 
 import javax.annotation.Nonnull;
-import java.sql.Connection;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -205,6 +202,8 @@ public class DaoNoteHelper {
     }
 
     private static Note readNote(ResultSet res) throws SQLException {
+        Timestamp created1 = res.getTimestamp("created");
+        OffsetDateTime created = DaoUtils.toOffsetDateTime(created1);
         Note note = new Note().id(res.getInt("id"))
                               .batchid(res.getString("batchid"))
                               .avisid(res.getString("avisid"))
@@ -214,7 +213,7 @@ public class DaoNoteHelper {
                               .pageNumber(DaoUtils.readNullableInt(res, "page_number"))
                               .username(res.getString("username"))
                               .note(res.getString("notes"))
-                              .created(DaoUtils.toOffsetDateTime(res.getTimestamp("created")));
+                              .created(created);
         return note;
     }
 

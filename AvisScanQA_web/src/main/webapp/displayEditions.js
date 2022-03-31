@@ -481,13 +481,13 @@ function createPageButtons(pages, parent, page) {
         href: page === 0 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page - 1)
     }));
 
-    if (pages.length - 1 < 6) {
+    if (pages.length - 1 < 8) {
         for (let p = 0; p < pages.length; p++) {
             active = page == p ? "active" : "no";
             const link = $("<a/>").attr({
                 href: editPageIndexInHash(location.hash, p),
 
-                class: `btn btn-sm btn-outline-secondary ${active})}`
+                class: `btn btn-sm btn-outline-secondary ${active}`
             }).text(p + 1)
             if (p !== page) {
                 determineColor(pages[p], link, pages[p].notes.length)
