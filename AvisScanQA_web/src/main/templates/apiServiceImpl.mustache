@@ -167,8 +167,18 @@ non-void response:
                 }}{{^vendorExtensions.x-java-is-response-void}}{{!
 pre-populated operation body:
                     }}{{#generateOperationBody}}
-        try{ {{#vendorExtensions.x-streamingOutput}}
-            httpServletResponse.setHeader("Content-Disposition", "inline; filename=\"filename.ext\"");
+        try { {{#vendorExtensions.x-streamingOutput}}
+            String filename = "somefile";
+            // Show download link in Swagger UI, inline when opened directly in browser
+            // https://github.com/swagger-api/swagger-ui/issues/3832
+            httpServletResponse.setHeader("Content-Disposition", "inline; swaggerDownload=\"attachment\"; filename=\"" + filename + "\"");
+
+            // Show inline in Swagger UI, inline when opened directly in browser
+            // httpServletResponse.setHeader("Content-Disposition", "inline; filename=\"" + filename + "\"");
+
+            // Show download link in Swagger UI, download dialog when opened directly in browser
+            // httpServletResponse.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
+
             return output -> output.write("Magic".getBytes(java.nio.charset.StandardCharsets.UTF_8));{{!
         }}{{/vendorExtensions.x-streamingOutput}}{{!
         }}{{^vendorExtensions.x-streamingOutput}}
