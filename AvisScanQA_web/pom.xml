@@ -76,6 +76,12 @@
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/org.openapitools/jackson-databind-nullable -->
+        <dependency>
+            <groupId>org.openapitools</groupId>
+            <artifactId>jackson-databind-nullable</artifactId>
+            <version>0.2.2</version>
+        </dependency>
 
 
         <dependency>
@@ -244,7 +250,7 @@
             <plugin>
                 <groupId>org.openapitools</groupId>
                 <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>4.2.2</version>
+                <version>5.4.0</version>
                 <configuration>
                     <generatorName>jaxrs-cxf-extended</generatorName>
                     <inputSpec>${project.build.outputDirectory}/openapi.yaml</inputSpec>

@@ -32,12 +32,12 @@ import javax.validation.Valid;
  * {{{appName}}}
  *
  {{#appDescription}}
- * <p>{{{appDescription}}}
+ * <p>{{{.}}}
  *
  {{/appDescription}}
  */
 {{/appName}}
-@Path("{{^useAnnotatedBasePath}}/{{/useAnnotatedBasePath}}{{#useAnnotatedBasePath}}{{contextPath}}{{/useAnnotatedBasePath}}")
+@Path("{{#useAnnotatedBasePath}}{{contextPath}}{{/useAnnotatedBasePath}}{{commonPath}}")
 @Api(value = "/", description = "{{description}}")
 {{#addConsumesProducesJson}}
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,12 +46,13 @@ import javax.validation.Valid;
 public interface {{classname}}  {
 {{#operations}}
 {{#operation}}
+
     {{#summary}}
     /**
      * {{summary}}
      *
      {{#notes}}
-     * {{notes}}
+     * {{.}}
      *
      {{/notes}}
      */
@@ -59,37 +60,15 @@ public interface {{classname}}  {
     @{{httpMethod}}
     {{#subresourceOperation}}@Path("{{{path}}}"){{/subresourceOperation}}
 {{#hasConsumes}}
-    @Consumes({ {{#consumes}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/consumes}} })
+    @Consumes({ {{#consumes}}"{{{mediaType}}}"{{^-last}}, {{/-last}}{{/consumes}} })
 {{/hasConsumes}}
 {{#hasProduces}}
-    @Produces({ {{#produces}}"{{{mediaType}}}"{{#hasMore}}, {{/hasMore}}{{/produces}} })
+    @Produces({ {{#produces}}"{{{mediaType}}}"{{^-last}}, {{/-last}}{{/produces}} })
 {{/hasProduces}}
-    @ApiOperation(value = "{{{summary}}}", tags={ {{#vendorExtensions.x-tags}}"{{tag}}"{{#hasMore}}, {{/hasMore}}{{/vendorExtensions.x-tags}} })
+    @ApiOperation(value = "{{{summary}}}", tags={ {{#vendorExtensions.x-tags}}"{{tag}}"{{^-last}}, {{/-last}}{{/vendorExtensions.x-tags}} })
     @ApiResponses(value = { {{#responses}}
-        @ApiResponse(code = {{{code}}}, message = "{{{message}}}"{{^vendorExtensions.x-java-is-response-void}}, response = {{{baseType}}}.class{{#containerType}}, responseContainer = "{{{containerType}}}"{{/containerType}}{{/vendorExtensions.x-java-is-response-void}}){{#hasMore}},{{/hasMore}}{{/responses}} })
-        public {{>returnTypes}} {{operationId}}({{!
-        }}{{#allParams}}{{!
-            }}{{>pathParams}}{{!
-            }}{{>queryParams}}{{!
-            }}{{>headerParams}}{{!
-            }}{{>bodyParams}}{{!
-            }}{{>formParams}}{{!
-            }}{{#hasMore}}, {{/hasMore}}{{!
-        }}{{/allParams}});
+        @ApiResponse(code = {{{code}}}, message = "{{{message}}}"{{^vendorExtensions.x-java-is-response-void}}, response = {{{baseType}}}.class{{#containerType}}, responseContainer = "{{{.}}}"{{/containerType}}{{/vendorExtensions.x-java-is-response-void}}){{^-last}},{{/-last}}{{/responses}} })
+    public {{>returnTypes}} {{operationId}}({{#allParams}}{{>queryParams}}{{>pathParams}}{{>headerParams}}{{>bodyParams}}{{>formParams}}{{^-last}}, {{/-last}}{{/allParams}});
 {{/operation}}
-
-    /**
-    * This method just redirects gets to WEBAPP/api to the swagger UI /WEBAPP/api/api-docs?url=WEBAPP/api/openapi.yaml
-    */
-    @GET
-    @Path("/")
-    default public Response redirect(@Context MessageContext request){
-        String path = request.get("org.apache.cxf.message.Message.PATH_INFO").toString();
-        if (path != null && !path.endsWith("/")){
-            path = path + "/";
-        }
-        return Response.temporaryRedirect(URI.create("api-docs?url=" + path + "openapi.yaml")).build();
-    }
 }
 {{/operations}}
-

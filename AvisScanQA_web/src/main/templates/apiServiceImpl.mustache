@@ -58,13 +58,13 @@ import org.springframework.stereotype.Service;
  * {{{appName}}}
  *
  {{#appDescription}}
- * <p>{{{appDescription}}}
+ * <p>{{{.}}}
  {{/appDescription}}
  *
  */
 {{/appName}}
 public class {{classname}}ServiceImpl implements {{classname}} {
-    private Logger log = LoggerFactory.getLogger(this.toString());
+    private final Logger log = LoggerFactory.getLogger(getClass());
 
 {{#generateOperationBody}}
 {{#loadTestDataFromFile}}
@@ -125,74 +125,26 @@ public class {{classname}}ServiceImpl implements {{classname}} {
     {{#summary}}
     /**
      * {{summary}}
-     * {{#allParams}}
-     * @param {{baseName}}: {{description}}
-     * {{/allParams}}
-     * @return <ul>{{#responses}}
-      *   <li>code = {{{code}}}, message = "{{{message}}}"{{^vendorExtensions.x-java-is-response-void}}, response = {{{baseType}}}.class{{#containerType}}, responseContainer = "{{{containerType}}}"{{/containerType}}{{/vendorExtensions.x-java-is-response-void}}</li>{{/responses}}
-      *   </ul>
-      * @throws ServiceException when other http codes should be returned
-      *
+     *
      {{#notes}}
-      * {{notes}}
-      *
-      {{/notes}}
-      * @implNote return will always produce a HTTP 200 code. Throw ServiceException if you need to return other codes
+     * {{.}}
+     *
+     {{/notes}}
      */
     {{/summary}}
     @Override
-    public {{>returnTypes}} {{operationId}}({{!
-        }}{{#allParams}}{{!
-            }}{{>pathParamsImpl}}{{!
-            }}{{>queryParamsImpl}}{{!
-            }}{{>headerParamsImpl}}{{!
-            }}{{>bodyParamsImpl}}{{!
-            }}{{>formParamsImpl}}{{!
-            }}{{#hasMore}}, {{/hasMore}}{{!
-        }}{{/allParams}}) throws ServiceException {
+    public {{>returnTypes}} {{operationId}}({{#allParams}}{{>queryParamsImpl}}{{>pathParamsImpl}}{{>headerParamsImpl}}{{>bodyParamsImpl}}{{>formParamsImpl}}{{^-last}}, {{/-last}}{{/allParams}}) {
     {{^loadTestDataFromFile}}
         // TODO: Implement...
-    {{/loadTestDataFromFile}}{{!
-
-}}{{! generic response: }}
-        {{#useGenericResponse}}{{!
-            }}return Response.ok().entity("magic!").build();{{/useGenericResponse}}{{!
-non-generic response:
-        }}{{^useGenericResponse}}{{!
-        }}{{#vendorExtensions.x-useGenericResponse}}
-        return Response.ok().entity("magic!").build();
-        {{/vendorExtensions.x-useGenericResponse}}{{!
-        }}{{^vendorExtensions.x-useGenericResponse}}{{!
-non-void response:
-                }}{{^vendorExtensions.x-java-is-response-void}}{{!
-pre-populated operation body:
-                    }}{{#generateOperationBody}}
-        try { {{#vendorExtensions.x-streamingOutput}}
-            String filename = "somefile";
-            // Show download link in Swagger UI, inline when opened directly in browser
-            // https://github.com/swagger-api/swagger-ui/issues/3832
-            httpServletResponse.setHeader("Content-Disposition", "inline; swaggerDownload=\"attachment\"; filename=\"" + filename + "\"");
-
-            // Show inline in Swagger UI, inline when opened directly in browser
-            // httpServletResponse.setHeader("Content-Disposition", "inline; filename=\"" + filename + "\"");
-
-            // Show download link in Swagger UI, download dialog when opened directly in browser
-            // httpServletResponse.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
-
-            return output -> output.write("Magic".getBytes(java.nio.charset.StandardCharsets.UTF_8));{{!
-        }}{{/vendorExtensions.x-streamingOutput}}{{!
-        }}{{^vendorExtensions.x-streamingOutput}}
-    {{{vendorExtensions.x-java-operation-body}}}{{!
-        }}{{/vendorExtensions.x-streamingOutput}}
-        } catch (Exception e){
-            throw handleException(e);
-        }{{/generateOperationBody}}
-    {{! null response:
-    }}{{^generateOperationBody}}
-        return null;{{/generateOperationBody}}{{!
-    }}{{/vendorExtensions.x-java-is-response-void}}{{!
-            }}{{/vendorExtensions.x-useGenericResponse}}{{!
-    }}{{/useGenericResponse}}
+    {{/loadTestDataFromFile}}
+{{! generic response:
+        }}{{#useGenericResponse}}return Response.ok().entity("magic!").build();{{/useGenericResponse}}{{!
+non-generic response: }}{{^useGenericResponse}}{{!
+non-void response: }}{{^vendorExtensions.x-java-is-response-void}}{{!
+pre-populated operation body: }}{{#generateOperationBody}}{{{vendorExtensions.x-java-operation-body}}}{{/generateOperationBody}}{{!
+null response: }}{{^generateOperationBody}}        return null;{{/generateOperationBody}}{{!
+}}{{/vendorExtensions.x-java-is-response-void}}{{!
+}}{{/useGenericResponse}}
     }
 
 {{/operation}}

@@ -24,6 +24,10 @@
                 /openapi\..+
             </param-value>
         </init-param>
+        <init-param>
+            <param-name>static-welcome-file</param-name>
+            <param-value>/api/index.html</param-value>
+        </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
 
