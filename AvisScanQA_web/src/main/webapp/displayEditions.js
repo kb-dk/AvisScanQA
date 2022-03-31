@@ -1,16 +1,18 @@
 let editionJsonData;
 
-function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pageIndex) {
+function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sectionIndex, pageIndex) {
     let day = moment(date).format('YYYY-MM-DD');
-    let nextDay = moment(date).add(1,'d').format("YYYY-MM-DD")
-    let pastDay = moment(date).subtract(1,'d').format("YYYY-MM-DD")
+    let nextDay = moment(date).add(1, 'd').format("YYYY-MM-DD")
+    let pastDay = moment(date).subtract(1, 'd').format("YYYY-MM-DD")
     var url = `api/batch/${batchID}/${avisID}/${day}`
     $("#notice-div").empty();
     $("#state-div").empty();
     $("#batchOverview-table").empty();
     const $headline = $("#headline-div").empty();
     $("#primary-show").empty();
-    $.getJSON("api/config.json").done(function (data){editionJsonData = data.edition})
+    $.getJSON("api/config.json").done(function (data) {
+        editionJsonData = data.edition
+    })
 
     $.getJSON(url)
         .done(function (newspaperDay) {
@@ -25,31 +27,32 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, pag
                 class: "btn btn-secondary", text: "Back to batch", href: `#/batch/${batchID}/`
             }))
             let $buttonForward = $("<a/>", {
-                class: "btn btn-secondary bi bi-caret-right",href: `#/newspapers/${batchID}/${avisID}/${nextDay}/0/0/`
-            }).css({"float":"right"})
-            if(day === newspaperDay.batch.endDate){
+                class: "btn btn-secondary bi bi-caret-right",
+                href: `#/newspapers/${batchID}/${avisID}/${nextDay}/0/0/0/`
+            }).css({"float": "right"})
+            if (day === newspaperDay.batch.endDate) {
 
                 $buttonForward.css({
-                    "background-color" : "#6c757d9e",
-                    "border-color":"#6c757d9e",
-                    "pointer-events":"none"
+                    "background-color": "#6c757d9e",
+                    "border-color": "#6c757d9e",
+                    "pointer-events": "none"
                 })
             }
             $headline.append($buttonForward)
             let $buttonBack = $("<a/>", {
-                class: "btn btn-secondary bi bi-caret-left", href: `#/newspapers/${batchID}/${avisID}/${pastDay}/0/0/`
-            }).css({"float":"right"})
-            if(day === newspaperDay.batch.startDate){
+                class: "btn btn-secondary bi bi-caret-left", href: `#/newspapers/${batchID}/${avisID}/${pastDay}/0/0/0/`
+            }).css({"float": "right"})
+            if (day === newspaperDay.batch.startDate) {
                 $buttonBack.css({
-                    "background-color" : "#6c757d9e",
-                    "border-color":"#6c757d9e",
-                    "pointer-events":"none"
+                    "background-color": "#6c757d9e",
+                    "border-color": "#6c757d9e",
+                    "pointer-events": "none"
                 })
             }
             $headline.append($buttonBack)
             $headline.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
             // console.log("Starting rendering of entites.");
-            renderDayDisplay(newspaperDay, editionIndex, pageIndex);
+            renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex);
         })
         .fail(function (jqxhr, textStatus, error) {
             $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
@@ -74,7 +77,7 @@ function noteSubmitHandler(event, url) {
 
     // let url = parts.filter(x => x).join("/")
 
-        url = parts.join("/") + "?" + query.toString();
+    url = parts.join("/") + "?" + query.toString();
 
     console.log(url)
     const notes = data.get('standardNote') + " " + data.get('notes');
@@ -135,7 +138,7 @@ function initComponents() {
     $primary.append($contentRow);
 }
 
-function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
+function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
 
@@ -163,7 +166,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     let $dropDownDayNotes = $("<select/>", {class: "form-select", name: "standardNote"});
 
     $dropDownDayNotes.append($("<option>", {value: "", html: "", selected: "true"}));
-    for(let option of editionJsonData.dropDownStandardMessage.dayDropDown.options){
+    for (let option of editionJsonData.dropDownStandardMessage.dayDropDown.options) {
         $dropDownDayNotes.append($("<option>", {value: option, html: option}));
     }
 
@@ -171,7 +174,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
     formRow1.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
     formRow2.append($dayNotesTextArea);
     formRow2.append($("<input/>", {
-        id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm", value:"Gem"
+        id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm", value: "Gem"
     }));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: newspaperDay.batch.batchid}));
     $dayNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: newspaperDay.batch.avisid}));
@@ -182,7 +185,7 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
 
     for (let i = 0; i < newspaperDay.notes.length; i++) {
 
-        $dayCol.append(createDisplayNoteForm(newspaperDay.batch.batchid,newspaperDay.notes[i]));
+        $dayCol.append(createDisplayNoteForm(newspaperDay.batch.batchid, newspaperDay.notes[i]));
     }
 
     const $editionCol = $("#editionCol");
@@ -221,15 +224,15 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         let $dropDownEditionNotes = $("<select/>", {class: "form-select", name: "standardNote"});
 
         $dropDownEditionNotes.append($("<option>", {value: "", html: "", selected: "true"}));
-        for(let option of editionJsonData.dropDownStandardMessage.udgDropDown.options){
-            $dropDownEditionNotes.append($("<option>", {value:option, html: option}));
+        for (let option of editionJsonData.dropDownStandardMessage.udgDropDown.options) {
+            $dropDownEditionNotes.append($("<option>", {value: option, html: option}));
         }
 
         formRow1.append($dropDownEditionNotes)
         formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
         formRow2.append($editionNotesTextArea);
         formRow2.append($("<input/>", {
-            id: "editionNotesFormSubmit", type: "submit", name: "submit", form: "editionNotesForm", value:"Gem"
+            id: "editionNotesFormSubmit", type: "submit", name: "submit", form: "editionNotesForm", value: "Gem"
         }));
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.batchid}));
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.avisid}));
@@ -239,27 +242,30 @@ function renderDayDisplay(newspaperDay, editionIndex, pageIndex) {
         $editionCol.append($editionNotesForm);
 
         for (let i = 0; i < edition.notes.length; i++) {
-            $editionCol.append(createDisplayNoteForm(edition.batchid,edition.notes[i]));
+            $editionCol.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
         }
-
-        //TODO section pages
-
-        renderSections(edition,editionIndex,pageIndex);
-      if (edition.sections[editionIndex].pages.length === 1) {
-          renderSinglePage(edition.section[editionIndex].pages[0]);
-      } else {
-          renderEdition(edition.sections[editionIndex], pageIndex);
-      }
+        renderSections(edition, sectionIndex, pageIndex);
+        if (edition.sections[sectionIndex].pages.length === 1) {
+            renderSinglePage(edition.section[sectionIndex].pages[0]);
+        } else {
+            renderEdition(edition.sections[sectionIndex], pageIndex);
+        }
 
     });
 }
-function renderSections(edition,editionIndex){
+
+function renderSections(edition, sectionIndex) {
     let $pageDisplay = $("#contentRow");
-    let $sectionCol = $("<div/>",{id:"sectionCol",class:"col"});
+    let $sectionCol = $("<div/>", {id: "sectionCol", class: "col"});
     $pageDisplay.append($sectionCol);
     //console.log(edition)
     for (let i = 0; i < edition.sections.length; i++) {
-        $sectionCol.append($("<a>",{class:`btn btn-sm btn-outline-secondary ${i === editionIndex ? "active" : ""}`,href:editEntityIndexInHash(location.hash,i),text:`section ${i + 1 }`,title:edition.sections[i].section}));
+        $sectionCol.append($("<a>", {
+            class: `btn btn-sm btn-outline-secondary ${i === sectionIndex ? "active" : ""}`,
+            href: editSectionIndexInHash(location.hash, i),
+            text: `section ${i + 1}`,
+            title: edition.sections[i].section
+        }));
     }
 
     let $sectionNotesTextArea = $("<textarea/>", {
@@ -277,27 +283,43 @@ function renderSections(edition,editionIndex){
     let $dropDownSectionNotes = $("<select/>", {class: "form-select", name: "standardNote"});
 
     $dropDownSectionNotes.append($("<option>", {value: "", html: "", selected: "true"}));
-    for(let option of editionJsonData.dropDownStandardMessage.sectionDropDown.options){
-        $dropDownSectionNotes.append($("<option>", {value:option, html: option}));
+    for (let option of editionJsonData.dropDownStandardMessage.sectionDropDown.options) {
+        $dropDownSectionNotes.append($("<option>", {value: option, html: option}));
     }
 
     formRow1.append($dropDownSectionNotes)
-    formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
+    formRow1.append($("<label/>", {for: "sectionNotes"}).text("Section notes"));
     formRow2.append($sectionNotesTextArea);
     formRow2.append($("<input/>", {
-        id: "sectionNotesFormSubmit", type: "submit", name: "submit", form: "sectionNotesForm", value:"Gem"
+        id: "sectionNotesFormSubmit", type: "submit", name: "submit", form: "sectionNotesForm", value: "Gem"
     }));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: edition.sections[editionIndex].batchid}));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: edition.sections[editionIndex].avisid}));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.sections[editionIndex].date}));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.sections[editionIndex].edition}));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "section", value: edition.sections[editionIndex].section}));
+    $sectionNotesForm.append($("<input/>", {
+        type: "hidden",
+        name: "batch",
+        value: edition.sections[sectionIndex].batchid
+    }));
+    $sectionNotesForm.append($("<input/>", {
+        type: "hidden",
+        name: "avis",
+        value: edition.sections[sectionIndex].avisid
+    }));
+    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.sections[sectionIndex].date}));
+    $sectionNotesForm.append($("<input/>", {
+        type: "hidden",
+        name: "edition",
+        value: edition.sections[sectionIndex].edition
+    }));
+    $sectionNotesForm.append($("<input/>", {
+        type: "hidden",
+        name: "section",
+        value: edition.sections[sectionIndex].section
+    }));
     $sectionNotesForm.submit(noteSubmitHandler);
     $sectionCol.append($sectionNotesForm);
     console.log((edition.sections))
-    for (let i = 0; i < edition.sections[editionIndex].notes.length; i++) {
+    for (let i = 0; i < edition.sections[sectionIndex].notes.length; i++) {
 
-        $sectionCol.append(createDisplayNoteForm(edition.batchid,edition.sections[editionIndex].notes[i]));
+        $sectionCol.append(createDisplayNoteForm(edition.batchid, edition.sections[sectionIndex].notes[i]));
     }
 }
 
@@ -317,7 +339,7 @@ function renderSinglePage(page) {
     let $standardMessageSelect = $("<select/>", {
         class: "form-select", name: "standardNote"
     }).append($("<option>", {value: "", html: "", selected: "true"}));
-    for (let option of editionJsonData.dropDownStandardMessage.pageDropDown.options){
+    for (let option of editionJsonData.dropDownStandardMessage.pageDropDown.options) {
         $standardMessageSelect.append($("<option>", {
             value: option, html: option
         }))
@@ -332,7 +354,7 @@ function renderSinglePage(page) {
         class: "userNotes", id: "pageNotes", type: "text", name: "notes"
     }));
     formRow2.append($("<input/>", {
-        id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm", value:"Gem"
+        id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm", value: "Gem"
     }));
 
     $pageNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
@@ -346,7 +368,7 @@ function renderSinglePage(page) {
     $pageCol.append($pageNotesForm);
 
     for (let i = 0; i < page.notes.length; i++) {
-        $pageCol.append(createDisplayNoteForm(page.batchid,page.notes[i]));
+        $pageCol.append(createDisplayNoteForm(page.batchid, page.notes[i]));
     }
 
     let $contentRow = $("#contentRow");
@@ -380,12 +402,12 @@ function renderSinglePage(page) {
 
 }
 
-function createDisplayNoteForm(batchid,note){
+function createDisplayNoteForm(batchid, note) {
     let $pageForm = $("<form>", {action: "", method: "delete"});
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: batchid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
 
-    const formRow = $("<div>", {id:`noteRow${note.id}`,class: "form-row"})
+    const formRow = $("<div>", {id: `noteRow${note.id}`, class: "form-row"})
     $pageForm.append(formRow);
 
     let $pageNote = $("<textarea/>", {
@@ -396,9 +418,15 @@ function createDisplayNoteForm(batchid,note){
         readOnly: "true",
         disabled: true
     });
-    formRow.append($("<label/>", {for: $pageNote.uniqueId().attr("id"), text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`}))
+    formRow.append($("<label/>", {
+        for: $pageNote.uniqueId().attr("id"),
+        text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+    }))
     formRow.append($pageNote);
-    formRow.append($("<button/>",{class:"bi bi-x-circle-fill",type:"submit"}).css({"border":"none","background-color":"#fff"}));
+    formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+        "border": "none",
+        "background-color": "#fff"
+    }));
     $pageForm.submit(noteDeleteHandler);
     return $pageForm;
 }
@@ -433,21 +461,9 @@ function loadImage(filename, element) {
 
 function renderEdition(entity, pageIndex) {
     let $pageNav = $("#page-nav");
-    //TODO section pages
     let pages = entity.pages;
+    createPageButtons(pages, $pageNav, pageIndex)
 
-    for (let i = 0; i < pages.length; i++) {
-        let nrOfProblems = pages[i].problems.length;
-        const link = $("<a/>").attr({
-            href: editPageIndexInHash(location.hash, i),
-
-            class: `btn btn-sm btn-outline-secondary ${(i === pageIndex ? "active" : "")})}`
-        }).text(i + 1);
-        if(i !== pageIndex) {
-            determineColor(pages[i], link, pages[i].notes.length)
-        }
-        $pageNav.append(link);
-    }
     if (pageIndex >= 0 && pageIndex < pages.length) {
         renderSinglePage(pages[pageIndex]);
     } else {
@@ -456,10 +472,103 @@ function renderEdition(entity, pageIndex) {
     }
 }
 
+function createPageButtons(pages, parent, page) {
+    let active;
+    let cutLow = page - 1;
+    let cutHigh = page + 1;
+    parent.append($("<a/>", {
+        class: "btn btn-sm btn-outline-secondary bi bi-arrow-left nextAndPreviousPage",
+        href: page === 0 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page - 1)
+    }));
+
+    if (pages.length - 1 < 6) {
+        for (let p = 0; p < pages.length; p++) {
+            active = page == p ? "active" : "no";
+            const link = $("<a/>").attr({
+                href: editPageIndexInHash(location.hash, p),
+
+                class: `btn btn-sm btn-outline-secondary ${active})}`
+            }).text(p + 1)
+            if (p !== page) {
+                determineColor(pages[p], link, pages[p].notes.length)
+            }
+            parent.append(link)
+        }
+    } else {
+        let link = $("<a/>", {
+            class: `btn btn-sm btn-outline-secondary ${page === 0 ? "active":""}`,
+            href: editPageIndexInHash(location.hash, 0)
+        }).text(1);
+        if(page !== 0){
+            determineColor(pages[0],link,pages[0].notes.length)
+        }
+
+        parent.append(link)
+        if (page > 2) {
+            parent.append($("<a/>", {
+                class: "btn btn-sm out-of-range",
+                href: editPageIndexInHash(location.hash, page - 2)
+            }).text("..."))
+        }
+
+        if (page === 0) {
+            cutHigh = page + 2;
+        }
+        if (page === pages.length - 1) {
+            cutLow = page - 2
+        }
+
+        for (let p = cutLow < 0 ? 0 : cutLow; p <= cutHigh; p++) {
+            if (p != 0 && p < pages.length - 1) {
+                active = page == p ? "active" : "no";
+                const link = $("<a/>").attr({
+                    href: editPageIndexInHash(location.hash, p),
+
+                    class: `btn btn-sm btn-outline-secondary ${active}`
+                }).text(p + 1)
+                if (p !== page) {
+                    determineColor(pages[p], link, pages[p].notes.length)
+                }
+                parent.append(link)
+            }
+        }
+        //console.log(page)
+        if (page < pages.length - 2) {
+            if (page < pages.length - 3) {
+                parent.append($("<a/>", {
+                    class: "btn btn-sm out-of-range",
+                    href: editPageIndexInHash(location.hash, page + 2)
+                }).text("..."))
+            }
+
+        }
+        link = $("<a/>", {
+            class:`btn btn-sm btn-outline-secondary ${page === pages.length-1 ? "active":""}`,
+            href: editPageIndexInHash(location.hash, pages.length - 1)
+        }).text(pages.length);
+        if(page !== pages.length-1){
+            determineColor(pages[pages.length-1],link,pages[pages.length-1].notes.length)
+        }
+
+        parent.append(link)
+        parent.append($("<a/>", {
+            class: "btn btn-sm btn-outline-secondary bi bi-arrow-right nextAndPreviousPage",
+            href: page === pages.length - 1 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page + 1)
+        }))
+
+    }
+}
+
 
 function editEntityIndexInHash(origHash, newEntityIndex) {
     var hashParts = origHash.split("/");
-    hashParts[hashParts.length - 3] = newEntityIndex;
+    hashParts[hashParts.length - 4] = newEntityIndex;
+    return hashParts.join("/");
+}
+
+function editSectionIndexInHash(origHash, newSectionIndex) {
+    var hashParts = origHash.split("/");
+    hashParts[hashParts.length - 3] = newSectionIndex;
     return hashParts.join("/");
 }
 

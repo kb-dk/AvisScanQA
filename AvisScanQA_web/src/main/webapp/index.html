@@ -150,9 +150,9 @@
         loadBatchForNewspaper(this.id);
     });
 
-    $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{page:int}', function () {
+    $.routes.add('/newspapers/{batch:string}/{avis:string}/{day:date}/{edition:int}/{section:int}/{page:int}', function () {
         clearAll();
-        loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition, this.page);
+        loadEditionsForNewspaperOnDate(this.batch, this.avis, this.day, this.edition,this.section, this.page);
     });
 
 
