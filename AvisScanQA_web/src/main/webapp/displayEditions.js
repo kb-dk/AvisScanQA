@@ -489,19 +489,18 @@ function createPageButtons(pages, parent, page) {
 
                 class: `btn btn-sm btn-outline-secondary ${active}`
             }).text(p + 1)
-            if (p !== page) {
-                determineColor(pages[p], link, pages[p].notes.length)
-            }
+            determineColor(pages[p], link, pages[p].notes.length)
+
             parent.append(link)
         }
     } else {
         let link = $("<a/>", {
-            class: `btn btn-sm btn-outline-secondary ${page === 0 ? "active":""}`,
+            class: `btn btn-sm btn-outline-secondary ${page === 0 ? "active" : ""}`,
             href: editPageIndexInHash(location.hash, 0)
         }).text(1);
-        if(page !== 0){
-            determineColor(pages[0],link,pages[0].notes.length)
-        }
+
+        determineColor(pages[0], link, pages[0].notes.length)
+
 
         parent.append(link)
         if (page > 2) {
@@ -526,9 +525,8 @@ function createPageButtons(pages, parent, page) {
 
                     class: `btn btn-sm btn-outline-secondary ${active}`
                 }).text(p + 1)
-                if (p !== page) {
-                    determineColor(pages[p], link, pages[p].notes.length)
-                }
+                determineColor(pages[p], link, pages[p].notes.length)
+
                 parent.append(link)
             }
         }
@@ -543,12 +541,12 @@ function createPageButtons(pages, parent, page) {
 
         }
         link = $("<a/>", {
-            class:`btn btn-sm btn-outline-secondary ${page === pages.length-1 ? "active":""}`,
+            class: `btn btn-sm btn-outline-secondary ${page === pages.length - 1 ? "active" : ""}`,
             href: editPageIndexInHash(location.hash, pages.length - 1)
         }).text(pages.length);
-        if(page !== pages.length-1){
-            determineColor(pages[pages.length-1],link,pages[pages.length-1].notes.length)
-        }
+
+        determineColor(pages[pages.length - 1], link, pages[pages.length - 1].notes.length)
+
         parent.append(link)
     }
     parent.append($("<a/>", {
