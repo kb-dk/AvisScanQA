@@ -25,7 +25,6 @@ import org.postgresql.Driver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
@@ -37,10 +36,10 @@ public class AvisScanQATool {
     
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private final boolean persistReport;
+    private final YAML config;
     
-    public AvisScanQATool(boolean persistReport) {
-        this.persistReport = persistReport;
+    public AvisScanQATool(YAML config) {
+        this.config = config;
     }
     
     public ResultCollector check(Path batchPath) throws IOException, URISyntaxException {
@@ -88,9 +87,9 @@ public class AvisScanQATool {
                 //TODO what to do if we fail in the first checks??
                 log.error("Failed basic checks: \n{}", resultCollector.toReport());
             }
-            if (persistReport) {
-    
-                registerResultInDB(batch, resultCollector);
+            if (config.getBoolean("jdbc.enabled")) {
+                
+                registerResultInDB(batch, resultCollector, config);
             }
         } finally {
             System.out.println(resultCollector.toReport());
@@ -99,26 +98,21 @@ public class AvisScanQATool {
     }
     
     
-    private void registerResultInDB(Batch batch, ResultCollector resultCollector)
-            throws IOException, URISyntaxException {
+    private void registerResultInDB(Batch batch, ResultCollector resultCollector, YAML config)
+            throws IOException {
         final List<Failure> failures = resultCollector.getFailures();
-        File configFolder = new File(Thread.currentThread()
-                                           .getContextClassLoader()
-                                           .getResource("AvisScanQA_cli-behaviour.yaml")
-                                           .toURI()).getParentFile();
-        YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/AvisScanQA_cli-*.yaml");
         
-        
-        
-        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent(r -> List.of(new DatabaseRegister(
-                r,
-                new Driver(),
-                dbConfig.getString("jdbc.jdbc-connection-string"),
-                dbConfig.getString("jdbc.jdbc-user"),
-                dbConfig.getString("jdbc.jdbc-password"),
-                dbConfig.getString("states.initial-batch-state"),
-                dbConfig.getString("states.finished-batch-state"),
-                failures)));
+        DecoratedRunnableComponent databaseComponent =
+                new DecoratedRunnableComponent(
+                        rc -> List.of(
+                                new DatabaseRegister(rc,
+                                                     new Driver(),
+                                                     config.getString("jdbc.jdbc-connection-string"),
+                                                     config.getString("jdbc.jdbc-user"),
+                                                     config.getString("jdbc.jdbc-password"),
+                                                     config.getString("states.initial-batch-state"),
+                                                     config.getString("states.finished-batch-state"),
+                                                     failures)));
         databaseComponent.doWorkOnItem(batch, resultCollector);
         
     }
