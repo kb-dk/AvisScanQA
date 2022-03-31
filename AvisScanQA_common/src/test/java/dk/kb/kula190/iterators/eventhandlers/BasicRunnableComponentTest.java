@@ -26,20 +26,17 @@ class BasicRunnableComponentTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
     
         BasicRunnableComponent component =
-                new BasicRunnableComponent() {
-                    //TODO Why both override and functional interface? Cleanup this mess
-                    @Override
-                    protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                        return List.of(
+                new BasicRunnableComponent(r -> List.of(
                                 //Simple Checkers
-                                new ChecksumChecker(resultCollector),
-                                new FileNamingChecker(resultCollector)
-                                      );
-                    }
-                };
+                                new ChecksumChecker(r),
+                                new FileNamingChecker(r)
+                                      ));
     
     
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
+        ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
+                                                              getClass().getPackage().getImplementationVersion(), null);
+    
+        component.doWorkOnItem(batch, resultCollector);
     
         System.out.println(resultCollector.toReport());
     

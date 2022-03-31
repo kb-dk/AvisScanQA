@@ -11,17 +11,19 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Function;
 
-public abstract class DecoratedRunnableComponent extends BasicRunnableComponent {
+public class DecoratedRunnableComponent extends BasicRunnableComponent {
     private static Logger log = org.slf4j.LoggerFactory.getLogger(DecoratedRunnableComponent.class);
     
     
-    public DecoratedRunnableComponent(TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory) {
-        super(eventRunnerFactory);
+    public DecoratedRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory) {
+        super(eventHandlerFactory);
     }
     
-    public DecoratedRunnableComponent() {
-        super();
+    public DecoratedRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory,
+                                      TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory) {
+        super(eventHandlerFactory, eventRunnerFactory);
     }
     
     protected TreeIterator getIterator(Path pathname) throws IOException {
@@ -60,7 +62,7 @@ public abstract class DecoratedRunnableComponent extends BasicRunnableComponent 
                 expressionsToMapFilenamesToStructure,
                 
                 
-               "checksums.txt");
+                "checksums.txt");
         
         return iterator;
         

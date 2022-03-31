@@ -57,42 +57,39 @@ public class EventRunner implements Runnable {
     
     /**
      * Trigger all the given event handlers on all events of the iterator.
-     *
-     * @throws java.io.IOException
      */
     public void run() {
-        ParsingEvent current = null;
-        while (iterator.hasNext()) {
-            current = popInjectedEvent();
-            if (current == null) {
-                current = iterator.next();
-            }
-            switch (current.getType()) {
-                case NodeBegin: {
-                    if (current instanceof NodeBeginsParsingEvent) {
-                        NodeBeginsParsingEvent event = (NodeBeginsParsingEvent) current;
-                        handleNodeBegins(event);
-                    }
-                    break;
+        
+        try {
+            ParsingEvent current = null;
+            while (iterator.hasNext()) {
+                current = popInjectedEvent();
+                if (current == null) {
+                    current = iterator.next();
                 }
-                case NodeEnd: {
-                    if (current instanceof NodeEndParsingEvent) {
-                        NodeEndParsingEvent event = (NodeEndParsingEvent) current;
-                        handleNodeEnd(event);
+                switch (current.getType()) {
+                    case NodeBegin -> {
+                        if (current instanceof NodeBeginsParsingEvent) {
+                            handleNodeBegins((NodeBeginsParsingEvent) current);
+                        }
                     }
-                    break;
-                }
-                case Attribute: {
-                    if (current instanceof AttributeParsingEvent) {
-                        AttributeParsingEvent event = (AttributeParsingEvent) current;
-                        handleAttribute(event);
+                    case NodeEnd -> {
+                        if (current instanceof NodeEndParsingEvent) {
+                            handleNodeEnd((NodeEndParsingEvent) current);
+                        }
                     }
-                    break;
+                    case Attribute -> {
+                        if (current instanceof AttributeParsingEvent) {
+                            handleAttribute((AttributeParsingEvent) current);
+                        }
+                    }
                 }
             }
-        }
-        if (!spawn) {
-            handleFinish();
+            if (!spawn) {
+                handleFinish();
+            }
+        } catch (RuntimeException e){
+            resultCollector.addExceptionalFailure(e);
         }
     }
     
@@ -105,8 +102,7 @@ public class EventRunner implements Runnable {
     public AttributeParsingEvent popInjectedEvent() {
         for (TreeEventHandler eventHandler : eventHandlers) {
             if (eventHandler instanceof InjectingTreeEventHandler) {
-                InjectingTreeEventHandler handler = (InjectingTreeEventHandler) eventHandler;
-                AttributeParsingEvent event = handler.popEvent();
+                AttributeParsingEvent event = ((InjectingTreeEventHandler) eventHandler).popEvent();
                 if (event != null) {
                     return event;
                 }

@@ -2,24 +2,30 @@ package dk.kb.kula190;
 
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.MultiThreadedEventRunner;
+import dk.kb.kula190.iterators.eventhandlers.TreeEventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
-public abstract class MultiThreadedRunnableComponent extends DecoratedRunnableComponent {
+public class MultiThreadedRunnableComponent extends DecoratedRunnableComponent {
     
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     
-    public MultiThreadedRunnableComponent(ExecutorService executorService) {
-        this(executorService, defaultForkCondition());
+    public MultiThreadedRunnableComponent(ExecutorService executorService, Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory) {
+        this(executorService, defaultForkCondition(), eventHandlerFactory);
     }
     
     
     public MultiThreadedRunnableComponent(ExecutorService executorService,
-                                          MultiThreadedEventRunner.EventCondition forkJoinCondition) {
-        super((resultCollector, treeEventHandlers, treeIterator) -> new MultiThreadedEventRunner(treeIterator,
+                                          MultiThreadedEventRunner.EventCondition forkJoinCondition,
+                                          Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory
+                                         ) {
+        super(eventHandlerFactory,
+              (resultCollector, treeEventHandlers, treeIterator) -> new MultiThreadedEventRunner(treeIterator,
                                                                                                  treeEventHandlers,
                                                                                                  resultCollector,
                                                                                                  forkJoinCondition,
@@ -36,7 +42,7 @@ public abstract class MultiThreadedRunnableComponent extends DecoratedRunnableCo
                 int level2 = new File(event.getName()).getName().split("_").length;
                 return level1 == 2 && level2 == 3; //level 2 is editions
             }
-        
+            
             @Override
             public boolean shouldJoin(ParsingEvent event) {
                 int level = event.getName().split("/").length;

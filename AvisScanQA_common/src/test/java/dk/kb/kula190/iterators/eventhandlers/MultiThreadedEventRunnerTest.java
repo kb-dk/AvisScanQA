@@ -35,19 +35,16 @@ class MultiThreadedEventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4), resultCollector-> List.of(
                         
-                         new TiffAnalyzerExiv2(resultCollector),
-                         new TiffCheckerExiv2(resultCollector),
+                         // new TiffAnalyzerExiv2(resultCollector),
+                         // new TiffCheckerExiv2(resultCollector),
+                        
+                         // new TiffAnalyzerImageMagick(resultCollector),
+                         // new TiffCheckerImageMagick(resultCollector)
                         //
-                         new TiffAnalyzerImageMagick(resultCollector),
-                         new TiffCheckerImageMagick(resultCollector)
-                        //
-//                        new MetsSplitter(resultCollector),
-//                        new MetsChecker(resultCollector),
+                       new MetsSplitter(resultCollector)
+                       // new MetsChecker(resultCollector),
                         
                         //Per file- checkers
 //                        new XmlSchemaChecker(resultCollector)
@@ -56,15 +53,15 @@ class MultiThreadedEventRunnerTest {
                         //CrossCheckers
                         // new XpathPageChecker(resultCollector),
                         // new NoMissingMiddlePagesChecker(resultCollector),
-                        // new PageStructureChecker(resultCollector)
+                        //  new PageStructureChecker(resultCollector)
                 
                 
-                              );
-            }
-            
-        };
-        
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
+                              ));
+    
+        ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
+                                                              getClass().getPackage().getImplementationVersion(), null);
+    
+        component.doWorkOnItem(batch, resultCollector);
         
         System.out.println(resultCollector.toReport());
         
