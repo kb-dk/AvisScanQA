@@ -14,7 +14,6 @@ import java.util.List;
 class BasicRunnableComponentTest {
     
     
-    
     private final File
             specificBatch
             = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
@@ -24,21 +23,24 @@ class BasicRunnableComponentTest {
         
         Path batchPath = specificBatch.toPath().toAbsolutePath();
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-    
+        
         BasicRunnableComponent component =
-                new BasicRunnableComponent(r -> List.of(
+                new BasicRunnableComponent(
+                        r -> List.of(
                                 //Simple Checkers
                                 new ChecksumChecker(r),
                                 new FileNamingChecker(r)
-                                      ));
-    
-    
+                                    ),
+                        "checksums.txt",
+                        List.of("transfer_acknowledged", "transfer_complete"));
+        
+        
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
                                                               getClass().getPackage().getImplementationVersion(), null);
-    
+        
         component.doWorkOnItem(batch, resultCollector);
-    
+        
         System.out.println(resultCollector.toReport());
-    
+        
     }
 }

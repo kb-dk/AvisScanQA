@@ -19,19 +19,29 @@ public class BasicRunnableComponent {
     private final TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory;
     
     private final Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory;
+    protected final String checksumFile;
+    protected final List<String> filesToIgnore;
     
-    public BasicRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory) {
+    public BasicRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory,
+                                  String checksumFile,
+                                  List<String> filesToIgnore) {
         this(eventHandlerFactory, (resultCollector, treeEventHandlers, treeIterator) -> new EventRunner(
                 treeIterator,
                 treeEventHandlers,
-                resultCollector));
+                resultCollector),
+             checksumFile,
+             filesToIgnore);
         
     }
     
     public BasicRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory,
-                                  TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory) {
+                                  TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory,
+                                  String checksumFile,
+                                  List<String> filesToIgnore) {
         this.eventHandlerFactory = eventHandlerFactory;
         this.eventRunnerFactory  = eventRunnerFactory;
+        this.checksumFile = checksumFile;
+        this.filesToIgnore = filesToIgnore;
     }
     
     
@@ -54,7 +64,8 @@ public class BasicRunnableComponent {
         File specificBatch = pathname.toFile();
         TreeIterator iterator = new SimpleIteratorForFilesystems(specificBatch,
                                                                  //How to adapt the filename for the checksum extension below
-                                                                 "checksums.txt");
+                                                                 checksumFile,
+                                                                 filesToIgnore);
         
         return iterator;
         

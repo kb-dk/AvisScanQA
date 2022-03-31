@@ -19,3 +19,9 @@ jdbc:
 states:
   initial-batch-state: "1IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
   finished-batch-state: "2IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
+
+iterator:
+  checksumFile: "checksums.txt"
+  filesToIgnore:
+    - transfer_acknowledged
+    - transfer_complete

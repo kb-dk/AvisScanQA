@@ -42,8 +42,9 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                             File folderForBatches,
                                             List<String> transparentDirNames,
                                             List<String> virtualLevelsRegexp,
-                                            String checksumFile) throws IOException {
-        super(specificBatch, checksumFile);
+                                            String checksumFile,
+                                            List<String> filesToIgnore) throws IOException {
+        super(specificBatch, checksumFile, filesToIgnore);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.virtualLevelsRegexp = virtualLevelsRegexp;
@@ -55,9 +56,10 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                             List<String> transparentDirNames,
                                             List<String> virtualLevelsRegexp,
                                             String checksumFile,
-                                            Map<String, String> checksums
+                                            Map<String, String> checksums,
+                                               List<String> filesToIgnore
                                             ) {
-        super(specificBatch, checksumFile, checksums);
+        super(specificBatch, checksumFile, checksums, filesToIgnore);
         this.batchFolder         = folderForBatches;
         this.transparentDirNames = transparentDirNames;
         this.virtualLevelsRegexp = virtualLevelsRegexp;
@@ -80,7 +82,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                                   transparentDirNames,
                                                                   virtualLevelsRegexp,
                                                                   checksumFile,
-                                                                  checksums
+                                                                  checksums,
+                                                                  filesToIgnore
                                                                   ))
               .forEach(result::add);
         
@@ -104,7 +107,8 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
                                                          virtualLevelsRegexp.subList(1,
                                                                                      virtualLevelsRegexp.size()),
                                                          checksumFile,
-                                                         checksums
+                                                         checksums,
+                                                         filesToIgnore
               ))
               .forEach(result::add);
         return result.iterator();
@@ -130,7 +134,7 @@ public class TransparintingFileSystemIterator extends SimpleIteratorForFilesyste
         return dirs.stream()
                    .flatMap(dir -> FileUtils.listFiles(dir,
                                                        new AndFileFilter(FileFileFilter.INSTANCE,
-                                                                         new NotFileFilter(new NameFileFilter(checksumFile))),
+                                                                         new NotFileFilter(new NameFileFilter(filesToIgnore))),
                                                        new NameFileFilter(transparentDirNames))
                                             .stream())
                    .sorted()

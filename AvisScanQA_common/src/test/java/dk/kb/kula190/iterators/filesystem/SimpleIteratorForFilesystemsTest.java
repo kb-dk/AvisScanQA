@@ -43,7 +43,8 @@ public class SimpleIteratorForFilesystemsTest extends AbstractTests {
                                                                     "\\.[^_]+$" //filename.split(pageRegexp)[0];
                                                                    ),
                     
-                                                            "checksums.txt");
+                                                            "checksums.txt",
+                                                            List.of("transfer_acknowledged","transfer_complete"));
         }
         return iterator;
         

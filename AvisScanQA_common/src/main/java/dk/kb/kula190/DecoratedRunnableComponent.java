@@ -17,13 +17,14 @@ public class DecoratedRunnableComponent extends BasicRunnableComponent {
     private static Logger log = org.slf4j.LoggerFactory.getLogger(DecoratedRunnableComponent.class);
     
     
-    public DecoratedRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory) {
-        super(eventHandlerFactory);
+    public DecoratedRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory, String checksumFile, List<String> filesToIgnore) {
+        super(eventHandlerFactory, checksumFile, filesToIgnore);
     }
     
     public DecoratedRunnableComponent(Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory,
-                                      TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory) {
-        super(eventHandlerFactory, eventRunnerFactory);
+                                      TriFunction<ResultCollector, List<TreeEventHandler>, TreeIterator, EventRunner> eventRunnerFactory,
+                                      String checksumFile, List<String> filesToIgnore) {
+        super(eventHandlerFactory, eventRunnerFactory, checksumFile, filesToIgnore);
     }
     
     protected TreeIterator getIterator(Path pathname) throws IOException {
@@ -60,9 +61,10 @@ public class DecoratedRunnableComponent extends BasicRunnableComponent {
                 
                 //actual files named as modersmaalet_19060703_udg01_1.sektion_0004.mix.xml
                 expressionsToMapFilenamesToStructure,
-                
-                
-                "checksums.txt");
+
+
+                checksumFile,
+                filesToIgnore);
         
         return iterator;
         

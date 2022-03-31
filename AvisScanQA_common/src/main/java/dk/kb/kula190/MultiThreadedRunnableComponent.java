@@ -15,21 +15,25 @@ public class MultiThreadedRunnableComponent extends DecoratedRunnableComponent {
     
     private final Logger log = LoggerFactory.getLogger(this.getClass());
     
-    public MultiThreadedRunnableComponent(ExecutorService executorService, Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory) {
-        this(executorService, defaultForkCondition(), eventHandlerFactory);
+    public MultiThreadedRunnableComponent(ExecutorService executorService, Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory, String checksumFile, List<String> filesToIgnore) {
+        this(executorService, defaultForkCondition(), eventHandlerFactory, checksumFile, filesToIgnore);
     }
     
     
     public MultiThreadedRunnableComponent(ExecutorService executorService,
                                           MultiThreadedEventRunner.EventCondition forkJoinCondition,
-                                          Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory
+                                          Function<ResultCollector, List<TreeEventHandler>> eventHandlerFactory,
+                                          String checksumFile, List<String> filesToIgnore
                                          ) {
         super(eventHandlerFactory,
               (resultCollector, treeEventHandlers, treeIterator) -> new MultiThreadedEventRunner(treeIterator,
                                                                                                  treeEventHandlers,
                                                                                                  resultCollector,
                                                                                                  forkJoinCondition,
-                                                                                                 executorService));
+                                                                                                 executorService),
+              checksumFile,
+              filesToIgnore
+              );
     }
     
     

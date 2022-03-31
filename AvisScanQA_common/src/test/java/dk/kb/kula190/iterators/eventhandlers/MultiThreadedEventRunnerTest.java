@@ -4,16 +4,7 @@ import dk.kb.kula190.Batch;
 import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.checkers.batchcheckers.MetsChecker;
 import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
-import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerExiv2;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerExiv2;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
-import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -35,16 +26,19 @@ class MultiThreadedEventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4), resultCollector-> List.of(
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(
+                Executors.newFixedThreadPool(4),
+                resultCollector -> List.of(
                         
-                         // new TiffAnalyzerExiv2(resultCollector),
-                         // new TiffCheckerExiv2(resultCollector),
+                        // new TiffAnalyzerExiv2(resultCollector),
+                        // new TiffCheckerExiv2(resultCollector),
                         
-                         // new TiffAnalyzerImageMagick(resultCollector),
-                         // new TiffCheckerImageMagick(resultCollector)
+                        // new TiffAnalyzerImageMagick(resultCollector),
+                        // new TiffCheckerImageMagick(resultCollector)
                         //
-                       new MetsSplitter(resultCollector)
-                       // new MetsChecker(resultCollector),
+                        new MetsSplitter(
+                                resultCollector)
+                        // new MetsChecker(resultCollector),
                         
                         //Per file- checkers
 //                        new XmlSchemaChecker(resultCollector)
@@ -56,11 +50,14 @@ class MultiThreadedEventRunnerTest {
                         //  new PageStructureChecker(resultCollector)
                 
                 
-                              ));
-    
+                                          ),
+                "checksums.txt",
+                List.of("transfer_acknowledged",
+                        "transfer_complete"));
+        
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
                                                               getClass().getPackage().getImplementationVersion(), null);
-    
+        
         component.doWorkOnItem(batch, resultCollector);
         
         System.out.println(resultCollector.toReport());

@@ -25,8 +25,9 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                       List<String> transparentDirNames,
                                       List<String> virtualLevelsRegexp,
                                       String checksumFile,
-                                      Map<String, String> checksums) {
-        super(id, batchFolder, transparentDirNames, virtualLevelsRegexp, checksumFile, checksums);
+                                      Map<String, String> checksums,
+                                      List<String> filesToIgnore) {
+        super(id, batchFolder, transparentDirNames, virtualLevelsRegexp, checksumFile, checksums, filesToIgnore);
         this.prefix              = prefix;
         this.group               = group;
         this.batchFolder         = batchFolder;
@@ -57,7 +58,8 @@ public class TransparintingFileIterator extends TransparintingFileSystemIterator
                                                                       transparentDirNames,
                                                                       virtualLevelsRegexp,
                                                                       checksumFile,
-                                                                      checksums))
+                                                                      checksums,
+                                                                      filesToIgnore))
                          .iterator();
             //}
         }

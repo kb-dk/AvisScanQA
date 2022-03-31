@@ -38,8 +38,13 @@ public class AvisScanQATool {
     
     private final YAML config;
     
-    public AvisScanQATool(YAML config) {
-        this.config = config;
+    private final String checksumFile;
+    private final List<String> filesToIgnore;
+    
+    public AvisScanQATool(YAML config, String checksumFile, List<String> filesToIgnore) {
+        this.config        = config;
+        this.checksumFile  = checksumFile;
+        this.filesToIgnore = filesToIgnore;
     }
     
     public ResultCollector check(Path batchPath) throws IOException, URISyntaxException {
@@ -51,49 +56,51 @@ public class AvisScanQATool {
                                                               null);
         
         try {
+            
+            //Filename checker will cause all other checks to fail...
+            
+            //Checksum checker might not cause other failures. Checksum errors cause automatic return
+            //But we might want to report OTHER errors even when checksums fails...
+            
+            //Perform basic checks
+            final BasicRunnableComponent
+                    basicRunnableComponent
+                    = new BasicRunnableComponent(r -> List.of(new ChecksumChecker(r), new FileNamingChecker(r)),
+                                                 checksumFile,
+                                                 filesToIgnore);
+            
+            basicRunnableComponent.doWorkOnItem(batch, resultCollector);
+            
+        } catch (Exception e) {
+            resultCollector.addExceptionalFailure(e);
+        }
+        
+        //If the basic checks worked, proceed
+        if (resultCollector.isSuccess()) {
+            
             try {
+                //TODO configurable number of threads
+                DecoratedRunnableComponent
+                        component
+                        = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4),
+                                                             checkerFactory(),
+                                                             checksumFile,
+                                                             filesToIgnore);
                 
-                //Filename checker will cause all other checks to fail...
-                
-                //Checksum checker might not cause other failures. Checksum errors cause automatic return
-                //But we might want to report OTHER errors even when checksums fails...
-                
-                //Perform basic checks
-                final BasicRunnableComponent
-                        basicRunnableComponent
-                        = new BasicRunnableComponent(r -> List.of(new ChecksumChecker(r), new FileNamingChecker(r)));
-                
-                basicRunnableComponent.doWorkOnItem(batch, resultCollector);
+                component.doWorkOnItem(batch, resultCollector);
                 
             } catch (Exception e) {
                 resultCollector.addExceptionalFailure(e);
             }
-            
-            //If the basic checks worked, proceed
-            if (resultCollector.isSuccess()) {
-                
-                try {
-                    //TODO configurable number of threads
-                    DecoratedRunnableComponent
-                            component
-                            = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4), checkerFactory());
-                    
-                    component.doWorkOnItem(batch, resultCollector);
-                    
-                } catch (Exception e) {
-                    resultCollector.addExceptionalFailure(e);
-                }
-            } else {
-                //TODO what to do if we fail in the first checks??
-                log.error("Failed basic checks: \n{}", resultCollector.toReport());
-            }
-            if (config.getBoolean("jdbc.enabled")) {
-                
-                registerResultInDB(batch, resultCollector, config);
-            }
-        } finally {
-            System.out.println(resultCollector.toReport());
+        } else {
+            //TODO what to do if we fail in the first checks??
+            log.error("Failed basic checks: \n{}", resultCollector.toReport());
         }
+        if (config.getBoolean("jdbc.enabled")) {
+            
+            registerResultInDB(batch, resultCollector, config);
+        }
+        
         return resultCollector;
     }
     
@@ -112,7 +119,9 @@ public class AvisScanQATool {
                                                      config.getString("jdbc.jdbc-password"),
                                                      config.getString("states.initial-batch-state"),
                                                      config.getString("states.finished-batch-state"),
-                                                     failures)));
+                                                     failures)),
+                        checksumFile,
+                        filesToIgnore);
         databaseComponent.doWorkOnItem(batch, resultCollector);
         
     }

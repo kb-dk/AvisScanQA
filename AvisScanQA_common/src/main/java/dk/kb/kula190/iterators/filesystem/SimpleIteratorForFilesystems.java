@@ -32,16 +32,19 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     
     protected final Map<String, String> checksums;
     protected final String checksumFile;
+    protected final List<String> filesToIgnore;
     
     /**
      * Construct an iterator rooted at a given directory
      *
      * @param dir the directory at which to root the iterator.
      */
-    public SimpleIteratorForFilesystems(File dir, String checksumFile) throws IOException {
+    public SimpleIteratorForFilesystems(File dir, String checksumFile, List<String> filesToIgnore) throws IOException {
         super(dir);
-        this.checksumFile = checksumFile;
-        checksums         = Files.readAllLines(dir.toPath().resolve(checksumFile))
+        this.checksumFile  = checksumFile;
+        this.filesToIgnore = new ArrayList<>(filesToIgnore);
+        this.filesToIgnore.add(checksumFile);
+        checksums          = Files.readAllLines(dir.toPath().resolve(checksumFile))
                          .stream()
                          .map(line -> line.split("  ", 2))
                          .collect(Collectors.toMap(lineSplits -> new File(dir, lineSplits[1]).toString(),
@@ -51,10 +54,14 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     
     protected SimpleIteratorForFilesystems(File id,
                                            String checksumFile,
-                                           Map<String, String> checksums) {
+                                           Map<String, String> checksums,
+                                           List<String> filesToIgnore) {
         super(id);
         this.checksums = checksums;
         this.checksumFile = checksumFile;
+        this.filesToIgnore = new ArrayList<>(filesToIgnore);
+        this.filesToIgnore.add(checksumFile);
+
     }
     
     @Override
@@ -64,7 +71,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         Arrays.sort(children);
         ArrayList<DelegatingTreeIterator> result = new ArrayList<>(children.length);
         for (File child : children) {
-            result.add(new SimpleIteratorForFilesystems(child, checksumFile, checksums));
+            result.add(new SimpleIteratorForFilesystems(child, checksumFile, checksums, filesToIgnore));
         }
         return result.iterator();
     }
@@ -74,7 +81,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         List<File> attributes = new ArrayList<>(FileUtils.listFiles(id,
                                                                     new AndFileFilter(FileFileFilter.INSTANCE,
                                                                                       new NotFileFilter(
-                                                                                              new NameFileFilter(checksumFile))),
+                                                                                              new NameFileFilter(filesToIgnore))),
                                                                     null));
         Collections.sort(attributes);
         return attributes.iterator();

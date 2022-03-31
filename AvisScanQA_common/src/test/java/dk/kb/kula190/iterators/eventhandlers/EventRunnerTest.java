@@ -3,12 +3,12 @@ package dk.kb.kula190.iterators.eventhandlers;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
+import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
+import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
+import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
 import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
-import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
-import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
-import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
@@ -29,15 +29,16 @@ class EventRunnerTest {
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
         
-        DecoratedRunnableComponent component = new DecoratedRunnableComponent(resultCollector -> List.of(
+        DecoratedRunnableComponent component = new DecoratedRunnableComponent(
+                resultCollector -> List.of(
                         // new TiffAnalyzerExiv2(resultCollector),
                         // new TiffCheckerExiv2(resultCollector),
                         
                         new TiffAnalyzerImageMagick(resultCollector),
                         // new TiffCheckerImageMagick(resultCollector),
                         
-                         new MetsSplitter(resultCollector),
-                         // new MetsChecker(resultCollector),
+                        new MetsSplitter(resultCollector),
+                        // new MetsChecker(resultCollector),
                         
                         //Per file- checkers
                         new XmlSchemaChecker(resultCollector),
@@ -47,11 +48,14 @@ class EventRunnerTest {
                         new NoMissingMiddlePagesChecker(resultCollector),
                         new PageStructureChecker(resultCollector)
                 
-                              ));
-    
+                                          ),
+                "checksums.txt",
+                List.of("transfer_acknowledged",
+                        "transfer_complete"));
+        
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
                                                               getClass().getPackage().getImplementationVersion(), null);
-    
+        
         component.doWorkOnItem(batch, resultCollector);
         
         System.out.println(resultCollector.toReport());

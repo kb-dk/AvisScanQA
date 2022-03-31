@@ -2,16 +2,15 @@ package dk.kb.kula190.iterators.eventhandlers;
 
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.DatabaseRegister;
+import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
-import dk.kb.kula190.DecoratedRunnableComponent;
 import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
-import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
-import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
+import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffCheckerImageMagick;
-import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
-
+import dk.kb.kula190.checkers.pagecheckers.PageStructureChecker;
+import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.util.yaml.YAML;
 import org.junit.jupiter.api.Test;
@@ -31,65 +30,66 @@ class DatabaseEventRunnerTest {
     
     @Test
     void run() throws Exception {
-    
+        
         Path batchPath = specificBatch.toPath().toAbsolutePath();
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
-    
-    
-        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4)) {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
-                    
-                        //Per file- checkers
-                        new XmlSchemaChecker(resultCollector),
-                        new TiffAnalyzerImageMagick(resultCollector),
-                        new TiffCheckerImageMagick(resultCollector),
-                    
-                        //CrossCheckers
-                        new XpathPageChecker(resultCollector),
-                        new NoMissingMiddlePagesChecker(resultCollector),
-                        new PageStructureChecker(resultCollector)
-            
-            
-                              );
-            }
         
-        };
-    
-        ResultCollector resultCollector = component.doWorkOnItem(batch);
-    
+        ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
+                                                              getClass().getPackage().getImplementationVersion(), null);
+        
+        
+        DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(
+                Executors.newFixedThreadPool(4),
+                r -> {
+                    return List.of(
+                            //Per file- checkers
+                            new XmlSchemaChecker(r),
+                            new TiffAnalyzerImageMagick(r),
+                            new TiffCheckerImageMagick(r),
+                            
+                            //CrossCheckers
+                            new XpathPageChecker(r),
+                            new NoMissingMiddlePagesChecker(r),
+                            new PageStructureChecker(r)
+                    
+                    
+                                  );
+                },
+                "checksums.txt",
+                List.of("transfer_acknowledged", "transfer_complete"));
+        
+        
+        component.doWorkOnItem(batch, resultCollector);
+        
         System.out.println(resultCollector.toReport());
-    
+        
         final List<Failure> failures = resultCollector.getFailures();
         File configFolder = new File(Thread.currentThread()
-                                   .getContextClassLoader()
-                                   .getResource("AvisScanQA_cli-behaviour.yaml")
-                                   .toURI()).getParentFile();
+                                           .getContextClassLoader()
+                                           .getResource("AvisScanQA_cli-behaviour.yaml")
+                                           .toURI()).getParentFile();
         YAML dbConfig = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/AvisScanQA_cli-*.yaml");
         
         
-        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent() {
-            @Override
-            protected List<TreeEventHandler> getCheckers(ResultCollector resultCollector) {
-                return List.of(
-
-                        new DatabaseRegister(resultCollector,
-                                             new Driver(),
-                                             dbConfig.getString("jdbc.jdbc-connection-string"),
-                                             dbConfig.getString("jdbc.jdbc-user"),
-                                             dbConfig.getString("jdbc.jdbc-password"),
-                                             dbConfig.getString("states.initial-batch-state"),
-                                             dbConfig.getString("states.finished-batch-state"),
-                                             failures)
-                              );
-            }
-
-        };
-        ResultCollector dbResultCollector = databaseComponent.doWorkOnItem(batch);
-    
-        System.out.println(dbResultCollector.toReport());
-    
-    
+        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent(
+                r -> List.of(new DatabaseRegister(
+                                     r,
+                                     new Driver(),
+                                     dbConfig.getString("jdbc.jdbc-connection-string"),
+                                     dbConfig.getString("jdbc.jdbc-user"),
+                                     dbConfig.getString("jdbc.jdbc-password"),
+                                     dbConfig.getString("states.initial-batch-state"),
+                                     dbConfig.getString("states.finished-batch-state"),
+                                     failures)
+                            ),
+                "checksums.txt",
+                List.of("transfer_acknowledged", "transfer_complete"));
+        
+        
+        databaseComponent.doWorkOnItem(batch, resultCollector);
+        
+        System.out.println(resultCollector.toReport());
+        
+        
     }
 }

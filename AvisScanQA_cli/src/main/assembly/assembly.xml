@@ -11,6 +11,11 @@
             <directory>target/appassembler</directory>
             <outputDirectory>.</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>src/main/scripts</directory>
+            <outputDirectory>${project.artifactId}/bin/</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
     </fileSets>
     <files>
         <file>
