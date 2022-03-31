@@ -80,10 +80,11 @@ class DatabaseEventRunnerTest {
                                      dbConfig.getString("jdbc.jdbc-password"),
                                      dbConfig.getString("states.initial-batch-state"),
                                      dbConfig.getString("states.finished-batch-state"),
+                                     "transfer_acknowledged",
                                      failures)
                             ),
                 "checksums.txt",
-                List.of("transfer_acknowledged", "transfer_complete"));
+                List.of("transfer_acknowledged", "transfer_complete", "checksums.txt"));
         
         
         databaseComponent.doWorkOnItem(batch, resultCollector);

@@ -16,104 +16,104 @@ public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
     
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {}
     
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
-                          String avis,
+                          String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {}
     
     @Override
     public void modsBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            String roundTrip,
                            LocalDate startDate,
                            LocalDate endDate) throws IOException {}
     @Override
     public void modsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     @Override
     public void modsEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
     @Override
     public void metsBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            String roundTrip,
                            LocalDate startDate,
                            LocalDate endDate) throws IOException {}
     
     @Override
     public void metsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     @Override
     public void metsEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {}
     
     @Override
     public void editionBegins(DecoratedNodeParsingEvent event,
-                              String avis,
+                              String newspaper,
                               LocalDate editionDate,
-                              String editionName) throws IOException {}
+                              String edition) throws IOException {}
     @Override
     public void editionEnds(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             LocalDate editionDate,
-                            String editionName) throws IOException {}
+                            String edition) throws IOException {}
     
     
     
     @Override
     public void sectionBegins(DecoratedNodeParsingEvent event,
-                              String avis,
+                              String newspaper,
                               LocalDate editionDate,
-                              String udgave,
+                              String edition,
                               String section) throws IOException {
         
     }
     
     @Override
     public void sectionEnds(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             LocalDate editionDate,
-                            String udgave,
+                            String edition,
                             String section) throws IOException {
         
     }
     
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            LocalDate editionDate,
                            String udgave,
-                           String sectionName,
+                           String section,
                            Integer pageNumber) throws IOException {
         
     }
     
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         
     }
@@ -121,50 +121,51 @@ public class DecoratedEventHandler extends AbstractDecoratedEventHandler {
    
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         
     }
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         
     }
     
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         
     }
     
     @Override
     public void pdfFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         
     }
     
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
-                             String injectedType, String avis,
+                             String injectedType,
+                             String newspaper,
                              LocalDate editionDate,
-                             String udgave,
-                             String sectionName,
+                             String edition,
+                             String section,
                              Integer pageNumber) throws IOException {
         
     }

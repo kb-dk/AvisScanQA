@@ -23,23 +23,23 @@ public class NoMissingMiddlePagesChecker extends DecoratedEventHandler {
     }
     
     @Override
-    public void sectionBegins(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionBegins(DecoratedNodeParsingEvent event, String newspaper, LocalDate editionDate, String edition, String section)
             throws IOException {
         pages.set(new ArrayList<>());
     }
     
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
-                           String editionName,
+                           String newspaper,
                            LocalDate editionDate,
                            String udgave,
-                           String sectionName,
+                           String section,
                            Integer pageNumber) {
         pages.get().add(pageNumber);
     }
     
     @Override
-    public void sectionEnds(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String udgave, String section)
+    public void sectionEnds(DecoratedNodeParsingEvent event, String newspaper, LocalDate editionDate, String edition, String section)
             throws IOException {
         List<Integer> integers = pages.get();
         List<Integer> sortedPages = integers.stream().sorted().toList();

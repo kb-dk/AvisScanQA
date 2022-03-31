@@ -36,7 +36,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
     
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
-                            String batch,
+                            String newspaper,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) {
@@ -61,10 +61,10 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
     @Override
     public synchronized void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
                              String injectedType,
-                             String avis,
+                             String newspaper,
                              LocalDate editionDate,
-                             String udgave,
-                             String sectionName,
+                             String edition,
+                             String section,
                              Integer pageNumber) throws IOException {
         
         switch (injectedType) {
@@ -82,10 +82,10 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
     
     @Override
     public synchronized void mixFile(DecoratedAttributeParsingEvent decoratedEvent,
-                                     String editionName,
+                                     String newspaper,
                                      LocalDate editionDate,
-                                     String udgave,
-                                     String sectionName,
+                                     String edition,
+                                     String section,
                                      Integer pageNumber) throws IOException {
         parsingEvent.set(decoratedEvent);
         try (InputStream stream = decoratedEvent.getData()) {
@@ -98,10 +98,10 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
     
     @Override
     public synchronized void altoFile(DecoratedAttributeParsingEvent event,
-                                      String editionName,
+                                      String newspaper,
                                       LocalDate editionDate,
-                                      String udgave,
-                                      String sectionName,
+                                      String edition,
+                                      String section,
                                       Integer pageNumber) throws IOException {
         parsingEvent.set(event);
         try (InputStream stream = event.getData()) {

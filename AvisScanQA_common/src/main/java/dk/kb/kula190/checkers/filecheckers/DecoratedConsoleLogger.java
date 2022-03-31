@@ -42,7 +42,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void modsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
@@ -53,13 +53,13 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) {
         indent(event);
         out.println("<batch "
-                    + "avis=\"" + avis + "\" "
+                    + "avis=\"" + newspaper + "\" "
                     + "start=\"" + startDate + "\" "
                     + "end=\"" + endDate + "\" "
                     + "roundtrip=\"" + roundTrip + "\" "
@@ -68,7 +68,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
-                          String avis,
+                          String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) {
@@ -78,7 +78,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void modsBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            String roundTrip,
                            LocalDate startDate,
                            LocalDate endDate) {
@@ -88,7 +88,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void modsEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) {
@@ -98,7 +98,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void metsBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            String roundTrip,
                            LocalDate startDate,
                            LocalDate endDate) {
@@ -108,7 +108,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void metsEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) {
@@ -117,25 +117,25 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     }
     
     @Override
-    public void editionBegins(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionBegins(DecoratedNodeParsingEvent event, String newspaper, LocalDate editionDate, String edition) {
         indent(event);
         out.println("<edition "
                     + "date=\"" + editionDate + "\" "
-                    + "udgave=\"" + editionName + "\" "
+                    + "udgave=\"" + edition + "\" "
                     + ">");
     }
     
     @Override
-    public void editionEnds(DecoratedNodeParsingEvent event, String avis, LocalDate editionDate, String editionName) {
+    public void editionEnds(DecoratedNodeParsingEvent event, String newspaper, LocalDate editionDate, String edition) {
         indent(event);
         out.println("</edition>");
     }
     
     @Override
     public void sectionBegins(DecoratedNodeParsingEvent event,
-                              String avis,
+                              String newspaper,
                               LocalDate editionDate,
-                              String udgave,
+                              String edition,
                               String section) {
         indent(event);
         out.println("<section "
@@ -145,9 +145,9 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void sectionEnds(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             LocalDate editionDate,
-                            String udgave,
+                            String edition,
                             String section) {
         indent(event);
         out.println("</section>");
@@ -155,10 +155,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
-                           String editionName,
+                           String newspaper,
                            LocalDate editionDate,
                            String udgave,
-                           String sectionName,
+                           String section,
                            Integer pageNumber) {
         indent(event);
         out.println("<page number=\"" + pageNumber + "\">");
@@ -166,10 +166,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) {
         indent(event);
         out.println("</page>");
@@ -178,7 +178,7 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void metsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
@@ -189,10 +189,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         indent(event);
         out.println("<mixFile checksum=\"" + event.getChecksum() + "\"/>");
@@ -200,10 +200,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         indent(event);
         out.println("<tiffFile checksum=\"" + event.getChecksum() + "\"/>");
@@ -211,10 +211,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         indent(event);
         out.println("<altoFile checksum=\"" + event.getChecksum() + "\"/>");
@@ -222,10 +222,10 @@ public class DecoratedConsoleLogger extends DecoratedEventHandler {
     
     @Override
     public void pdfFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         indent(event);
         out.println("<pdfFile checksum=\"" + event.getChecksum() + "\"/>");

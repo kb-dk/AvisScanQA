@@ -27,7 +27,7 @@ class MultiThreadedEventRunnerTest {
         
         
         DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(
-                Executors.newFixedThreadPool(4),
+                Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors()),
                 resultCollector -> List.of(
                         
                         // new TiffAnalyzerExiv2(resultCollector),
@@ -53,7 +53,8 @@ class MultiThreadedEventRunnerTest {
                                           ),
                 "checksums.txt",
                 List.of("transfer_acknowledged",
-                        "transfer_complete"));
+                        "transfer_complete",
+                        "checksums.txt"));
         
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
                                                               getClass().getPackage().getImplementationVersion(), null);

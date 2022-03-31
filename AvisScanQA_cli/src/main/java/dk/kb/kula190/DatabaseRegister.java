@@ -9,12 +9,14 @@ import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEven
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
 import dk.kb.util.json.JSON;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.text.CaseUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.Driver;
@@ -35,6 +37,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String jdbcPassword;
     private final String initialBatchState;
     private final String finishedBatchState;
+    private final String acknowledgmentFile;
     private final List<Failure> checkerFailures;
 
     private final List<Failure> registeredFailures;
@@ -47,22 +50,24 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             String jdbcPassword,
                             String initialBatchState,
                             String finishedBatchState,
+                            String acknowledgmentFile,
                             List<Failure> checkerFailures
                            ) {
         super(resultCollector);
-        this.jdbcDriver = jdbcDriver;
-        this.jdbcURL = jdbcURL;
-        this.jdbcUser = jdbcUser;
-        this.jdbcPassword = jdbcPassword;
-        this.checkerFailures = checkerFailures;
+        this.jdbcDriver         = jdbcDriver;
+        this.jdbcURL            = jdbcURL;
+        this.jdbcUser           = jdbcUser;
+        this.jdbcPassword       = jdbcPassword;
+        this.acknowledgmentFile = acknowledgmentFile;
+        this.checkerFailures    = checkerFailures;
         this.registeredFailures = new ArrayList<>();
-        this.initialBatchState = initialBatchState;
+        this.initialBatchState  = initialBatchState;
         this.finishedBatchState = finishedBatchState;
     }
 
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
-                            String avis,
+                            String newspaper,
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
@@ -98,7 +103,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //Batch ID
                 preparedStatement.setString(param++, batchName.get());
                 //Avis ID
-                preparedStatement.setString(param++, avis);
+                preparedStatement.setString(param++, newspaper);
                 // roundtrip
                 preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
                 //start date
@@ -116,16 +121,17 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-
+            
         } catch (SQLException e) {
-            //TODO
             throw new IOException(e);
         }
+    
+        FileUtils.touch(Paths.get(event.getLocation(), acknowledgmentFile).toFile());
     }
 
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
-                          String avis,
+                          String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
@@ -146,7 +152,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //Batch ID
                 preparedStatement.setString(param++, batchName.get());
                 //Avis ID
-                preparedStatement.setString(param++, avis);
+                preparedStatement.setString(param++, newspaper);
                 // roundtrip
                 preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
                 //start date
@@ -197,10 +203,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
 
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         List<Failure> failuresForThisPage = checkerFailures.stream()
                                                            .filter(failure -> matchThisPage(failure.getReference(),
@@ -219,7 +225,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
-                preparedStatement.setString(param++, event.getLocation().substring(event.getLocation().indexOf(avis)));
+                preparedStatement.setString(param++, event.getLocation().substring(event.getLocation().indexOf(newspaper)));
                 //format_type
                 preparedStatement.setString(param++, "tiff");
                 //edition_date
@@ -229,15 +235,15 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 //page_numer
                 preparedStatement.setInt(param++, pageNumber);
                 //avis_id
-                preparedStatement.setString(param++, avis);
+                preparedStatement.setString(param++, newspaper);
                 //avis_title,
-                preparedStatement.setString(param++, CaseUtils.toCamelCase(avis, true));
+                preparedStatement.setString(param++, CaseUtils.toCamelCase(newspaper, true));
                 //shadow_path
                 preparedStatement.setString(param++, event.getName());
                 //section_title
-                preparedStatement.setString(param++, sectionName);
+                preparedStatement.setString(param++, section);
                 //edition_title
-                preparedStatement.setString(param++, udgave);
+                preparedStatement.setString(param++, edition);
                 //delivery_date
                 preparedStatement.setDate(param++, new Date(new File(event.getLocation()).lastModified()));
                 //side_label

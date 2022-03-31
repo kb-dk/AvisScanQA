@@ -46,13 +46,13 @@ public class MetsChecker extends DecoratedEventHandler {
     
     @Override
     public void modsFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
         final XpathMods mods = new XpathMods(event,
                                              EventHandlerUtils.handleDocument(event),
-                                             avis,
+                                             newspaper,
                                              roundTrip,
                                              startDate,
                                              endDate);
@@ -95,10 +95,10 @@ public class MetsChecker extends DecoratedEventHandler {
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
                              String injectedType,
-                             String avis,
+                             String newspaper,
                              LocalDate editionDate,
-                             String udgave,
-                             String sectionName,
+                             String edition,
+                             String section,
                              Integer pageNumber) throws IOException {
         
         if (MetsSplitter.INJECTED_TYPE_METS.equals(injectedType)) {
@@ -115,7 +115,7 @@ public class MetsChecker extends DecoratedEventHandler {
                             String roundTrip,
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
-        log.debug("injected METS event for {},{},{},{}", avis, roundTrip, startDate, endDate);
+        log.trace("injected METS event for {},{},{},{}", avis, roundTrip, startDate, endDate);
         
         XPathSelector xpath =
                 XpathUtils.createXPathSelector(
@@ -323,27 +323,27 @@ public class MetsChecker extends DecoratedEventHandler {
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         tiffFilesVisited.add(EventHandlerUtils.lastName(event.getLocation()));
     }
     
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         altoFilesVisited.add(EventHandlerUtils.lastName(event.getLocation()));
     }
     
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
-                          String avis,
+                          String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {

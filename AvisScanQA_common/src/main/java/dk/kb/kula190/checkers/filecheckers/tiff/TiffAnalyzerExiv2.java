@@ -25,7 +25,7 @@ public class TiffAnalyzerExiv2 extends InjectingTreeEventHandler {
     @Override
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
         if (FilenameUtils.isExtension(event.getName(), "tif")) {
-            log.info("Analyzing {} with ImageMagick", event.getLocation());
+            log.trace("Analyzing {} with exiv2", event.getLocation());
 
             List<String> lines = Utils.runTool("exiv2", event.getLocation(), "-u", "-PEIXnt");
             String propertiesString = toProperties(lines);

@@ -42,8 +42,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
     public SimpleIteratorForFilesystems(File dir, String checksumFile, List<String> filesToIgnore) throws IOException {
         super(dir);
         this.checksumFile  = checksumFile;
-        this.filesToIgnore = new ArrayList<>(filesToIgnore);
-        this.filesToIgnore.add(checksumFile);
+        this.filesToIgnore =filesToIgnore;
         checksums          = Files.readAllLines(dir.toPath().resolve(checksumFile))
                          .stream()
                          .map(line -> line.split("  ", 2))
@@ -59,9 +58,7 @@ public class SimpleIteratorForFilesystems extends AbstractIterator<File> {
         super(id);
         this.checksums = checksums;
         this.checksumFile = checksumFile;
-        this.filesToIgnore = new ArrayList<>(filesToIgnore);
-        this.filesToIgnore.add(checksumFile);
-
+        this.filesToIgnore =filesToIgnore;
     }
     
     @Override

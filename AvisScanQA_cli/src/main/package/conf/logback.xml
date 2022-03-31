@@ -20,16 +20,16 @@
         </rollingPolicy>
         <append>true</append>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36}\(%file:%line\) - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
 
-    <logger name="dk.kb" level="DEBUG">
-        <appender-ref ref="FILE"/>
-    </logger>
+    <logger name="dk.kb.kula190.checkers.filecheckers.ProgressLogger" level="TRACE"/>
+
+    <logger name="dk.kb" level="DEBUG"/>
 
     <root level="WARN">
-        <appender-ref ref="STDOUT"/>
+        <appender-ref ref="FILE"/>
     </root>
 </configuration>

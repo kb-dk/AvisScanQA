@@ -22,52 +22,52 @@ public class PageStructureChecker extends DecoratedEventHandler {
     
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            LocalDate editionDate,
                            String udgave,
-                           String sectionName,
-                           Integer pageNumber) throws IOException {
+                           String section,
+                           Integer pageNumber) {
         //Checkes that each page consists of MIX ALTO TIFF
         types.set(new HashSet<>());
     }
     
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
-                         Integer pageNumber) throws IOException {
+                         String edition,
+                         String section,
+                         Integer pageNumber) {
         checkEquals(event, FailureType.MISSING_FILE_ERROR,"Appendix H – File structure: Page does not contains all expected file {expected}. Files were {actual}", types.get(), Set.of("MIX", "ALTO", "TIFF", "MIX/METS") );
     }
     
     
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         types.get().add("MIX");
     }
     
     @Override
     public void altoFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         types.get().add("ALTO");
     }
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         types.get().add("TIFF");
     }
@@ -75,10 +75,10 @@ public class PageStructureChecker extends DecoratedEventHandler {
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent,
                              String injectedType,
-                             String avis,
+                             String newspaper,
                              LocalDate editionDate,
-                             String udgave,
-                             String sectionName,
+                             String edition,
+                             String section,
                              Integer pageNumber) throws IOException {
         
         switch (injectedType) {

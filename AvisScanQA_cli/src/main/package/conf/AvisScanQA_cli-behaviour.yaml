@@ -21,7 +21,10 @@ states:
   finished-batch-state: "2IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
 
 iterator:
+  numThreads: 2 # If set, controls the number of threads. Default is Runtime.getRuntime().availableProcessors()
   checksumFile: "checksums.txt"
+  acknowledgmentFile: "transfer_acknowledged"
   filesToIgnore:
-    - transfer_acknowledged
-    - transfer_complete
+    - "checksums.txt"
+    - "transfer_acknowledged"
+    - "transfer_complete"

@@ -51,7 +51,8 @@ class EventRunnerTest {
                                           ),
                 "checksums.txt",
                 List.of("transfer_acknowledged",
-                        "transfer_complete"));
+                        "transfer_complete",
+                        "checksums.txt"));
         
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),
                                                               getClass().getPackage().getImplementationVersion(), null);

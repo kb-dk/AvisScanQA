@@ -44,10 +44,10 @@ public class XpathPageChecker extends DecoratedEventHandler {
     
     @Override
     public void pageBegins(DecoratedNodeParsingEvent event,
-                           String avis,
+                           String newspaper,
                            LocalDate editionDate,
                            String udgave,
-                           String sectionName,
+                           String section,
                            Integer pageNumber) throws IOException {
         
         //clear state
@@ -59,14 +59,14 @@ public class XpathPageChecker extends DecoratedEventHandler {
     
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
-                        String avis,
+                        String newspaper,
                         LocalDate editionDate,
-                        String udgave,
-                        String sectionName,
+                        String edition,
+                        String section,
                         Integer pageNumber) throws IOException {
         //object
         XpathMix xpathMix = Mix.get();
-        xpathMix.setMixXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+        xpathMix.setMixXpathData(event, newspaper, editionDate, edition, section, pageNumber);
         
         //Perform MIX-only checks here
         
@@ -81,24 +81,24 @@ public class XpathPageChecker extends DecoratedEventHandler {
     
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) throws IOException {
         //object
         XpathTiff xpathTiff = Tiff.get();
-        xpathTiff.setTiffXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+        xpathTiff.setTiffXpathData(event, newspaper, editionDate, edition, section, pageNumber);
     
         //Perform TIFF-only checks here
     }
     
     @Override
-    public void altoFile(DecoratedAttributeParsingEvent event, String avis, LocalDate editionDate, String udgave,
-                         String sectionName, Integer pageNumber) throws IOException {
+    public void altoFile(DecoratedAttributeParsingEvent event, String newspaper, LocalDate editionDate, String edition,
+                         String section, Integer pageNumber) throws IOException {
         
         XpathAlto xpathAlto = Alto.get();
-        xpathAlto.setAltoXpathData(event, avis, editionDate, udgave, sectionName, pageNumber);
+        xpathAlto.setAltoXpathData(event, newspaper, editionDate, edition, section, pageNumber);
         
         
         //TODO better checks of actual values https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
@@ -122,26 +122,25 @@ public class XpathPageChecker extends DecoratedEventHandler {
  
     
     @Override
-    public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String avis,
-                             LocalDate editionDate, String udgave, String sectionName, Integer pageNumber)
+    public void injectedFile(DecoratedAttributeParsingEvent decoratedEvent, String injectedType, String newspaper,
+                             LocalDate editionDate, String edition, String section, Integer pageNumber)
             throws IOException {
         
         switch (injectedType) {
             case TiffAnalyzerImageMagick.INJECTED_TYPE -> { // ImageMagick Output
                 XpathTiff xpathTiff = Tiff.get();
-                xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, avis, editionDate, udgave, sectionName,
+                xpathTiff.setTiffInjectedFileData(decoratedEvent, injectedType, newspaper, editionDate, edition, section,
                                                   pageNumber);
             }
             case MetsSplitter.INJECTED_TYPE_MIX -> { //MIX FROM METS FILE
                 //        This is the mix extracted from METS for a specific page
-                log.debug("Injected MIX event for {},{},{},{},{}", avis, editionDate, udgave, sectionName, pageNumber);
                 XpathMetsMix xpathMetsMix = MetsMix.get();
                 xpathMetsMix.setMetsMixInjectedFileData(decoratedEvent,
                                                         injectedType,
-                                                        avis,
+                                                        newspaper,
                                                         editionDate,
-                                                        udgave,
-                                                        sectionName,
+                                                        edition,
+                                                        section,
                                                         pageNumber);
             }
         }
@@ -149,11 +148,12 @@ public class XpathPageChecker extends DecoratedEventHandler {
     
     @Override
     public void pageEnds(DecoratedNodeParsingEvent event,
-                         String avis,
+                         String newspaper,
                          LocalDate editionDate,
-                         String udgave,
-                         String sectionName,
+                         String edition,
+                         String section,
                          Integer pageNumber) {
+        
         XpathMix xpathMix = Mix.get();
         XpathTiff xpathTiff = Tiff.get();
         XpathAlto xpathAlto = Alto.get();

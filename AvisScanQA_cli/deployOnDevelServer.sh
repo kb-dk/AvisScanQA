@@ -21,3 +21,5 @@ ssh "${develServer}" "tar -xzf ./${projectName}-${version}.tar.gz"
 
 echo "Installing crontab to automatically check new batches"
 ssh "${develServer}" "crontab -r; cat ${projectName}/conf/crontab | crontab -;"
+
+echo "Done"

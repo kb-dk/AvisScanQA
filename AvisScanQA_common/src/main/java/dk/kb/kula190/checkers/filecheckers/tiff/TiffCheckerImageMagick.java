@@ -23,16 +23,16 @@ public class TiffCheckerImageMagick extends DecoratedEventHandler {
     @Override
     public void injectedFile(DecoratedAttributeParsingEvent event,
                              String injectedType,
-                             String avis,
+                             String newspaper,
                              LocalDate editionDate,
-                             String udgave,
-                             String sectionName,
+                             String edition,
+                             String section,
                              Integer pageNumber) throws IOException {
 
         if (!Objects.equals(injectedType, TiffAnalyzerImageMagick.INJECTED_TYPE)) {
             return;
         }
-        log.info("Checking {}", event.getLocation());
+        log.trace("Checking {}", event.getLocation());
 
 
         YAML result;

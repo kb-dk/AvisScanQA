@@ -80,9 +80,9 @@ public class MetsSplitter extends InjectingTreeEventHandler {
         // files
         //But we need locks to ensure that the "Mets" thread complete before the "Tiff" threads start
         if (extension.equals("mets")) {
-            log.info("Found mets file");
+            log.trace("Found mets file");
             metsFile(event);
-            log.info("Done mets file");
+            log.trace("Done mets file");
         } else if (extension.equals("tif")) {
             tiffFile(event);
         }

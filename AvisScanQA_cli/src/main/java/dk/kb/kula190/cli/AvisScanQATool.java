@@ -11,6 +11,7 @@ import dk.kb.kula190.checkers.batchcheckers.MetsSplitter;
 import dk.kb.kula190.checkers.editioncheckers.NoMissingMiddlePagesChecker;
 import dk.kb.kula190.checkers.filecheckers.ChecksumChecker;
 import dk.kb.kula190.checkers.filecheckers.FileNamingChecker;
+import dk.kb.kula190.checkers.filecheckers.ProgressLogger;
 import dk.kb.kula190.checkers.filecheckers.XmlSchemaChecker;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerExiv2;
 import dk.kb.kula190.checkers.filecheckers.tiff.TiffAnalyzerImageMagick;
@@ -39,15 +40,17 @@ public class AvisScanQATool {
     private final YAML config;
     
     private final String checksumFile;
+    private final String acknowledgmentFile;
     private final List<String> filesToIgnore;
     
-    public AvisScanQATool(YAML config, String checksumFile, List<String> filesToIgnore) {
-        this.config        = config;
-        this.checksumFile  = checksumFile;
-        this.filesToIgnore = filesToIgnore;
+    public AvisScanQATool(YAML config, String checksumFile, String acknowledgmentFile, List<String> filesToIgnore) {
+        this.config             = config;
+        this.checksumFile       = checksumFile;
+        this.acknowledgmentFile = acknowledgmentFile;
+        this.filesToIgnore      = filesToIgnore;
     }
     
-    public ResultCollector check(Path batchPath) throws IOException, URISyntaxException {
+    public ResultCollector check(Path batchPath) throws IOException {
         
         Batch batch = new Batch(batchPath.getFileName().toString(), batchPath);
         
@@ -56,18 +59,11 @@ public class AvisScanQATool {
                                                               null);
         
         try {
-            
-            //Filename checker will cause all other checks to fail...
-            
-            //Checksum checker might not cause other failures. Checksum errors cause automatic return
-            //But we might want to report OTHER errors even when checksums fails...
-            
+            log.info("Initial filenameChecking of batch {}", batch.getFullID());
             //Perform basic checks
             final BasicRunnableComponent
                     basicRunnableComponent
-                    = new BasicRunnableComponent(r -> List.of(new ChecksumChecker(r), new FileNamingChecker(r)),
-                                                 checksumFile,
-                                                 filesToIgnore);
+                    = new BasicRunnableComponent(r -> List.of(new FileNamingChecker(r)), checksumFile, filesToIgnore);
             
             basicRunnableComponent.doWorkOnItem(batch, resultCollector);
             
@@ -77,15 +73,13 @@ public class AvisScanQATool {
         
         //If the basic checks worked, proceed
         if (resultCollector.isSuccess()) {
-            
             try {
-                //TODO configurable number of threads
-                DecoratedRunnableComponent
-                        component
-                        = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(4),
-                                                             checkerFactory(),
-                                                             checksumFile,
-                                                             filesToIgnore);
+                final int nThreads = config.getInteger("iterator.numThreads",
+                                                       Runtime.getRuntime().availableProcessors());
+                log.info("Starting full checks of batch {} with {} threads", batch.getFullID(), nThreads);
+                
+                DecoratedRunnableComponent component = new MultiThreadedRunnableComponent(Executors.newFixedThreadPool(
+                        nThreads), checkerFactory(), checksumFile, filesToIgnore);
                 
                 component.doWorkOnItem(batch, resultCollector);
                 
@@ -93,52 +87,60 @@ public class AvisScanQATool {
                 resultCollector.addExceptionalFailure(e);
             }
         } else {
-            //TODO what to do if we fail in the first checks??
-            log.error("Failed basic checks: \n{}", resultCollector.toReport());
+            log.error("Failed basic checks:, so no point in performing advanced checks ");
         }
         if (config.getBoolean("jdbc.enabled")) {
-            
+            log.info("Registering results of QA on batch {} in database", batch.getFullID());
             registerResultInDB(batch, resultCollector, config);
         }
         
+        log.info("All checks done, returning");
         return resultCollector;
     }
     
     
-    private void registerResultInDB(Batch batch, ResultCollector resultCollector, YAML config)
-            throws IOException {
+    private void registerResultInDB(Batch batch, ResultCollector resultCollector, YAML config) throws IOException {
         final List<Failure> failures = resultCollector.getFailures();
         
-        DecoratedRunnableComponent databaseComponent =
-                new DecoratedRunnableComponent(
-                        rc -> List.of(
-                                new DatabaseRegister(rc,
-                                                     new Driver(),
-                                                     config.getString("jdbc.jdbc-connection-string"),
-                                                     config.getString("jdbc.jdbc-user"),
-                                                     config.getString("jdbc.jdbc-password"),
-                                                     config.getString("states.initial-batch-state"),
-                                                     config.getString("states.finished-batch-state"),
-                                                     failures)),
-                        checksumFile,
-                        filesToIgnore);
+        DecoratedRunnableComponent databaseComponent = new DecoratedRunnableComponent(
+                rc -> List.of(new DatabaseRegister(rc,
+                                                   new Driver(),
+                                                   config.getString("jdbc.jdbc-connection-string"),
+                                                   config.getString("jdbc.jdbc-user"),
+                                                   config.getString("jdbc.jdbc-password"),
+                                                   config.getString("states.initial-batch-state"),
+                                                   config.getString("states.finished-batch-state"),
+                                                   acknowledgmentFile,
+                                                   failures)),
+                checksumFile,
+                filesToIgnore);
         databaseComponent.doWorkOnItem(batch, resultCollector);
         
     }
     
     private Function<ResultCollector, List<TreeEventHandler>> checkerFactory() {
         //TODO ensure this is the current and correct list of checkers
-        return r -> List.of(new TiffAnalyzerExiv2(r), new TiffCheckerExiv2(r),
-        
-                            new TiffAnalyzerImageMagick(r), new TiffCheckerImageMagick(r),
-        
-                            new MetsSplitter(r), new MetsChecker(r),
-        
-                            //Per file- checkers
-                            new XmlSchemaChecker(r),
-        
-                            //CrossCheckers
-                            new XpathPageChecker(r), new NoMissingMiddlePagesChecker(r), new PageStructureChecker(r));
+        return resultCollector -> List.of(
+                
+                //BatchCheckers
+                new MetsSplitter(resultCollector), new MetsChecker(resultCollector),
+                
+                //EditionCheckers
+                new NoMissingMiddlePagesChecker(resultCollector),
+                
+                //PageCheckers
+                new XpathPageChecker(resultCollector), new PageStructureChecker(resultCollector),
+                
+                //FileCheckers
+                new ChecksumChecker(resultCollector), new XmlSchemaChecker(resultCollector),
+                
+                //Tiff Checkers - Exiv2
+                new TiffAnalyzerExiv2(resultCollector), new TiffCheckerExiv2(resultCollector),
+                
+                //Tiff Checkers - ImageMagick
+                new TiffAnalyzerImageMagick(resultCollector), new TiffCheckerImageMagick(resultCollector),
+                
+                new ProgressLogger(resultCollector));
     }
     
 }

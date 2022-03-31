@@ -32,7 +32,7 @@ class BasicRunnableComponentTest {
                                 new FileNamingChecker(r)
                                     ),
                         "checksums.txt",
-                        List.of("transfer_acknowledged", "transfer_complete"));
+                        List.of("transfer_acknowledged", "transfer_complete", "checksums.txt"));
         
         
         ResultCollector resultCollector = new ResultCollector(getClass().getSimpleName(),

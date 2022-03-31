@@ -129,6 +129,7 @@ public class ResultCollector {
     }
     
     public void addExceptionalFailure(Exception e){
+        log.warn("Exception failure", e);
         Failure failure = new Failure();
         failure.setType(FailureType.EXCEPTION);
         failure.setReference(null);

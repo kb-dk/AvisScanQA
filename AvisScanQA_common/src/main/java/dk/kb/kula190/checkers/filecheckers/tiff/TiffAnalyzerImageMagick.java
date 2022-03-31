@@ -30,7 +30,7 @@ public class TiffAnalyzerImageMagick extends InjectingTreeEventHandler {
     @Override
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
         if (Set.of("tif", "tiff").contains(FilenameUtils.getExtension(event.getName()))) {
-            log.info("Analyzing {} with ImageMagick", event.getLocation());
+            log.trace("Analyzing {} with ImageMagick", event.getLocation());
 
             List<String> lines1 = Utils.runTool("identify", event.getLocation(), "-verbose");
             List<String> lines = lines1;

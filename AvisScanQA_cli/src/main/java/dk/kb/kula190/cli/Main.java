@@ -22,6 +22,7 @@ public class Main {
         
         AvisScanQATool tool = new AvisScanQATool(config,
                                                  config.getString("iterator.checksumFile"),
+                                                 config.getString("iterator.acknowledgmentFile"),
                                                  config.getList("iterator.filesToIgnore"));
         
         ResultCollector resultCollector = tool.check(Path.of(args[0]).toAbsolutePath());
