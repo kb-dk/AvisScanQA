@@ -549,14 +549,12 @@ function createPageButtons(pages, parent, page) {
         if(page !== pages.length-1){
             determineColor(pages[pages.length-1],link,pages[pages.length-1].notes.length)
         }
-
         parent.append(link)
-        parent.append($("<a/>", {
-            class: "btn btn-sm btn-outline-secondary bi bi-arrow-right nextAndPreviousPage",
-            href: page === pages.length - 1 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page + 1)
-        }))
-
     }
+    parent.append($("<a/>", {
+        class: "btn btn-sm btn-outline-secondary bi bi-arrow-right nextAndPreviousPage",
+        href: page === pages.length - 1 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page + 1)
+    }))
 }
 
 
