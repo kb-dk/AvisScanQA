@@ -372,7 +372,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
+ 
     //This is used for the content display, which we do not need any more
     @Override
     public URI getEntityURL(Long handle, String type) {
