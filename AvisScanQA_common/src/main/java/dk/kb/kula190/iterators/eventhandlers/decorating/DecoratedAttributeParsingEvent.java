@@ -124,6 +124,21 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
     public Integer getPageNumber() {
         return pageNumber;
     }
-
-
+    
+    @Override
+    public String toString() {
+        return "DecoratedAttributeParsingEvent{" +
+               "type=" + type +
+               ", name='" + name + '\'' +
+               ", location='" + location + '\'' +
+               ", avis='" + avis + '\'' +
+               ", roundTrip='" + roundTrip + '\'' +
+               ", startDate=" + startDate +
+               ", endDate=" + endDate +
+               ", editionDate=" + editionDate +
+               ", udgave='" + udgave + '\'' +
+               ", sectionName='" + sectionName + '\'' +
+               ", pageNumber=" + pageNumber +
+               '}';
+    }
 }
