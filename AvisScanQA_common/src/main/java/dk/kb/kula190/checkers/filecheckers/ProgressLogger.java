@@ -47,7 +47,7 @@ public class ProgressLogger extends DecoratedEventHandler {
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-        log.debug("batch:ends newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
+        log.debug("batch:ends   newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
                      newspaper,
                      roundTrip,
                      startDate,
@@ -76,7 +76,7 @@ public class ProgressLogger extends DecoratedEventHandler {
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
-        log.trace(" mods:ends newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
+        log.trace(" mods:ends   newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
                      newspaper,
                      roundTrip,
                      startDate,
@@ -105,7 +105,7 @@ public class ProgressLogger extends DecoratedEventHandler {
                          String roundTrip,
                          LocalDate startDate,
                          LocalDate endDate) throws IOException {
-        log.debug(" mets:ends newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
+        log.debug(" mets:ends   newpaper '{}', roundtrip '{}', startdate '{}', endDate '{}'",
                      newspaper,
                      roundTrip,
                      startDate,
@@ -122,7 +122,7 @@ public class ProgressLogger extends DecoratedEventHandler {
     @Override
     public void editionEnds(DecoratedNodeParsingEvent event, String newspaper, LocalDate editionDate, String edition)
             throws IOException {
-        log.debug(" edition:ends newpaper '{}', day '{}', edition '{}'", newspaper, editionDate, edition);
+        log.debug(" edition:ends   newpaper '{}', day '{}', edition '{}'", newspaper, editionDate, edition);
 
     }
     
@@ -142,7 +142,7 @@ public class ProgressLogger extends DecoratedEventHandler {
                             LocalDate editionDate,
                             String edition,
                             String section) throws IOException {
-        log.trace("  section:ends newpaper '{}', day '{}', edition '{}', section '{}'",
+        log.trace("  section:ends   newpaper '{}', day '{}', edition '{}', section '{}'",
                      newspaper, editionDate, edition, section);
     
     }
