@@ -169,9 +169,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
             List<Failure> batchFailures = new ArrayList<>(checkerFailures);
             batchFailures.removeAll(registeredFailures);
             
-            String failuresMessage = batchFailures.stream()
-                                                  .map(failure -> JSON.toJson(failure, false))
-                                                  .collect(Collectors.joining("\n"));
+            String failuresMessage = JSON.toJson(batchFailures, true);
             
             updateBatchState(newspaper,
                              roundTrip,
@@ -222,9 +220,8 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                                            .toList();
         registeredFailures.addAll(failuresForThisPage);
         
-        String failuresMessage = failuresForThisPage.stream()
-                                                    .map(failure -> JSON.toJson(failure, false))
-                                                    .collect(Collectors.joining("\n"));
+        String failuresMessage = JSON.toJson(failuresForThisPage, true);
+        
         try (Connection connection = dataSource.getConnection()) {
             
             try (PreparedStatement preparedStatement = connection.prepareStatement(
