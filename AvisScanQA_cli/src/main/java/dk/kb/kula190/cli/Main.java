@@ -12,7 +12,7 @@ public class Main {
     
     public static final String IGNORED_FILES_DEFAULT_VALUE = "transfer_complete,transfer_acknowledged,delete_ok";
     
-    public static void main(String[] args) throws IOException, URISyntaxException {
+    public static void main(String... args) throws IOException, URISyntaxException {
         
         File configFolder = new File(Thread.currentThread()
                                            .getContextClassLoader()

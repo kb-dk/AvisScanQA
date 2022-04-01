@@ -1,6 +1,6 @@
 <configuration scan="true" scanPeriod="5 minutes">
 
-    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />
+<!--    <statusListener class="ch.qos.logback.core.status.OnConsoleStatusListener" />-->
 
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
@@ -11,8 +11,11 @@
         </encoder>
     </appender>
 
-    <!--    <logger name="dk.kb" level="INFO"/>-->
-    <!--    <logger name="dk.kb.kula190" level="DEBUG"/>-->
+
+    <logger name="dk.kb.kula190.checkers.filecheckers.ProgressLogger" level="DEBUG"/>
+
+    <logger name="dk.kb" level="DEBUG"/>
+
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
