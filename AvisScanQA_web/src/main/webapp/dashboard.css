@@ -159,3 +159,8 @@ body {
 .active{
   box-shadow: 0px 0px 1px 1px black;
 }
+
+.bootstrap-table .fixed-table-container .fixed-table-body{
+  /*Override bootstrap tables as it seems to make the page WAY too long*/
+  height: unset;
+}
