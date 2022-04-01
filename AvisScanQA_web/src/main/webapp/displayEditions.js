@@ -559,12 +559,17 @@ function createPageButtons(pages, parent, page) {
 function editEntityIndexInHash(origHash, newEntityIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 4] = newEntityIndex;
+    //Reset to section 0 and page 0, to ensure that we do not try to open a page/section that does not exist
+    hashParts[hashParts.length - 3] = 0;
+    hashParts[hashParts.length - 2] = 0;
     return hashParts.join("/");
 }
 
 function editSectionIndexInHash(origHash, newSectionIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 3] = newSectionIndex;
+    //Reset to page 0, to ensure that we do not try to open a page that does not exist in this section
+    hashParts[hashParts.length - 2] = 0;
     return hashParts.join("/");
 }
 
