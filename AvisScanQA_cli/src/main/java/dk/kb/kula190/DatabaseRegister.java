@@ -1,6 +1,5 @@
 package dk.kb.kula190;
 
-import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
@@ -16,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.Date;
@@ -26,6 +26,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 //Not multithreaded...
@@ -39,10 +40,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String finishedBatchState;
     private final String acknowledgmentFile;
     private final List<Failure> checkerFailures;
-
+    
     private final List<Failure> registeredFailures;
     private BasicDataSource dataSource;
-
+    
     public DatabaseRegister(ResultCollector resultCollector,
                             Driver jdbcDriver,
                             String jdbcURL,
@@ -51,8 +52,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             String initialBatchState,
                             String finishedBatchState,
                             String acknowledgmentFile,
-                            List<Failure> checkerFailures
-                           ) {
+                            List<Failure> checkerFailures) {
         super(resultCollector);
         this.jdbcDriver         = jdbcDriver;
         this.jdbcURL            = jdbcURL;
@@ -64,7 +64,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
         this.initialBatchState  = initialBatchState;
         this.finishedBatchState = finishedBatchState;
     }
-
+    
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
                             String newspaper,
@@ -72,135 +72,143 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
         dataSource = new BasicDataSource();
-
+        
         if (jdbcUser != null) {
             dataSource.setUsername(jdbcUser);
         }
-
+        
         if (jdbcPassword != null) {
             dataSource.setPassword(jdbcPassword);
         }
         dataSource.setUrl(jdbcURL);
-
+        
         dataSource.setDefaultReadOnly(false);
         dataSource.setDefaultAutoCommit(false);
-
+        
         dataSource.setRemoveAbandonedTimeout(60); // 60 sec
         dataSource.setMaxWaitMillis(60000); // 1 min
         dataSource.setMaxTotal(2); // Change to 10 when running as WAR
-
+        
         dataSource.setDriver(jdbcDriver);
-
-
+        
+        
         try (Connection connection = dataSource.getConnection()) {
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, state, "
-                    + "username, lastmodified) "
-                    + "VALUES (?,?,?,?,?,?,?,?, now()) "
-                    + "ON CONFLICT (batchid) DO UPDATE SET state = excluded.state")) {
-                int param = 1;
-                //Batch ID
-                preparedStatement.setString(param++, batchName.get());
-                //Avis ID
-                preparedStatement.setString(param++, newspaper);
-                // roundtrip
-                preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
-                //start date
-                preparedStatement.setDate(param++, Date.valueOf(startDate));
-                //end date
-                preparedStatement.setDate(param++, Date.valueOf(endDate));
-                //delivery date
-                preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
-                //state
-                //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, initialBatchState);
-
-                preparedStatement.setString(param++, System.getenv("USER"));
-
-                boolean result = preparedStatement.execute();
-            }
-            connection.commit();
-            
+            updateBatchState(newspaper, roundTrip, startDate, endDate, connection, initialBatchState, 0, null);
         } catch (SQLException e) {
-            throw new IOException(e);
+            throw new IOException("Failure in registering batch state "
+                                  + initialBatchState
+                                  + " for batch "
+                                  + batchName.get(), e);
         }
-    
-        FileUtils.touch(Paths.get(event.getLocation(), acknowledgmentFile).toFile());
+        
+        Path ackFile = Paths.get(event.getLocation(), acknowledgmentFile);
+        log.debug("Finished handling of batch {} so writing acknowledgmentFile {}", batchName.get(), ackFile);
+        FileUtils.touch(ackFile.toFile());
+        log.info("Finished handling of batch {} so wrote acknowledgmentFile {}", batchName.get(), ackFile);
     }
-
+    
+    private void updateBatchState(String newspaper,
+                                  String roundTrip,
+                                  LocalDate startDate,
+                                  LocalDate endDate,
+                                  Connection connection,
+                                  String state,
+                                  int numProblems,
+                                  String failureMessage) throws SQLException {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("""
+                                                                               INSERT INTO
+                                                                                    batch(batchid,
+                                                                                          avisid,
+                                                                                          roundtrip,
+                                                                                          start_date,
+                                                                                          end_date,
+                                                                                          delivery_date,
+                                                                                          problems,
+                                                                                          state,
+                                                                                          num_problems,
+                                                                                          username,
+                                                                                          lastmodified)
+                                                                               VALUES (?,?,?,?,?,?,?,?,?,?,now())
+                                                                               """)) {
+            int param = 1;
+            //Batch ID
+            preparedStatement.setString(param++, batchName.get());
+            //Avis ID
+            preparedStatement.setString(param++, newspaper);
+            // roundtrip
+            preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
+            //start date
+            preparedStatement.setDate(param++, Date.valueOf(startDate));
+            //end date
+            preparedStatement.setDate(param++, Date.valueOf(endDate));
+            //delivery date
+            preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
+            //failureMessage
+            preparedStatement.setString(param++, Optional.ofNullable(failureMessage).orElse(""));
+            //state
+            preparedStatement.setString(param++, state);
+            //numProblems
+            preparedStatement.setInt(param++, numProblems);
+            //Username
+            preparedStatement.setString(param++, System.getenv("USER"));
+            
+            boolean result = preparedStatement.execute();
+        }
+        connection.commit();
+    }
+    
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
                           String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-
+        
         try (Connection connection = dataSource.getConnection()) {
-
+            
             List<Failure> batchFailures = new ArrayList<>(checkerFailures);
             batchFailures.removeAll(registeredFailures);
-
+            
             String failuresMessage = batchFailures.stream()
                                                   .map(failure -> JSON.toJson(failure, false))
                                                   .collect(Collectors.joining("\n"));
-
-            try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, "
-                    + "state, num_problems, username, lastmodified) VALUES (?,?,?,?,?,?,?,?,?,?,now()) ")) {
-                int param = 1;
-                //Batch ID
-                preparedStatement.setString(param++, batchName.get());
-                //Avis ID
-                preparedStatement.setString(param++, newspaper);
-                // roundtrip
-                preparedStatement.setInt(param++, Integer.parseInt(roundTrip));
-                //start date
-                preparedStatement.setDate(param++, Date.valueOf(startDate));
-                //end date
-                preparedStatement.setDate(param++, Date.valueOf(endDate));
-                //delivery date
-                preparedStatement.setDate(param++, Date.valueOf(LocalDate.now()));
-                //problems
-                preparedStatement.setString(param++, failuresMessage);
-                //state
-                //TODO Batch state vocabulary: https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-28
-                preparedStatement.setString(param++, finishedBatchState);
-
-                preparedStatement.setInt(param++, checkerFailures.size());
-
-                preparedStatement.setString(param++, System.getenv("USER"));
-
-                boolean result = preparedStatement.execute();
-            }
-            connection.commit();
-
+            
+            updateBatchState(newspaper,
+                             roundTrip,
+                             startDate,
+                             endDate,
+                             connection,
+                             finishedBatchState,
+                             checkerFailures.size(),
+                             failuresMessage);
+            
         } catch (SQLException e) {
-            //TODO
-            throw new IOException(e);
+            throw new IOException("Failure in registering batch state "
+                                  + finishedBatchState
+                                  + " for batch "
+                                  + batchName.get(), e);
         } finally {
             try {
                 if (dataSource != null) {
                     dataSource.close();
                 }
-
-
             } catch (Exception e) {
                 // ignore errors during shutdown, we cant do anything about it anyway
                 log.error("shutdown failed", e);
             }
         }
     }
-
+    
     private boolean matchThisPage(Reference reference, DecoratedParsingEvent event) {
-        return Objects.equals(event.getAvis(), reference.getAvis()) &&
-               Objects.equals(event.getEditionDate().toString(), reference.getEditionDate()) &&
-               Objects.equals(event.getUdgave(), reference.getUdgave()) &&
-               Objects.equals(event.getSectionName(), reference.getSectionName()) &&
-               Objects.equals(event.getPageNumber(), reference.getPageNumber());
-
+        return Objects.equals(event.getAvis(), reference.getAvis())
+               && Objects.equals(event.getEditionDate().toString(),
+                                 reference.getEditionDate())
+               && Objects.equals(event.getUdgave(), reference.getUdgave())
+               && Objects.equals(event.getSectionName(), reference.getSectionName())
+               && Objects.equals(event.getPageNumber(), reference.getPageNumber());
+        
     }
-
+    
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String newspaper,
@@ -210,22 +218,24 @@ public class DatabaseRegister extends DecoratedEventHandler {
                          Integer pageNumber) throws IOException {
         List<Failure> failuresForThisPage = checkerFailures.stream()
                                                            .filter(failure -> matchThisPage(failure.getReference(),
-                                                                                            event)).toList();
+                                                                                            event))
+                                                           .toList();
         registeredFailures.addAll(failuresForThisPage);
-
+        
         String failuresMessage = failuresForThisPage.stream()
                                                     .map(failure -> JSON.toJson(failure, false))
                                                     .collect(Collectors.joining("\n"));
         try (Connection connection = dataSource.getConnection()) {
-
+            
             try (PreparedStatement preparedStatement = connection.prepareStatement(
-                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, " +
-                    "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, " +
-                    "fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, "
+                    + "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, "
+                    + "fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
-                preparedStatement.setString(param++, event.getLocation().substring(event.getLocation().indexOf(newspaper)));
+                preparedStatement.setString(param++,
+                                            event.getLocation().substring(event.getLocation().indexOf(newspaper)));
                 //format_type
                 preparedStatement.setString(param++, "tiff");
                 //edition_date
@@ -250,20 +260,19 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, "");
                 //fraktur
                 preparedStatement.setBoolean(param++, true);
-
+                
                 //problems
                 preparedStatement.setString(param++, failuresMessage);
-
+                
                 //Batch-reference
                 preparedStatement.setString(param++, batchName.get());
-
+                
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-
+            
         } catch (SQLException e) {
-            //TODO
-            throw new IOException(e);
+            throw new IOException("Failure in registering page " + event + " for batch " + batchName.get(), e);
         }
     }
 }
