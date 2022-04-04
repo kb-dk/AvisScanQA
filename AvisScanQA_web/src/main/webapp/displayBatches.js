@@ -65,11 +65,13 @@ function loadBatchForNewspaper(batchID) {
                 $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
 
                 if (batch.problems) {
-                    $notice
-                        .append($("<p>").text("Batch Problems:")
-                            .append("<pre/>").text(JSON.stringify(JSON.parse(batch.problems),
-                                ['type', 'filereference', 'description'],
-                                2)));
+                    console.log(batch.problems)
+                    var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n","\n")).join(",\n")
+
+                    $notice.append( $("<p>").text("Batch Problems:"))
+
+                    $notice.append($("<pre/>",{id:"batchProblemsPre"}).text(output));
+
                 }
             }
             let $notesButtonDiv = $("<div/>",{id:"notesButtonDiv"});

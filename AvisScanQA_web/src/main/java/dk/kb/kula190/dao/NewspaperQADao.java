@@ -202,24 +202,30 @@ public class NewspaperQADao {
     public List<NewspaperDate> getDatesForNewspaperID(String avisID, String year) throws DAOFailureException {
         log.debug("Looking up dates for newspaper id: '{}', in year {}", avisID, year);
 
+        int yearInt = Integer.parseInt(year);
         Map<LocalDate, NewspaperDate> resultMap = new HashMap<>();
 
         try (Connection conn = connectionPool.getConnection()) {
             List<SlimBatch> batches = DaoBatchHelper.getLatestBatches(avisID, conn);
             for (SlimBatch batch : batches) {
-                DaoBatchHelper.batchDays(batch).forEach(date -> {
-                    final NewspaperDate newspaperDate = new NewspaperDate().date(date)
-                                                                           .pageCount(0)
-                                                                           .problems("")
-                                                                           .editionCount(0)
-                                                                           .notesCount(0)
-                                                                           .batchid(batch.getBatchid())
-                                                                           .avisid(batch.getAvisid())
-                                                                           .roundtrip(batch.getRoundtrip())
-                                                                           .state(batch.getState());
-                    resultMap.put(date, newspaperDate);
+                if (batch.getEndDate().getYear() <= yearInt && batch.getStartDate().getYear() >= yearInt) {
 
-                });
+                    DaoBatchHelper.batchDays(batch).
+                                  filter(date -> date.getYear() == yearInt)
+                                  .forEach((LocalDate date) -> {
+                        final NewspaperDate newspaperDate = new NewspaperDate().date(date)
+                                                                               .pageCount(0)
+                                                                               .problems("")
+                                                                               .editionCount(0)
+                                                                               .notesCount(0)
+                                                                               .batchid(batch.getBatchid())
+                                                                               .avisid(batch.getAvisid())
+                                                                               .roundtrip(batch.getRoundtrip())
+                                                                               .state(batch.getState());
+                        resultMap.put(date, newspaperDate);
+
+                    });
+                }
             }
 
 
@@ -487,7 +493,6 @@ public class NewspaperQADao {
                     .edition(editionPages.getKey())
                     .sections(sections);
             editions.add(edition);
-
 
 
             Map<String, Set<NewspaperPage>> sectionsToPages = editionPages.getValue().stream()

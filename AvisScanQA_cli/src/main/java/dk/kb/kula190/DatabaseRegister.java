@@ -40,10 +40,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
     private final String finishedBatchState;
     private final String acknowledgmentFile;
     private final List<Failure> checkerFailures;
-    
+
     private final List<Failure> registeredFailures;
     private BasicDataSource dataSource;
-    
+
     public DatabaseRegister(ResultCollector resultCollector,
                             Driver jdbcDriver,
                             String jdbcURL,
@@ -54,17 +54,17 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             String acknowledgmentFile,
                             List<Failure> checkerFailures) {
         super(resultCollector);
-        this.jdbcDriver         = jdbcDriver;
-        this.jdbcURL            = jdbcURL;
-        this.jdbcUser           = jdbcUser;
-        this.jdbcPassword       = jdbcPassword;
+        this.jdbcDriver = jdbcDriver;
+        this.jdbcURL = jdbcURL;
+        this.jdbcUser = jdbcUser;
+        this.jdbcPassword = jdbcPassword;
         this.acknowledgmentFile = acknowledgmentFile;
-        this.checkerFailures    = checkerFailures;
+        this.checkerFailures = checkerFailures;
         this.registeredFailures = new ArrayList<>();
-        this.initialBatchState  = initialBatchState;
+        this.initialBatchState = initialBatchState;
         this.finishedBatchState = finishedBatchState;
     }
-    
+
     @Override
     public void batchBegins(DecoratedNodeParsingEvent event,
                             String newspaper,
@@ -72,26 +72,26 @@ public class DatabaseRegister extends DecoratedEventHandler {
                             LocalDate startDate,
                             LocalDate endDate) throws IOException {
         dataSource = new BasicDataSource();
-        
+
         if (jdbcUser != null) {
             dataSource.setUsername(jdbcUser);
         }
-        
+
         if (jdbcPassword != null) {
             dataSource.setPassword(jdbcPassword);
         }
         dataSource.setUrl(jdbcURL);
-        
+
         dataSource.setDefaultReadOnly(false);
         dataSource.setDefaultAutoCommit(false);
-        
+
         dataSource.setRemoveAbandonedTimeout(60); // 60 sec
         dataSource.setMaxWaitMillis(60000); // 1 min
         dataSource.setMaxTotal(2); // Change to 10 when running as WAR
-        
+
         dataSource.setDriver(jdbcDriver);
-        
-        
+
+
         try (Connection connection = dataSource.getConnection()) {
             updateBatchState(newspaper, roundTrip, startDate, endDate, connection, initialBatchState, 0, null);
         } catch (SQLException e) {
@@ -100,13 +100,13 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                   + " for batch "
                                   + batchName.get(), e);
         }
-        
+
         Path ackFile = Paths.get(event.getLocation(), acknowledgmentFile);
         log.debug("Finished handling of batch {} so writing acknowledgmentFile {}", batchName.get(), ackFile);
         FileUtils.touch(ackFile.toFile());
         log.info("Finished handling of batch {} so wrote acknowledgmentFile {}", batchName.get(), ackFile);
     }
-    
+
     private void updateBatchState(String newspaper,
                                   String roundTrip,
                                   LocalDate startDate,
@@ -151,26 +151,27 @@ public class DatabaseRegister extends DecoratedEventHandler {
             preparedStatement.setInt(param++, numProblems);
             //Username
             preparedStatement.setString(param++, System.getenv("USER"));
-            
+
             boolean result = preparedStatement.execute();
         }
         connection.commit();
     }
-    
+
     @Override
     public void batchEnds(DecoratedNodeParsingEvent event,
                           String newspaper,
                           String roundTrip,
                           LocalDate startDate,
                           LocalDate endDate) throws IOException {
-        
+
         try (Connection connection = dataSource.getConnection()) {
-            
+
             List<Failure> batchFailures = new ArrayList<>(checkerFailures);
             batchFailures.removeAll(registeredFailures);
-            
-            String failuresMessage = JSON.toJson(batchFailures, true);
-            
+
+
+            String failuresMessage = orEmpty(batchFailures);
+
             updateBatchState(newspaper,
                              roundTrip,
                              startDate,
@@ -179,7 +180,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                              finishedBatchState,
                              checkerFailures.size(),
                              failuresMessage);
-            
+
         } catch (SQLException e) {
             throw new IOException("Failure in registering batch state "
                                   + finishedBatchState
@@ -196,7 +197,14 @@ public class DatabaseRegister extends DecoratedEventHandler {
             }
         }
     }
-    
+
+    private String orEmpty(List<?> batchFailures) {
+        if (!batchFailures.isEmpty()){
+            return "";
+        }
+        return JSON.toJson(batchFailures, true);
+    }
+
     private boolean matchThisPage(Reference reference, DecoratedParsingEvent event) {
         return Objects.equals(event.getAvis(), reference.getAvis())
                && Objects.equals(event.getEditionDate().toString(),
@@ -204,9 +212,9 @@ public class DatabaseRegister extends DecoratedEventHandler {
                && Objects.equals(event.getUdgave(), reference.getUdgave())
                && Objects.equals(event.getSectionName(), reference.getSectionName())
                && Objects.equals(event.getPageNumber(), reference.getPageNumber());
-        
+
     }
-    
+
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String newspaper,
@@ -219,11 +227,11 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                                                                             event))
                                                            .toList();
         registeredFailures.addAll(failuresForThisPage);
-        
-        String failuresMessage = JSON.toJson(failuresForThisPage, true);
-        
+
+        String failuresMessage = orEmpty(failuresForThisPage);
+
         try (Connection connection = dataSource.getConnection()) {
-            
+
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, "
                     + "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, "
@@ -257,17 +265,17 @@ public class DatabaseRegister extends DecoratedEventHandler {
                 preparedStatement.setString(param++, "");
                 //fraktur
                 preparedStatement.setBoolean(param++, true);
-                
+
                 //problems
                 preparedStatement.setString(param++, failuresMessage);
-                
+
                 //Batch-reference
                 preparedStatement.setString(param++, batchName.get());
-                
+
                 boolean result = preparedStatement.execute();
             }
             connection.commit();
-            
+
         } catch (SQLException e) {
             throw new IOException("Failure in registering page " + event + " for batch " + batchName.get(), e);
         }

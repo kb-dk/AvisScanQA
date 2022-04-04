@@ -202,6 +202,7 @@ function renderNewspaperForYear(years, currentyear, url) {
 }
 
 function determineColor(dayInMonth, element,noteCount) {
+    console.log(dayInMonth)
     if (dayInMonth.state === "") {
         element.css(configJson.global.calendarStyling.notWithinBatch);
     } else if (dayInMonth.problems.length > 0) {
@@ -244,15 +245,18 @@ function buildCalendar(year, month, availableDates) {
     }
     for (let availableDate of availableDates) {
         //overwrite days where we have content
+
         let element = daysInMonth[availableDate.day.date() - 1];
-        element.available = true;
-        element.count = availableDate.count;
-        element.editionCount = availableDate.editionCount;
-        element.state = availableDate.state;
-        element.problems = availableDate.problems;
-        element.notesCount = availableDate.notesCount;
-        element.avisid = availableDate.avisid;
-        element.batchid = availableDate.batchid;
+            element.available = true;
+            element.count = availableDate.count;
+            element.editionCount = availableDate.editionCount;
+            element.state = availableDate.state;
+            element.problems = availableDate.problems;
+            element.notesCount = availableDate.notesCount;
+            element.avisid = availableDate.avisid;
+            element.batchid = availableDate.batchid;
+
+
     }
 
     let calHtml = "";

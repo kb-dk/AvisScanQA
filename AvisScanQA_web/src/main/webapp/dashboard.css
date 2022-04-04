@@ -164,3 +164,7 @@ body {
   /*Override bootstrap tables as it seems to make the page WAY too long*/
   height: unset;
 }
+#batchProblemsPre{
+  overflow-y: auto;
+  max-height: 20em;
+}
