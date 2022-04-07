@@ -51,8 +51,14 @@ avischk-web-qa:
         containsNotes:
           color: "yellow"
           fontWeight: "bold"
-    newspaper: { }
+    newspaper:
+      dropDownStandardMessages:
+        options:
+          - "Avis ugyldig"
     batch:
+      dropDownStandardMessages:
+        options:
+          - "Batch ugyldigt"
       stateButtonOptions:
         APPROVED:
           name: "Accepted"

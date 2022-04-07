@@ -81,27 +81,29 @@ function loadYearsForNewspaper(avisID, year) {
                         class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
                         tabindex: "100"
                     })
-
+                    $showNotesDiv.offsetTop = $notesButton.offsetTop;
                     setShowNotesFocusInAndOut($notesButton, $showNotesDiv)
 
                     let $newspaperNotesForm = $("<form/>", {id: "newspaperNotesForm", action: "", method: "post"});
-                    const formRow1 = $("<div>", {class: "form-row"})
-                    const formRow2 = $("<div>", {class: "form-row"})
+                    const formRow1 = $("<div>", {class: "form-row form-row-upper"})
+                    const formRow2 = $("<div>", {class: "form-row form-row-lower"})
                     $newspaperNotesForm.append(formRow1);
                     $newspaperNotesForm.append(formRow2);
 
-                    formRow1.append($("<select/>", {
-                        class: "form-select", name: "standardNote"
-                    }).append($("<option>", {value: "", html: "", selected: "true"}))
-                        .append($("<option>", {
-                            value: "Avis ugyldigt", html: "Avis ugyldigt"
-                        })))
+                    let $newspaperDropDown = $("<select/>", {
+                        class: "form-control calendarNotesDropdown", name: "standardNote"
+                    });
+                    formRow1.append($newspaperDropDown)
+                    $newspaperDropDown.append($("<option>", {class:"",value: "", html: "", selected: "true"}));
+                    for (const option of configJson.newspaper.dropDownStandardMessages.options) {
+                        $newspaperDropDown.append($("<option>", {class:"dropdown-item",value: option, html:option}));
+                    }
 
-                    formRow2.append($("<textarea/>", {
-                        class: "userNotes", id: "batchNotes", type: "text", name: "notes"
+                    formRow1.append($("<textarea/>", {
+                        class: "userNotes calendarNotes", id: "batchNotes", type: "text", name: "notes"
                     }));
-                    formRow2.append($("<input/>", {
-                        id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm",value:"Gem"
+                    formRow1.append($("<input/>", {
+                        class:"btn btn-sm btn-outline-dark",id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm",value:"Gem"
                     }));
                     $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
 
@@ -128,15 +130,15 @@ function loadYearsForNewspaper(avisID, year) {
                                 readOnly: "true",
                                 disabled: true
                             });
-                            formRow.append($("<label/>", {
-                                for: $newspaperNote.uniqueId().attr("id"),
-                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                            }))
                             formRow.append($newspaperNote);
                             formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
                                 "border": "none",
                                 "background-color": "transparent"
                             }));
+                            formRow.append($("<label/>", {
+                                for: $newspaperNote.uniqueId().attr("id"),
+                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                            }))
                             $newspaperForm.submit(noteNewspaperDeleteHandler);
                             $showNotesDiv.append($newspaperForm);
                         }
@@ -202,7 +204,6 @@ function renderNewspaperForYear(years, currentyear, url) {
 }
 
 function determineColor(dayInMonth, element,noteCount) {
-    console.log(dayInMonth)
     if (dayInMonth.state === "") {
         element.css(configJson.global.calendarStyling.notWithinBatch);
     } else if (dayInMonth.problems.length > 0) {

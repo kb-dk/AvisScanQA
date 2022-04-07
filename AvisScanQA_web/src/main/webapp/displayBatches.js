@@ -40,7 +40,6 @@ function loadBatchForNewspaper(batchID) {
                         class: "dropdown-item",
                         title: val.description,
                         form: "stateForm",
-
                         value: `${option}`,
                         html: `${val.name}`,
                     }));
@@ -65,16 +64,14 @@ function loadBatchForNewspaper(batchID) {
                 $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
 
                 if (batch.problems) {
-                    console.log(batch.problems)
-                    var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n","\n")).join(",\n")
+                    var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
 
-                    $notice.append( $("<p>").text("Batch Problems:"))
-
-                    $notice.append($("<pre/>",{id:"batchProblemsPre"}).text(output));
+                    $notice.append($("<p>").text("Batch Problems:"))
+                    $notice.append($("<pre/>", {id: "batchProblemsPre"}).text(output));
 
                 }
             }
-            let $notesButtonDiv = $("<div/>",{id:"notesButtonDiv"});
+            let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
             let $notesButton = $("<button/>", {
                 class: `notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`,
                 text: `${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and" : ""} create notes`
@@ -84,26 +81,28 @@ function loadBatchForNewspaper(batchID) {
                 class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
                 tabindex: "100"
             })
-            setShowNotesFocusInAndOut($notesButton,$showNotesDiv);
+            $showNotesDiv.offsetTop = $notesButton.offsetTop;
+            setShowNotesFocusInAndOut($notesButton, $showNotesDiv);
 
             let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
-            const formRow1 = $("<div>", {class: "form-row"})
-            const formRow2 = $("<div>", {class: "form-row"})
+            const formRow1 = $("<div>", {class: "form-row form-row-upper"})
+            const formRow2 = $("<div>", {class: "form-row form-row-lower"})
             $batchNotesForm.append(formRow1);
             $batchNotesForm.append(formRow2);
+            let $batchDropDown = $("<select/>", {
+                class: "form-control calendarNotesDropdown", name: "standardNote"
+            });
+            $batchDropDown.append($("<option>", {value: "", html: "", selected: "true"}));
+            for (const option of batchConfig.dropDownStandardMessages.options) {
+                $batchDropDown.append($("<option>", {value: option, html:option}));
+            }
+            formRow1.append($batchDropDown)
 
-            formRow1.append($("<select/>", {
-                class: "form-select", name: "standardNote"
-            }).append($("<option>", {value: "", html: "", selected: "true"}))
-                .append($("<option>", {
-                    value: "Batch ugyldigt", html: "Batch ugyldigt"
-                })))
-
-            formRow2.append($("<textarea/>", {
-                class: "userNotes", id: "batchNotes", type: "text", name: "notes"
+            formRow1.append($("<textarea/>", {
+                class: "userNotes calendarNotes", id: "batchNotes", type: "text", name: "notes"
             }));
-            formRow2.append($("<input/>", {
-                id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm", value:"Gem"
+            formRow1.append($("<input/>", {
+                class:"btn btn-sm btn-outline-dark",id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm", value: "Gem"
             }));
 
             $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
@@ -111,44 +110,37 @@ function loadBatchForNewspaper(batchID) {
 
             $batchNotesForm.submit(noteSubmitHandler);
             $showNotesDiv.append($batchNotesForm);
-            console.log(batch)
-            if (batch.notes) {
 
+            for (let i = 0; i < batch.notes.length; i++) {
+                let $batchForm = $("<form>", {action: "", method: "delete"});
+                $batchForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
 
-                for (let i = 0; i < batch.notes.length; i++) {
-                    // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
-                    let $batchForm = $("<form>", {action: "", method: "delete"});
-                    $batchForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
+                const note = batch.notes[i];
+                $batchForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
 
-                    const note = batch.notes[i];
-                    $batchForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
+                const formRow = $("<div>", {class: "form-row"})
+                $batchForm.append(formRow);
 
-                    const formRow = $("<div>", {class: "form-row"})
-                    $batchForm.append(formRow);
-
-                    let $batchNote = $("<textarea/>", {
-                        class: "userNotes",
-                        type: "text",
-                        name: "notes",
-                        text: note.note,
-                        readOnly: "true",
-                        disabled: true
-                    });
-                    formRow.append($("<label/>", {
-                        for: $batchNote.uniqueId().attr("id"),
-                        text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                    }))
-                    formRow.append($batchNote);
-                    formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
-                        "border": "none",
-                        "background-color": "transparent"
-                    }));
-                    $batchForm.submit(noteDeleteHandler);
-                    $showNotesDiv.append($batchForm);
-                }
+                let $batchNote = $("<textarea/>", {
+                    class: "userNotes",
+                    type: "text",
+                    name: "notes",
+                    text: note.note,
+                    readOnly: "true",
+                    disabled: true
+                });
+                formRow.append($batchNote);
+                formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+                    "border": "none",
+                    "background-color": "transparent"
+                }));
+                formRow.append($("<label/>", {
+                    for: $batchNote.uniqueId().attr("id"),
+                    text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                }))
+                $batchForm.submit(noteDeleteHandler);
+                $showNotesDiv.append($batchForm);
             }
-            //let childrenOfNotesDiv = Array.from($showNotesDiv.childNodes);
-
             $notesButtonDiv.append($notesButton)
             $notice.append($notesButtonDiv);
             $notice.append($showNotesDiv);
@@ -157,35 +149,38 @@ function loadBatchForNewspaper(batchID) {
 
         });
 }
-function setShowNotesFocusInAndOut(focusInEl, focusOutEl){
+
+function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
     focusInEl.focusin((e) => {
         focusOutEl.addClass("active");
         focusOutEl.focus();
     });
     focusOutEl.focusout((e) => {
         let bool = !e.relatedTarget;//if relatedTarget is null bool is true
-        if (bool){
+        if (bool) {
             focusOutEl.removeClass("active");
-        }else{
+        } else {
             bool = focusOutEl[0] != e.relatedTarget
-            if (bool){
-                if (!htmlElementWithinCollection(focusOutEl[0].children,e.relatedTarget.form)){
+            if (bool) {
+                if (!htmlElementWithinCollection(focusOutEl[0].children, e.relatedTarget.form)) {
                     focusOutEl.removeClass("active");
                 }
-            }else{
+            } else {
                 focusOutEl.focus();
             }
         }
     });
 }
-function htmlElementWithinCollection(collection,element){
-    for(let i = 0; i < collection.length; i++){
-        if(collection.item(i) == element){
+
+function htmlElementWithinCollection(collection, element) {
+    for (let i = 0; i < collection.length; i++) {
+        if (collection.item(i) == element) {
             return true
         }
     }
     return false;
 }
+
 /**
  *
  * @param {int} start
@@ -206,7 +201,7 @@ function renderBatchTable(filter) {
         url: "api/batch",
         filterControl: true,
         detailView: true,
-        detailFormatter:function (i, r){
+        detailFormatter: function (i, r) {
             console.log(r)
             return "State description: " + batchConfig.stateButtonOptions[r.state].description;
         },
@@ -243,7 +238,7 @@ function renderBatchTable(filter) {
             searchFormatter: false, //Use this to have the select use the basic value, rather than the formatted value
             formatter: function (value, row) {
                 // https://examples.bootstrap-table.com/index.html#column-options/formatter.html#view-source
-                return "<div title='"+batchConfig.stateButtonOptions[value].description+"'>" + batchConfig.stateButtonOptions[value].name + "</div>";
+                return "<div title='" + batchConfig.stateButtonOptions[value].description + "'>" + batchConfig.stateButtonOptions[value].name + "</div>";
 
             },
         }, {
@@ -259,7 +254,6 @@ function renderBatchTable(filter) {
             filterAlgorithm: 'or'
         }
     })
-
     if (filter != null) {
         //If we view a certain batch or newspaper, we only want batches from the same newspaper
         $table.bootstrapTable('filterBy', {
@@ -268,9 +262,6 @@ function renderBatchTable(filter) {
     } else {
         $table.bootstrapTable('filterBy', {})
     }
-    //console.log($(".stateCell").attributes("title", "test"))
-
-
 }
 
 function stateSubmitHandler(event) {
@@ -279,15 +270,11 @@ function stateSubmitHandler(event) {
     const data = new FormData(event.target);
     const state = event.originalEvent.submitter.value;
 
-
     let parts = ["api", "batch", data.get('batch')]
     var query = new URLSearchParams();
 
     query.append("state", state);
-
-    console.log(event.target);
     let url = parts.join("/") + "?" + query.toString();
-
 
     $.ajax({
         type: "POST",
@@ -299,10 +286,7 @@ function stateSubmitHandler(event) {
         dataType: "json",
         contentType: "application/json"
     });
-
     location.reload(false);
-
-    // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
 
