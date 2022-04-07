@@ -94,15 +94,25 @@ function loadBatchForNewspaper(batchID) {
             });
             $batchDropDown.append($("<option>", {value: "", html: "", selected: "true"}));
             for (const option of batchConfig.dropDownStandardMessages.options) {
-                $batchDropDown.append($("<option>", {value: option, html:option}));
+                $batchDropDown.append($("<option>", {value: option, html: option}));
             }
             formRow1.append($batchDropDown)
+            let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
+            formRow1.append($hiddenTextAreaValue)
+            let $batchNotesTextArea = $("<span/>", {
+                class: "userNotes calendarNotes", id: "batchNotes", type: "text"
+            }).attr('contenteditable', true).on('input', (e) => {
+                $hiddenTextAreaValue.val(e.target.innerText);
+            });
 
-            formRow1.append($("<textarea/>", {
-                class: "userNotes calendarNotes", id: "batchNotes", type: "text", name: "notes"
-            }));
+            formRow1.append($batchNotesTextArea)
             formRow1.append($("<input/>", {
-                class:"btn btn-sm btn-outline-dark",id: "batchNotesFormSubmit", type: "submit", name: "submit", form: "batchNotesForm", value: "Gem"
+                class: "btn btn-sm btn-outline-dark",
+                id: "batchNotesFormSubmit",
+                type: "submit",
+                name: "submit",
+                form: "batchNotesForm",
+                value: "Gem"
             }));
 
             $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
@@ -120,24 +130,24 @@ function loadBatchForNewspaper(batchID) {
 
                 const formRow = $("<div>", {class: "form-row"})
                 $batchForm.append(formRow);
-
-                let $batchNote = $("<textarea/>", {
+                let $batchNote = $("<span/>", {
                     class: "userNotes",
                     type: "text",
-                    name: "notes",
                     text: note.note,
                     readOnly: "true",
                     disabled: true
                 });
+                formRow.append($("<label/>", {
+                    for: $batchNote.uniqueId().attr("id"),
+                    text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                }))
+
                 formRow.append($batchNote);
                 formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
                     "border": "none",
                     "background-color": "transparent"
                 }));
-                formRow.append($("<label/>", {
-                    for: $batchNote.uniqueId().attr("id"),
-                    text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                }))
+
                 $batchForm.submit(noteDeleteHandler);
                 $showNotesDiv.append($batchForm);
             }
@@ -162,7 +172,7 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
         } else {
             bool = focusOutEl[0] != e.relatedTarget
             if (bool) {
-                if (!htmlElementWithinCollection(focusOutEl[0].children, e.relatedTarget.form)) {
+                if (!htmlElementWithinCollection(focusOutEl[0].children, e.relatedTarget, e.relatedTarget.form)) {
                     focusOutEl.removeClass("active");
                 }
             } else {
@@ -172,10 +182,15 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
     });
 }
 
-function htmlElementWithinCollection(collection, element) {
+function htmlElementWithinCollection(collection, element, form) {
     for (let i = 0; i < collection.length; i++) {
-        if (collection.item(i) == element) {
+        if (collection.item(i) == form || collection.item(i) == element) {
             return true
+        }
+        if (collection.item(i).children.length > 0) {
+            if (htmlElementWithinCollection(collection.item(i).children, element)) {
+                return true
+            }
         }
     }
     return false;
@@ -281,12 +296,13 @@ function stateSubmitHandler(event) {
         url: url,
         data: state,
         success: function () {
+            location.reload();
             alert("Batch has been accepted")
         },
         dataType: "json",
         contentType: "application/json"
     });
-    location.reload(false);
+
     return false;  // <- cancel event
 }
 

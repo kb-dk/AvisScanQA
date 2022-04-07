@@ -15,6 +15,7 @@ function noteNewspaperSubmitHandler(event) {
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
             alert("notes updated")
+            location.reload();
         }, dataType: "json", contentType: "application/json"
     });
     //location.reload();
@@ -40,6 +41,7 @@ function noteNewspaperDeleteHandler(event) {
     $.ajax({
         type: "DELETE", url: url, data: notes, success: function () {
             alert("note deleted")
+            location.reload()
         }, dataType: "json", contentType: "application/json"
     });
     //location.reload();
@@ -98,9 +100,12 @@ function loadYearsForNewspaper(avisID, year) {
                     for (const option of configJson.newspaper.dropDownStandardMessages.options) {
                         $newspaperDropDown.append($("<option>", {class:"dropdown-item",value: option, html:option}));
                     }
-
-                    formRow1.append($("<textarea/>", {
-                        class: "userNotes calendarNotes", id: "batchNotes", type: "text", name: "notes"
+                    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+                    formRow1.append($hiddenTextAreaValue);
+                    formRow1.append($("<span/>", {
+                        class: "userNotes calendarNotes", id: "batchNotes", type: "text"
+                    }).attr('contenteditable',true).on('input',(e)=>{
+                        $hiddenTextAreaValue.val(e.target.innerText);
                     }));
                     formRow1.append($("<input/>", {
                         class:"btn btn-sm btn-outline-dark",id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm",value:"Gem"
@@ -122,7 +127,7 @@ function loadYearsForNewspaper(avisID, year) {
                             const formRow = $("<div>", {class: "form-row"})
                             $newspaperForm.append(formRow);
 
-                            let $newspaperNote = $("<textarea/>", {
+                            let $newspaperNote = $("<span/>", {
                                 class: "userNotes",
                                 type: "text",
                                 name: "notes",
@@ -130,15 +135,15 @@ function loadYearsForNewspaper(avisID, year) {
                                 readOnly: "true",
                                 disabled: true
                             });
+                            formRow.append($("<label/>", {
+                                for: $newspaperNote.uniqueId().attr("id"),
+                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                            }))
                             formRow.append($newspaperNote);
                             formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
                                 "border": "none",
                                 "background-color": "transparent"
                             }));
-                            formRow.append($("<label/>", {
-                                for: $newspaperNote.uniqueId().attr("id"),
-                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                            }))
                             $newspaperForm.submit(noteNewspaperDeleteHandler);
                             $showNotesDiv.append($newspaperForm);
                         }

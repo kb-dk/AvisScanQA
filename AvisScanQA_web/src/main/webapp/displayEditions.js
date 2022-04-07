@@ -16,8 +16,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
 
     $.getJSON(url)
         .done(function (newspaperDay) {
-            console.log(day === newspaperDay.batch.startDate);
-            console.log(day === newspaperDay.batch.endDate);
+
             $headline.append($("<a/>", {
                 class: "btn btn-secondary",
                 text: "Back to newspaper year",
@@ -61,7 +60,6 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
 
 
 function noteSubmitHandler(event, url) {
-    console.log(event)
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
@@ -75,22 +73,17 @@ function noteSubmitHandler(event, url) {
     query.append("section", data.get('section'));
     query.append("page", data.get('page'));
 
-    // let url = parts.filter(x => x).join("/")
-
     url = parts.join("/") + "?" + query.toString();
 
-    console.log(url)
     const notes = data.get('standardNote') + " " + data.get('notes');
 
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
+            alert("Note added");
             location.reload();
             //event.target.parentNode.append(createDisplayNoteForm(batchID,data))
         }, dataType: "json", contentType: "application/json"
     });
-
-    //location.reload();
-    // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
 
@@ -114,10 +107,7 @@ function noteDeleteHandler(event) {
             alert("note deleted")
         }, dataType: "json", contentType: "application/json"
     });
-    console.log(event)
     $(`#noteRow${noteID}`).remove();
-    //location.reload();
-    // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
 
@@ -148,12 +138,13 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         return;
     }
     const edition = editions[editionIndex];
-
+    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
     const $dayCol = $("#dayCol");
-    let $dayNotesTextArea = $("<textarea/>", {
-        class: "userNotes", id: "dayNotes", type: "text", name: "notes"
+    let $dayNotesTextArea = $("<span/>", {
+        class: "userNotes", id: "dayNotes", type: "text"
+    }).attr('contenteditable',true).on('input',(e)=>{
+        $hiddenTextAreaValue.val(e.target.innerText);
     })
-
 
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
 
@@ -172,6 +163,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
 
     formRow1.append($dropDownDayNotes)
     formRow1.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
+    formRow2.append($hiddenTextAreaValue);
     formRow2.append($dayNotesTextArea);
     formRow2.append($("<input/>", {
         id: "dayNotesFormSubmit", type: "submit", name: "submit", form: "dayNotesForm", value: "Gem"
@@ -182,11 +174,11 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $dayNotesForm.submit(noteSubmitHandler);
     $dayCol.append($dayNotesForm);
 
-
+    let $noteContainer = $("<div/>",{class:"noteContainer"});
     for (let i = 0; i < newspaperDay.notes.length; i++) {
-
-        $dayCol.append(createDisplayNoteForm(newspaperDay.batch.batchid, newspaperDay.notes[i]));
+        $noteContainer.append(createDisplayNoteForm(newspaperDay.batch.batchid, newspaperDay.notes[i]));
     }
+    $dayCol.append($noteContainer);
 
     const $editionCol = $("#editionCol");
 
@@ -208,11 +200,12 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $editionNav.append(link);
     }
     $("#edition-show").load("editionDisplay.html", function () {
-
-        let $editionNotesTextArea = $("<textarea/>", {
-            class: "userNotes", id: "editionNotes", type: "text", name: "notes"
+        let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+        let $editionNotesTextArea = $("<span/>", {
+            class: "userNotes", id: "editionNotes", type: "text"
+        }).attr('contenteditable',true).on('input',(e)=>{
+            $hiddenTextAreaValue.val(e.target.innerText);
         })
-
 
         let $editionNotesForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
 
@@ -231,6 +224,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         formRow1.append($dropDownEditionNotes)
         formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
         formRow2.append($editionNotesTextArea);
+        formRow2.append($hiddenTextAreaValue);
         formRow2.append($("<input/>", {
             id: "editionNotesFormSubmit", type: "submit", name: "submit", form: "editionNotesForm", value: "Gem"
         }));
@@ -240,10 +234,11 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
         $editionNotesForm.submit(noteSubmitHandler);
         $editionCol.append($editionNotesForm);
-
+        let $noteContainer = $("<div/>",{class:"noteContainer"});
         for (let i = 0; i < edition.notes.length; i++) {
-            $editionCol.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
+            $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
         }
+        $editionCol.append($noteContainer)
         renderSections(edition, sectionIndex, pageIndex);
         if (edition.sections[sectionIndex].pages.length === 1) {
             renderSinglePage(edition.section[sectionIndex].pages[0]);
@@ -267,9 +262,11 @@ function renderSections(edition, sectionIndex) {
             title: edition.sections[i].section
         }));
     }
-
-    let $sectionNotesTextArea = $("<textarea/>", {
-        class: "userNotes", id: "sectionNotes", type: "text", name: "notes"
+    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+    let $sectionNotesTextArea = $("<span/>", {
+        class: "userNotes", id: "sectionNotes", type: "text"
+    }).attr('contenteditable',true).on('input',(e)=>{
+        $hiddenTextAreaValue.val(e.target.innerText);
     })
 
 
@@ -289,6 +286,7 @@ function renderSections(edition, sectionIndex) {
 
     formRow1.append($dropDownSectionNotes)
     formRow1.append($("<label/>", {for: "sectionNotes"}).text("Section notes"));
+    formRow2.append($hiddenTextAreaValue)
     formRow2.append($sectionNotesTextArea);
     formRow2.append($("<input/>", {
         id: "sectionNotesFormSubmit", type: "submit", name: "submit", form: "sectionNotesForm", value: "Gem"
@@ -316,11 +314,11 @@ function renderSections(edition, sectionIndex) {
     }));
     $sectionNotesForm.submit(noteSubmitHandler);
     $sectionCol.append($sectionNotesForm);
-    console.log((edition.sections))
+    let $noteContainer = $("<div/>",{class:"noteContainer"});
     for (let i = 0; i < edition.sections[sectionIndex].notes.length; i++) {
-
-        $sectionCol.append(createDisplayNoteForm(edition.batchid, edition.sections[sectionIndex].notes[i]));
+        $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.sections[sectionIndex].notes[i]));
     }
+    $sectionCol.append($noteContainer)
 }
 
 
@@ -349,10 +347,15 @@ function renderSinglePage(page) {
 
     formRow1.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
 
-
-    formRow2.append($("<textarea/>", {
-        class: "userNotes", id: "pageNotes", type: "text", name: "notes"
-    }));
+    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+    formRow2.append($hiddenTextAreaValue);
+    let $pageNotesTextArea = $("<span/>", {
+        class: "userNotes", id: "pageNotes", type: "text"
+    });
+    $pageNotesTextArea.attr('contenteditable',true).on('input',(e)=>{
+        $hiddenTextAreaValue.val(e.target.innerText);
+    });
+    formRow2.append($pageNotesTextArea)
     formRow2.append($("<input/>", {
         id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm", value: "Gem"
     }));
@@ -366,10 +369,11 @@ function renderSinglePage(page) {
 
     $pageNotesForm.submit(noteSubmitHandler);
     $pageCol.append($pageNotesForm);
-
+    let $noteContainer = $("<div/>",{class:"noteContainer"});
     for (let i = 0; i < page.notes.length; i++) {
-        $pageCol.append(createDisplayNoteForm(page.batchid, page.notes[i]));
+        $noteContainer.append(createDisplayNoteForm(page.batchid, page.notes[i]));
     }
+    $pageCol.append($noteContainer);
 
     let $contentRow = $("#contentRow");
     $contentRow.append($pageCol);
@@ -410,7 +414,7 @@ function createDisplayNoteForm(batchid, note) {
     const formRow = $("<div>", {id: `noteRow${note.id}`, class: "form-row"})
     $pageForm.append(formRow);
 
-    let $pageNote = $("<textarea/>", {
+    let $pageNote = $("<span/>", {
         class: "userNotes",
         type: "text",
         name: "notes",
