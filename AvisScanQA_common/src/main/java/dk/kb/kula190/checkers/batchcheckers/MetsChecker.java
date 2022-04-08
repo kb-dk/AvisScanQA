@@ -143,11 +143,9 @@ public class MetsChecker extends DecoratedEventHandler {
                  .forEach(ref -> altoFilesFromMets.add(ref));
             
             
-            //TODO is the Type2DMD_Num always the same? Is Mods always DMD1?
-            
             XpathMods mods = new XpathMods(decoratedEvent,
                                            Utils.asSeparateXML(xpath.selectNode(metsDoc,
-                                                                                "/mets:mets/mets:dmdSec[@ID='DMD1']/mets:mdWrap/mets:xmlData/*")),
+                                                                                "/mets:mets/mets:dmdSec/mets:mdWrap[@MDTYPE='MODS']/mets:xmlData/*")),
                                            avis,
                                            roundTrip,
                                            startDate,
@@ -156,7 +154,7 @@ public class MetsChecker extends DecoratedEventHandler {
             
             XpathDC dc = new XpathDC().data(decoratedEvent,
                                             Utils.asSeparateXML(xpath.selectNode(metsDoc,
-                                                                                 "/mets:mets/mets:dmdSec[@ID='DMD2']/mets:mdWrap/mets:xmlData/*")),
+                                                                                 "/mets:mets/mets:dmdSec/mets:mdWrap[@MDTYPE='DC']/mets:xmlData/*")),
                                             avis,
                                             roundTrip,
                                             startDate,
@@ -165,7 +163,7 @@ public class MetsChecker extends DecoratedEventHandler {
             
             XpathMarc marc = new XpathMarc().data(decoratedEvent,
                                                   Utils.asSeparateXML(xpath.selectNode(metsDoc,
-                                                                                       "/mets:mets/mets:dmdSec[@ID='DMD3']/mets:mdWrap/mets:xmlData/*")),
+                                                                                       "/mets:mets/mets:dmdSec/mets:mdWrap[@MDTYPE='MARC']/mets:xmlData/*")),
                                                   avis,
                                                   roundTrip,
                                                   startDate,
@@ -247,11 +245,11 @@ public class MetsChecker extends DecoratedEventHandler {
     
     private void checkDC(DecoratedAttributeParsingEvent decoratedEvent, XPathSelector xpath, XpathDC metadataDC) {
         //DC
-        checkEquals(decoratedEvent,
+        checkAllInSet(decoratedEvent,
                     FailureType.INVALID_METS_ERROR,
-                    "Mets dc language was incorrect should have been {expected} but was {actual}",
+                    "Mets dc language was incorrect should have been some of {expected} but was {actual}",
                     metadataDC.getLanguage(),
-                    "dan"); //TODO Also accept german language
+                    Set.of("dan","ger"));
         
         checkEquals(decoratedEvent,
                     FailureType.INVALID_METS_ERROR,
