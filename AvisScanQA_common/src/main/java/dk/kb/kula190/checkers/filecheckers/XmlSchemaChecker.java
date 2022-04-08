@@ -128,8 +128,10 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
                 //TODO Give the right Appendic name here
                 addFailure(parsingEvent.get(),
                            FailureType.SCHEMA_ERROR,
-                           name + " error encountered",
-                           exception.getMessage()); //TODO get message in failure
+                           name + " error encountered at line {0}, column {1}: {2}",
+                           exception.getLineNumber(),
+                           exception.getColumnNumber(),
+                           exception.getMessage());
             }
             
             @Override
