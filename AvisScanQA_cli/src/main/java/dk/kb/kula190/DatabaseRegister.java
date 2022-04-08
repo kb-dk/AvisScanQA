@@ -197,9 +197,9 @@ public class DatabaseRegister extends DecoratedEventHandler {
             }
         }
     }
-    //TODO not isEmpty? We got instances where batchFailures contains a single space.
+    
     private String orEmpty(List<?> batchFailures) {
-        if (!batchFailures.isEmpty()){
+        if (batchFailures.isEmpty()){
             return "";
         }
         return JSON.toJson(batchFailures, true);
