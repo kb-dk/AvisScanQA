@@ -15,7 +15,7 @@ public class XpathDC {
     private Set<String> types;
     private Set<String> identifiers;
     private Set<String> formats;
-    private String language;
+    private Set<String> language;
     private Set<String> coverages;
     
     
@@ -40,7 +40,7 @@ public class XpathDC {
         
         formats = new HashSet<>(xpath.selectStringList(metadataDC, "/oai_dc:dc/dc:format/text()"));
         
-        language = xpath.selectString(metadataDC, "/oai_dc:dc/dc:language");
+        language = new HashSet<>(xpath.selectStringList(metadataDC, "/oai_dc:dc/dc:language/text()"));
     
         coverages = new HashSet<>(xpath.selectStringList(metadataDC, "/oai_dc:dc/dc:coverage/text()"));
         return this;
@@ -85,7 +85,7 @@ public class XpathDC {
         return formats;
     }
     
-    public String getLanguage() {
+    public Set<String> getLanguage() {
         return language;
     }
     

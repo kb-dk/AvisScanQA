@@ -96,6 +96,23 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         return matcher;
     }
     
+    
+    protected <K> void checkAllInSet(ParsingEvent event,
+                              FailureType type,
+                              String description,
+                              Set<K> actual,
+                              Set<K> set,
+                              Object... extraValues) {
+        String actualString = asString(actual);
+        String expectedString = asString(set);
+        if (set == null || !set.containsAll(actual)) {
+            addFailure(event,
+                       type,
+                       description.replace("{expected}", expectedString).replace("{actual}", actualString),
+                       extraValues);
+        }
+        
+    }
     protected void checkInSet(ParsingEvent event,
                               FailureType type,
                               String description,
