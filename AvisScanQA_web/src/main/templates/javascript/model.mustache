@@ -1,0 +1,9 @@
+{{#models}}{{#model}}
+{{^isEnum}}
+/**
+* @typedef {Object} {{classname}}
+{{#vars}}
+    * @property { {{#isPrimitiveType}}{{dataType}}{{/isPrimitiveType}}{{^isPrimitiveType}}{{complexType}}{{/isPrimitiveType}}{{#isArray}}[]{{/isArray}} }    {{name}} - {{description}}
+{{/vars}}
+*/
+{{/isEnum}}{{/model}}{{/models}}

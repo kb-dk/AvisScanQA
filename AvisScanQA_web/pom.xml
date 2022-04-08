@@ -328,6 +328,32 @@
                             <output>${project.build.outputDirectory}</output>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>generate javascript classes</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <ignoreFileOverride>
+                                ${project.basedir}/.openapi-codegen-ignore-impl
+                            </ignoreFileOverride>
+                            <generatorName>javascript</generatorName>
+                            <templateDirectory>src/main/templates/javascript</templateDirectory>
+                            <generateModels>true</generateModels>
+                            <generateModelTests>false</generateModelTests>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateApis>false</generateApis>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateAliasAsModel>false</generateAliasAsModel>
+                            <configOptions>
+                                <sourceFolder>target/generated-sources-javascript</sourceFolder>
+                                <invokerPackage>${project.artifactId}</invokerPackage>
+                                <modelPackage>model</modelPackage>
+                            </configOptions>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
 

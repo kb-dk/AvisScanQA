@@ -1,5 +1,13 @@
 let editionJsonData;
 
+/**
+ * @param { String } batchID
+ * @param {string} avisID
+ * @param {*} date
+ * @param {number} editionIndex
+ * @param {number} sectionIndex
+ * @param {number} pageIndex
+ */
 function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sectionIndex, pageIndex) {
     let day = moment(date).format('YYYY-MM-DD');
     let nextDay = moment(date).add(1, 'd').format("YYYY-MM-DD")
@@ -128,6 +136,12 @@ function initComponents() {
     $primary.append($contentRow);
 }
 
+/**
+ * @param {NewspaperDay} newspaperDay
+ * @param {number} editionIndex
+ * @param {number} sectionIndex
+ * @param {number} pageIndex
+ */
 function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
@@ -138,11 +152,11 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         return;
     }
     const edition = editions[editionIndex];
-    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
     const $dayCol = $("#dayCol");
     let $dayNotesTextArea = $("<span/>", {
         class: "userNotes", id: "dayNotes", type: "text"
-    }).attr('contenteditable',true).on('input',(e)=>{
+    }).attr('contenteditable', true).on('input', (e) => {
         $hiddenTextAreaValue.val(e.target.innerText);
     })
 
@@ -174,7 +188,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $dayNotesForm.submit(noteSubmitHandler);
     $dayCol.append($dayNotesForm);
 
-    let $noteContainer = $("<div/>",{class:"noteContainer"});
+    let $noteContainer = $("<div/>", {class: "noteContainer"});
     for (let i = 0; i < newspaperDay.notes.length; i++) {
         $noteContainer.append(createDisplayNoteForm(newspaperDay.batch.batchid, newspaperDay.notes[i]));
     }
@@ -200,10 +214,10 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $editionNav.append(link);
     }
     $("#edition-show").load("editionDisplay.html", function () {
-        let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+        let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
         let $editionNotesTextArea = $("<span/>", {
             class: "userNotes", id: "editionNotes", type: "text"
-        }).attr('contenteditable',true).on('input',(e)=>{
+        }).attr('contenteditable', true).on('input', (e) => {
             $hiddenTextAreaValue.val(e.target.innerText);
         })
 
@@ -234,7 +248,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $editionNotesForm.append($("<input/>", {type: "hidden", name: "edition", value: edition.edition}));
         $editionNotesForm.submit(noteSubmitHandler);
         $editionCol.append($editionNotesForm);
-        let $noteContainer = $("<div/>",{class:"noteContainer"});
+        let $noteContainer = $("<div/>", {class: "noteContainer"});
         for (let i = 0; i < edition.notes.length; i++) {
             $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
         }
@@ -243,12 +257,17 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         if (edition.sections[sectionIndex].pages.length === 1) {
             renderSinglePage(edition.section[sectionIndex].pages[0]);
         } else {
-            renderEdition(edition.sections[sectionIndex], pageIndex);
+            renderSection(edition.sections[sectionIndex], pageIndex);
         }
 
     });
 }
 
+/**
+ *
+ * @param {NewspaperEdition} edition
+ * @param {Number} sectionIndex
+ */
 function renderSections(edition, sectionIndex) {
     let $pageDisplay = $("#contentRow");
     let $sectionCol = $("<div/>", {id: "sectionCol", class: "col"});
@@ -262,10 +281,10 @@ function renderSections(edition, sectionIndex) {
             title: edition.sections[i].section
         }));
     }
-    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
     let $sectionNotesTextArea = $("<span/>", {
         class: "userNotes", id: "sectionNotes", type: "text"
-    }).attr('contenteditable',true).on('input',(e)=>{
+    }).attr('contenteditable', true).on('input', (e) => {
         $hiddenTextAreaValue.val(e.target.innerText);
     })
 
@@ -314,14 +333,17 @@ function renderSections(edition, sectionIndex) {
     }));
     $sectionNotesForm.submit(noteSubmitHandler);
     $sectionCol.append($sectionNotesForm);
-    let $noteContainer = $("<div/>",{class:"noteContainer"});
+    let $noteContainer = $("<div/>", {class: "noteContainer"});
     for (let i = 0; i < edition.sections[sectionIndex].notes.length; i++) {
         $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.sections[sectionIndex].notes[i]));
     }
     $sectionCol.append($noteContainer)
 }
 
-
+/**
+ *
+ * @param {NewspaperPage} page
+ */
 function renderSinglePage(page) {
     let $pageDisplay = $("#primary-show");
 
@@ -347,12 +369,12 @@ function renderSinglePage(page) {
 
     formRow1.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
 
-    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
     formRow2.append($hiddenTextAreaValue);
     let $pageNotesTextArea = $("<span/>", {
         class: "userNotes", id: "pageNotes", type: "text"
     });
-    $pageNotesTextArea.attr('contenteditable',true).on('input',(e)=>{
+    $pageNotesTextArea.attr('contenteditable', true).on('input', (e) => {
         $hiddenTextAreaValue.val(e.target.innerText);
     });
     formRow2.append($pageNotesTextArea)
@@ -369,7 +391,7 @@ function renderSinglePage(page) {
 
     $pageNotesForm.submit(noteSubmitHandler);
     $pageCol.append($pageNotesForm);
-    let $noteContainer = $("<div/>",{class:"noteContainer"});
+    let $noteContainer = $("<div/>", {class: "noteContainer"});
     for (let i = 0; i < page.notes.length; i++) {
         $noteContainer.append(createDisplayNoteForm(page.batchid, page.notes[i]));
     }
@@ -406,6 +428,12 @@ function renderSinglePage(page) {
 
 }
 
+/**
+ *
+ * @param {string} batchid
+ * @param {Note} note
+ * @returns {jQuery|HTMLElement}
+ */
 function createDisplayNoteForm(batchid, note) {
     let $pageForm = $("<form>", {action: "", method: "delete"});
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: batchid}));
@@ -435,7 +463,12 @@ function createDisplayNoteForm(batchid, note) {
     return $pageForm;
 }
 
-
+/**
+ *
+ * @param {string} filename
+ * @param {jQuery} element
+ * @returns {*}
+ */
 function loadImage(filename, element) {
     let result = $("<div>");
     element.append(result);
@@ -463,7 +496,12 @@ function loadImage(filename, element) {
 
 }
 
-function renderEdition(entity, pageIndex) {
+/**
+ *
+ * @param { NewspaperSection } entity
+ * @param {number} pageIndex
+ */
+function renderSection(entity, pageIndex) {
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
     createPageButtons(pages, $pageNav, pageIndex)
@@ -476,6 +514,12 @@ function renderEdition(entity, pageIndex) {
     }
 }
 
+/**
+ *
+ * @param {NewspaperPage[]} pages
+ * @param {jQuery|HTMLElement} parent
+ * @param {number} page
+ */
 function createPageButtons(pages, parent, page) {
     let active;
     let cutLow = page - 1;
@@ -487,7 +531,7 @@ function createPageButtons(pages, parent, page) {
 
     if (pages.length - 1 < 8) {
         for (let p = 0; p < pages.length; p++) {
-            active = page == p ? "active" : "no";
+            active = page === p ? "active" : "no";
             const link = $("<a/>").attr({
                 href: editPageIndexInHash(location.hash, p),
 
@@ -522,8 +566,8 @@ function createPageButtons(pages, parent, page) {
         }
 
         for (let p = cutLow < 0 ? 0 : cutLow; p <= cutHigh; p++) {
-            if (p != 0 && p < pages.length - 1) {
-                active = page == p ? "active" : "no";
+            if (p !== 0 && p < pages.length - 1) {
+                active = page === p ? "active" : "no";
                 const link = $("<a/>").attr({
                     href: editPageIndexInHash(location.hash, p),
 
@@ -559,24 +603,35 @@ function createPageButtons(pages, parent, page) {
     }))
 }
 
-
+/**
+ * @param {string} origHash
+ * @param {string} newEntityIndex
+ * @returns {string}
+ */
 function editEntityIndexInHash(origHash, newEntityIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 4] = newEntityIndex;
     //Reset to section 0 and page 0, to ensure that we do not try to open a page/section that does not exist
-    hashParts[hashParts.length - 3] = 0;
-    hashParts[hashParts.length - 2] = 0;
-    return hashParts.join("/");
+    return editPageIndexInHash(editSectionIndexInHash(hashParts.join("/"), 0), 0);
 }
 
+/**
+ * @param {string} origHash
+ * @param {string} newSectionIndex
+ * @returns {string}
+ */
 function editSectionIndexInHash(origHash, newSectionIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 3] = newSectionIndex;
     //Reset to page 0, to ensure that we do not try to open a page that does not exist in this section
-    hashParts[hashParts.length - 2] = 0;
-    return hashParts.join("/");
+    return editPageIndexInHash(hashParts.join("/"), 0);
 }
 
+/**
+ * @param {string} origHash
+ * @param {string} newPageIndex
+ * @returns {string}
+ */
 function editPageIndexInHash(origHash, newPageIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newPageIndex;

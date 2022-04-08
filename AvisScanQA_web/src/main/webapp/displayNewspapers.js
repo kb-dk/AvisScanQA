@@ -51,7 +51,10 @@ function noteNewspaperDeleteHandler(event) {
 
 function loadNewspaperIDs() {
     $.getJSON('api/newspaperIDs')
-        .done(function (newspaperIDs) {
+        .done(
+            /**
+             * @param { String[] } newspaperIDs */
+            function (newspaperIDs) {
             for (const newspaperID of newspaperIDs) {
                 $("#avisIDer").append(
                     "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
@@ -59,11 +62,18 @@ function loadNewspaperIDs() {
         });
 }
 
-
+/**
+ * @param {String} avisID
+ * @param {Number} year
+ */
 function loadYearsForNewspaper(avisID, year) {
     const url = `api/years/${avisID}`;
     $.getJSON(url)
-        .done(function (years) {
+        .done(
+            /**
+             * @param {String[]} years
+             */
+            function (years) {
             $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
             $("#state-div").empty();
             let $notice = $("#notice-div").empty();
@@ -72,7 +82,11 @@ function loadYearsForNewspaper(avisID, year) {
             }
             const notesUrl = `api/${avisID}/notes`;
             $.getJSON(notesUrl)
-                .done(function (notes) {
+                .done(
+                    /**
+                     * @param {Note[]} notes
+                     */
+                    function (notes) {
                     let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
                     let $notesButton = $("<button/>", {
                         class: `notesButton btn ${notes.length > 0 ? "btn-warning" : "btn-primary"} btn-primary`,
@@ -96,19 +110,24 @@ function loadYearsForNewspaper(avisID, year) {
                         class: "form-control calendarNotesDropdown", name: "standardNote"
                     });
                     formRow1.append($newspaperDropDown)
-                    $newspaperDropDown.append($("<option>", {class:"",value: "", html: "", selected: "true"}));
+                    $newspaperDropDown.append($("<option>", {class: "", value: "", html: "", selected: "true"}));
                     for (const option of configJson.newspaper.dropDownStandardMessages.options) {
-                        $newspaperDropDown.append($("<option>", {class:"dropdown-item",value: option, html:option}));
+                        $newspaperDropDown.append($("<option>", {class: "dropdown-item", value: option, html: option}));
                     }
-                    let $hiddenTextAreaValue = $("<input/>",{type:"hidden",name:"notes"})
+                    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
                     formRow1.append($hiddenTextAreaValue);
                     formRow1.append($("<span/>", {
                         class: "userNotes calendarNotes", id: "batchNotes", type: "text"
-                    }).attr('contenteditable',true).on('input',(e)=>{
+                    }).attr('contenteditable', true).on('input', (e) => {
                         $hiddenTextAreaValue.val(e.target.innerText);
                     }));
                     formRow1.append($("<input/>", {
-                        class:"btn btn-sm btn-outline-dark",id: "newspaperNotesFormSubmit", type: "submit", name: "submit", form: "newspaperNotesForm",value:"Gem"
+                        class: "btn btn-sm btn-outline-dark",
+                        id: "newspaperNotesFormSubmit",
+                        type: "submit",
+                        name: "submit",
+                        form: "newspaperNotesForm",
+                        value: "Gem"
                     }));
                     $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
 
@@ -161,9 +180,9 @@ function loadYearsForNewspaper(avisID, year) {
 }
 
 /**
- * @param {iterable<int>} years array of years to render (either Generator<int, void, int> or int[])
- * @param {int} currentyear current year
- * @param {string} url url to get NewspaperDates from
+ * @param {iterable<Number>} years array of years to render (either Generator<int, void, int> or int[])
+ * @param {Number} currentyear current year
+ * @param {String} url url to get NewspaperDates from
  */
 function renderNewspaperForYear(years, currentyear, url) {
     const yearNav = $("<div/>", {
@@ -208,22 +227,28 @@ function renderNewspaperForYear(years, currentyear, url) {
         });
 }
 
-function determineColor(dayInMonth, element,noteCount) {
+/**
+ *
+ * @param { {state: string, problems: string, count: number} } dayInMonth
+ * @param { jQuery|HTMLElement } element
+ * @param {number} noteCount
+ */
+function determineColor(dayInMonth, element, noteCount) {
     if (dayInMonth.state === "") {
         element.css(configJson.global.calendarStyling.notWithinBatch);
     } else if (dayInMonth.problems.length > 0) {
         element.css(configJson.global.calendarStyling.error);
-    } else if (dayInMonth.count == 0) {
+    } else if (dayInMonth.count === 0) {
         element.css(configJson.global.calendarStyling.noPageWithin);
-    } else if(dayInMonth.state){
+    } else if (dayInMonth.state) {
         if (dayInMonth.state === "APPROVED") {
             element.css(configJson.global.calendarStyling.default);
         }
         element.css(configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling);
-    }else{
+    } else {
         element.css(configJson.global.calendarStyling.default);
     }
-    if(noteCount > 0){
+    if (noteCount > 0) {
         element.css(configJson.global.calendarStyling.containsNotes);
     }
 }
@@ -253,14 +278,14 @@ function buildCalendar(year, month, availableDates) {
         //overwrite days where we have content
 
         let element = daysInMonth[availableDate.day.date() - 1];
-            element.available = true;
-            element.count = availableDate.count;
-            element.editionCount = availableDate.editionCount;
-            element.state = availableDate.state;
-            element.problems = availableDate.problems;
-            element.notesCount = availableDate.notesCount;
-            element.avisid = availableDate.avisid;
-            element.batchid = availableDate.batchid;
+        element.available = true;
+        element.count = availableDate.count;
+        element.editionCount = availableDate.editionCount;
+        element.state = availableDate.state;
+        element.problems = availableDate.problems;
+        element.notesCount = availableDate.notesCount;
+        element.avisid = availableDate.avisid;
+        element.batchid = availableDate.batchid;
 
 
     }
@@ -312,7 +337,7 @@ function buildCalendar(year, month, availableDates) {
         button.attr("style", 'padding-left: 0; padding-right: 0')
             .text(date)
             .addClass("btn btn-sm");
-        determineColor(dayInMonth,button,dayInMonth.notesCount)
+        determineColor(dayInMonth, button, dayInMonth.notesCount)
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
 
@@ -324,7 +349,11 @@ function buildCalendar(year, month, availableDates) {
     return calHtml;
 }
 
-
+/**
+ *
+ * @param {NewspaperDate[] } dates
+ * @returns {*[]}
+ */
 function splitDatesIntoMonths(dates) {
     var months = [];
     months[0] = {name: "Januar", days: []};
@@ -342,24 +371,29 @@ function splitDatesIntoMonths(dates) {
 
     let d;
     for (d in dates) {
-        let NewspaperDate = dates[d]; //as [ 1920 , 1 ,2 ] with first month as 1
-        let date = NewspaperDate.date;
+        let newspaperDate = dates[d]; //as [ 1920 , 1 ,2 ] with first month as 1
+        let date = newspaperDate.date;
         date[1] -= 1; //javascript uses 0-indexed months, so adapt
         let day = moment(date);
         months[day.month()].days.push({
             "day": day,
-            "count": NewspaperDate.pageCount,
-            "editionCount": NewspaperDate.editionCount,
-            "state": NewspaperDate.state,
-            "problems": NewspaperDate.problems,
-            "notesCount": NewspaperDate.notesCount,
-            "batchid": NewspaperDate.batchid,
-            "avisid": NewspaperDate.avisid
+            "count": newspaperDate.pageCount,
+            "editionCount": newspaperDate.editionCount,
+            "state": newspaperDate.state,
+            "problems": newspaperDate.problems,
+            "notesCount": newspaperDate.notesCount,
+            "batchid": newspaperDate.batchid,
+            "avisid": newspaperDate.avisid
         });
     }
     return months;
 }
 
+/**
+ * @param {String} origHash
+ * @param {String} newIndex
+ * @returns {String}
+ */
 function editYearIndexInHash(origHash, newIndex) {
     var hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newIndex; // there's an empty place..

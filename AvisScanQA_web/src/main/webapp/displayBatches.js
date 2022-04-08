@@ -3,6 +3,9 @@ $.getJSON("api/config.json", function (data) {
     batchConfig = data.batch;
 })
 
+/**
+ * @param {String} batchID
+ */
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
 
@@ -14,150 +17,153 @@ function loadBatchForNewspaper(batchID) {
         .fail(function (jqxhr, textStatus, error) {
             $headline.append($("<h1/>").text(`${jqxhr.responseText}`));
         })
-        .done(function (batch) {
-            let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
-            let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
+        .done(
+            /**
+             * @param {Batch} batch */
+            function (batch) {
+                let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
+                let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
 
-            let currentNewspaperYear = fromYEAR;
+                let currentNewspaperYear = fromYEAR;
 
-            let newspaperYears = range(fromYEAR, toYEAR);
+                let newspaperYears = range(fromYEAR, toYEAR);
 
-            $headline.append($("<h1/>").text(`Batch ${batch.batchid}`));
+                $headline.append($("<h1/>").text(`Batch ${batch.batchid}`));
 
-            $state.load("dropDownState.html", function () {
-                let $stateDropDownMenu = $("#stateDropDownMenu");
+                $state.load("dropDownState.html", function () {
+                    let $stateDropDownMenu = $("#stateDropDownMenu");
 
-                $("#stateFormBatchID").val(batch.batchid);
-                const $stateForm = $("#stateForm");
-                let $dropDownState = $("#dropDownState");
-                $dropDownState.text(batchConfig.stateButtonOptions[batch.state].name)
-                let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
-                $dropDownState.css(stateButtonColors);
+                    $("#stateFormBatchID").val(batch.batchid);
+                    const $stateForm = $("#stateForm");
+                    let $dropDownState = $("#dropDownState");
+                    $dropDownState.text(batchConfig.stateButtonOptions[batch.state].name)
+                    let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
+                    $dropDownState.css(stateButtonColors);
 
-                for (let [option, val] of Object.entries(batchConfig.stateButtonOptions)) {
-                    $stateDropDownMenu.append($("<button/>", {
-                        type: "submit",
-                        class: "dropdown-item",
-                        title: val.description,
-                        form: "stateForm",
-                        value: `${option}`,
-                        html: `${val.name}`,
-                    }));
+                    for (let [option, val] of Object.entries(batchConfig.stateButtonOptions)) {
+                        $stateDropDownMenu.append($("<button/>", {
+                            type: "submit",
+                            class: "dropdown-item",
+                            title: val.description,
+                            form: "stateForm",
+                            value: `${option}`,
+                            html: `${val.name}`,
+                        }));
 
+                    }
+
+                    $(`[value="${batch.state}"`).css("font-weight", "Bold");
+
+                    $stateForm.submit(stateSubmitHandler);
+                    $state.append($stateForm);
+                })
+
+                if (batch.numNotes > 0) {
+                    $notice.append($("<a>", {
+                        href: `#/batch/${batch.batchid}/notes`,
+                        target: "_blank"
+                    }).text(`Get Notes (${batch.numNotes})`))
                 }
 
-                $(`[value="${batch.state}"`).css("font-weight", "Bold");
+                if (batch.numProblems > 0) {
 
-                $stateForm.submit(stateSubmitHandler);
-                $state.append($stateForm);
-            })
+                    $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
 
-            if (batch.numNotes > 0) {
-                $notice.append($("<a>", {
-                    href: `#/batch/${batch.batchid}/notes`,
-                    target: "_blank"
-                }).text(`Get Notes (${batch.numNotes})`))
-            }
+                    if (batch.problems) {
+                        var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
 
-            if (batch.numProblems > 0) {
+                        $notice.append($("<p>").text("Batch Problems:"))
+                        $notice.append($("<pre/>", {id: "batchProblemsPre"}).text(output));
 
-                $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
-
-                if (batch.problems) {
-                    var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
-
-                    $notice.append($("<p>").text("Batch Problems:"))
-                    $notice.append($("<pre/>", {id: "batchProblemsPre"}).text(output));
-
+                    }
                 }
-            }
-            let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
-            let $notesButton = $("<button/>", {
-                class: `notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`,
-                text: `${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and" : ""} create notes`
-            });
-            let $showNotesDiv = $("<div/>", {
-                visible: false,
-                class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
-                tabindex: "100"
-            })
-            $showNotesDiv.offsetTop = $notesButton.offsetTop;
-            setShowNotesFocusInAndOut($notesButton, $showNotesDiv);
-
-            let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
-            const formRow1 = $("<div>", {class: "form-row form-row-upper"})
-            const formRow2 = $("<div>", {class: "form-row form-row-lower"})
-            $batchNotesForm.append(formRow1);
-            $batchNotesForm.append(formRow2);
-            let $batchDropDown = $("<select/>", {
-                class: "form-control calendarNotesDropdown", name: "standardNote"
-            });
-            $batchDropDown.append($("<option>", {value: "", html: "", selected: "true"}));
-            for (const option of batchConfig.dropDownStandardMessages.options) {
-                $batchDropDown.append($("<option>", {value: option, html: option}));
-            }
-            formRow1.append($batchDropDown)
-            let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
-            formRow1.append($hiddenTextAreaValue)
-            let $batchNotesTextArea = $("<span/>", {
-                class: "userNotes calendarNotes", id: "batchNotes", type: "text"
-            }).attr('contenteditable', true).on('input', (e) => {
-                $hiddenTextAreaValue.val(e.target.innerText);
-            });
-
-            formRow1.append($batchNotesTextArea)
-            formRow1.append($("<input/>", {
-                class: "btn btn-sm btn-outline-dark",
-                id: "batchNotesFormSubmit",
-                type: "submit",
-                name: "submit",
-                form: "batchNotesForm",
-                value: "Gem"
-            }));
-
-            $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
-            $batchNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: batch.avisid}));
-
-            $batchNotesForm.submit(noteSubmitHandler);
-            $showNotesDiv.append($batchNotesForm);
-
-            for (let i = 0; i < batch.notes.length; i++) {
-                let $batchForm = $("<form>", {action: "", method: "delete"});
-                $batchForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
-
-                const note = batch.notes[i];
-                $batchForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
-
-                const formRow = $("<div>", {class: "form-row"})
-                $batchForm.append(formRow);
-                let $batchNote = $("<span/>", {
-                    class: "userNotes",
-                    type: "text",
-                    text: note.note,
-                    readOnly: "true",
-                    disabled: true
+                let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
+                let $notesButton = $("<button/>", {
+                    class: `notesButton btn ${batch.notes.length > 0 ? "btn-warning" : "btn-primary"}`,
+                    text: `${batch.notes.length > 0 ? "Show " + batch.notes.length + " notes and" : ""} create notes`
                 });
-                formRow.append($("<label/>", {
-                    for: $batchNote.uniqueId().attr("id"),
-                    text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                }))
+                let $showNotesDiv = $("<div/>", {
+                    visible: false,
+                    class: `showNotesDiv ${(this.visible === 'true' ? "active" : "")}`,
+                    tabindex: "100"
+                })
+                $showNotesDiv.offsetTop = $notesButton.offsetTop;
+                setShowNotesFocusInAndOut($notesButton, $showNotesDiv);
 
-                formRow.append($batchNote);
-                formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
-                    "border": "none",
-                    "background-color": "transparent"
+                let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
+                const formRow1 = $("<div>", {class: "form-row form-row-upper"})
+                const formRow2 = $("<div>", {class: "form-row form-row-lower"})
+                $batchNotesForm.append(formRow1);
+                $batchNotesForm.append(formRow2);
+                let $batchDropDown = $("<select/>", {
+                    class: "form-control calendarNotesDropdown", name: "standardNote"
+                });
+                $batchDropDown.append($("<option>", {value: "", html: "", selected: "true"}));
+                for (const option of batchConfig.dropDownStandardMessages.options) {
+                    $batchDropDown.append($("<option>", {value: option, html: option}));
+                }
+                formRow1.append($batchDropDown)
+                let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
+                formRow1.append($hiddenTextAreaValue)
+                let $batchNotesTextArea = $("<span/>", {
+                    class: "userNotes calendarNotes", id: "batchNotes", type: "text"
+                }).attr('contenteditable', true).on('input', (e) => {
+                    $hiddenTextAreaValue.val(e.target.innerText);
+                });
+
+                formRow1.append($batchNotesTextArea)
+                formRow1.append($("<input/>", {
+                    class: "btn btn-sm btn-outline-dark",
+                    id: "batchNotesFormSubmit",
+                    type: "submit",
+                    name: "submit",
+                    form: "batchNotesForm",
+                    value: "Gem"
                 }));
 
-                $batchForm.submit(noteDeleteHandler);
-                $showNotesDiv.append($batchForm);
-            }
-            $notesButtonDiv.append($notesButton)
-            $notice.append($notesButtonDiv);
-            $notice.append($showNotesDiv);
-            renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
-            renderBatchTable(batch.avisid);
+                $batchNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
+                $batchNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: batch.avisid}));
 
-        });
+                $batchNotesForm.submit(noteSubmitHandler);
+                $showNotesDiv.append($batchNotesForm);
+
+                for (let i = 0; i < batch.notes.length; i++) {
+                    let $batchForm = $("<form>", {action: "", method: "delete"});
+                    $batchForm.append($("<input/>", {type: "hidden", name: "batch", value: batch.batchid}));
+
+                    const note = batch.notes[i];
+                    $batchForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
+
+                    const formRow = $("<div>", {class: "form-row"})
+                    $batchForm.append(formRow);
+                    let $batchNote = $("<span/>", {
+                        class: "userNotes",
+                        type: "text",
+                        text: note.note,
+                        readOnly: "true",
+                        disabled: true
+                    });
+                    formRow.append($("<label/>", {
+                        for: $batchNote.uniqueId().attr("id"),
+                        text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                    }))
+
+                    formRow.append($batchNote);
+                    formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+                        "border": "none",
+                        "background-color": "transparent"
+                    }));
+
+                    $batchForm.submit(noteDeleteHandler);
+                    $showNotesDiv.append($batchForm);
+                }
+                $notesButtonDiv.append($notesButton)
+                $notice.append($notesButtonDiv);
+                $notice.append($showNotesDiv);
+                renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
+                renderBatchTable(batch.avisid);
+
+            });
 }
 
 function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
@@ -198,9 +204,9 @@ function htmlElementWithinCollection(collection, element, form) {
 
 /**
  *
- * @param {int} start
- * @param {int} end
- * @returns {Generator<int, void, int>}
+ * @param {Number} start
+ * @param {Number} end
+ * @returns {Generator<Number, void, Number>}
  */
 function* range(start, end) {
     for (let i = start; i <= end; i++) {
@@ -309,7 +315,8 @@ function stateSubmitHandler(event) {
 
 function handleNotesDownload(batchId) {
     $.getJSON(`api/notes/${batchId}`)
-        .done(function (notes) {
+        .done(/** @param {Note[]} notes */
+            function (notes) {
             const items = notes;
             const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
             if (items.length > 0) {
