@@ -243,10 +243,14 @@ function determineColor(dayInMonth, element, noteCount) {
     } else if (dayInMonth.state) {
         if (dayInMonth.state === "APPROVED") {
             element.css(configJson.global.calendarStyling.default);
+        }else{
+            element.css(configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling);
         }
-        element.css(configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling);
     } else {
         element.css(configJson.global.calendarStyling.default);
+    }
+    if(dayInMonth.state === "APPROVED"){
+        element.css(configJson.batch.stateButtonOptions.APPROVED.calendarStyling);
     }
     if (noteCount > 0) {
         element.css(configJson.global.calendarStyling.containsNotes);
