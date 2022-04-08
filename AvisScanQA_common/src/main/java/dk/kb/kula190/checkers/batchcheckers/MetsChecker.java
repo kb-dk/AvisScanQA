@@ -251,7 +251,7 @@ public class MetsChecker extends DecoratedEventHandler {
                     FailureType.INVALID_METS_ERROR,
                     "Mets dc language was incorrect should have been {expected} but was {actual}",
                     metadataDC.getLanguage(),
-                    "dan");
+                    "dan"); //TODO Also accept german language
         
         checkEquals(decoratedEvent,
                     FailureType.INVALID_METS_ERROR,

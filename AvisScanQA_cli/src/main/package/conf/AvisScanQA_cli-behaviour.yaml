@@ -28,3 +28,4 @@ iterator:
     - "checksums.txt"
     - "transfer_acknowledged"
     - "transfer_complete"
+

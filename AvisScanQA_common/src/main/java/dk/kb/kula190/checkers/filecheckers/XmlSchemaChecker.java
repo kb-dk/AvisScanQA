@@ -129,7 +129,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
                 addFailure(parsingEvent.get(),
                            FailureType.SCHEMA_ERROR,
                            name + " error encountered",
-                           exception.getMessage());
+                           exception.getMessage()); //TODO get message in failure
             }
             
             @Override
