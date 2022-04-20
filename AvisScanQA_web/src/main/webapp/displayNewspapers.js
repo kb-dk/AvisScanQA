@@ -49,49 +49,6 @@ function noteNewspaperDeleteHandler(event) {
     return false;  // <- cancel event
 }
 
-function temp() {
-    $.getJSON('api/newspaperIDs')
-        .done(
-            /**
-             * @param { String[] } newspaperIDs */
-            function (newspaperIDs) {
-                for (const newspaperID of newspaperIDs) {
-                    $("#avisIDer").append(
-                        "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
-                }
-            });
-}
-
-async function temptemp() {
-
-
-    $.getJSON('api/newspaperIDs')
-        .done(
-            /**
-             * @param { String[] } newspaperIDs */
-            function (newspaperIDs) {
-
-                let $table = $("#avisIDer")
-                let $tableBody = $("#avisIDbody").empty()
-                for (const newspaperID of newspaperIDs) {
-
-                    $.getJSON(`api/years/${newspaperID}`)
-                        .done(
-                            function (years) {
-                                let $tr = $tableBody.append($("<tr/>"));
-                                $tr.append($("<td/>")
-                                    .append($("<a/>", {href: `#/newspaper/${newspaperID}/0/`, text: newspaperID})));
-                                $tr.append($("<td/>", {text: years[0]}));
-                                $tr.append($("<td/>", {text: years[years.length - 1]}));
-
-                            }
-                        )
-                }
-                $table.append($tableBody)
-            });
-
-}
-
 async function loadNewspaperIDs() {
 
     await $.getJSON('api/newspaperIDs', async function (newspaperIDs) {
