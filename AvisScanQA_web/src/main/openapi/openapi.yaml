@@ -91,7 +91,6 @@ paths:
               schema:
                 $ref: "#/components/schemas/Batch"
     post:
-      #TODO perhaps warn/error if you try to APPROVE an older roundtrip
       operationId: setState
       summary: ""
       parameters:

@@ -288,36 +288,53 @@ function renderBatchTable(filter) {
 function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
+
     const data = new FormData(event.target);
     const state = event.originalEvent.submitter.value;
+    const batch = data.get('batch');
 
-    let parts = ["api", "batch", data.get('batch')]
+    let parts = ["api", "batch", batch]
     var query = new URLSearchParams();
 
     query.append("state", state);
     let url = parts.join("/") + "?" + query.toString();
 
-    $.ajax({
-        type: "POST",
-        url: url,
-        data: state,
-        success: function () {
-            location.reload();
-            alert("Batch has been accepted")
-        },
-        dataType: "json",
-        contentType: "application/json"
-    });
-
+    let changeState = true;
+    if(state === "APPROVED"){
+        let roundTripNumber = parseInt(batch.substring(batch.length - 1)) + 1;
+        changeState = checkBatchIDExists(batch.substring(0, batch.length - 1) + roundTripNumber);
+        changeState = confirm("Der findes et nyere roundtrip, er du sikker på du vil godkende dette batch?")
+    }
+    if (changeState) {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: state,
+            success: function () {
+                location.reload();
+                alert("Batch has been accepted")
+            },
+            dataType: "json",
+            contentType: "application/json"
+        });
+    }
     return false;  // <- cancel event
 }
 
+function checkBatchIDExists(batchID) {
+    $.getJSON('api/batch/' + batchID, function () {
+            return true
+    })
+        .fail(() => {
+            return true
+        })
+}
 
 function handleNotesDownload(batchId) {
     $.getJSON(`api/notes/${batchId}`)
         .done(/**
          @param {Note[]} notes */
-            function (notes) {
+        function (notes) {
             const items = notes;
             const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
             if (items.length > 0) {
