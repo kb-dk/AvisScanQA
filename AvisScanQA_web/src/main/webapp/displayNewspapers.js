@@ -49,17 +49,85 @@ function noteNewspaperDeleteHandler(event) {
     return false;  // <- cancel event
 }
 
-function loadNewspaperIDs() {
+function temp() {
     $.getJSON('api/newspaperIDs')
         .done(
             /**
              * @param { String[] } newspaperIDs */
             function (newspaperIDs) {
-            for (const newspaperID of newspaperIDs) {
-                $("#avisIDer").append(
-                    "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
-            }
-        });
+                for (const newspaperID of newspaperIDs) {
+                    $("#avisIDer").append(
+                        "<li class='nav-newspaperID'><a class='nav-link' href='#/newspaper/" + newspaperID + "/0/'>" + newspaperID + "</a></li>");
+                }
+            });
+}
+
+async function temptemp() {
+
+
+    $.getJSON('api/newspaperIDs')
+        .done(
+            /**
+             * @param { String[] } newspaperIDs */
+            function (newspaperIDs) {
+
+                let $table = $("#avisIDer")
+                let $tableBody = $("#avisIDbody").empty()
+                for (const newspaperID of newspaperIDs) {
+
+                    $.getJSON(`api/years/${newspaperID}`)
+                        .done(
+                            function (years) {
+                                let $tr = $tableBody.append($("<tr/>"));
+                                $tr.append($("<td/>")
+                                    .append($("<a/>", {href: `#/newspaper/${newspaperID}/0/`, text: newspaperID})));
+                                $tr.append($("<td/>", {text: years[0]}));
+                                $tr.append($("<td/>", {text: years[years.length - 1]}));
+
+                            }
+                        )
+                }
+                $table.append($tableBody)
+            });
+
+}
+
+async function loadNewspaperIDs() {
+
+    await $.getJSON('api/newspaperIDs', async function (newspaperIDs) {
+        let data = [];
+        /**
+         * @param { String[] } newspaperIDs */
+        for (let newspaperID of newspaperIDs) {
+            let tmp = {};
+            tmp['avis'] = newspaperID;
+            await $.getJSON(`api/years/${newspaperID}`, async function (years) {
+                tmp['yearSpan'] = years[0] + '-' + years[years.length-1];
+            })
+            data.push(tmp)
+
+        }
+        let $table = $("#avisIDer")
+        $table.bootstrapTable({
+            data: data, columns: [{
+                title: 'Avis',
+                field: 'avis',
+                formatter: function (value) {
+                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`
+                },
+                sortable: true
+            },
+                {
+                    title: 'År',
+                    field: 'yearSpan',
+                    sortable: true
+                }
+
+            ]
+        })
+
+    })
+
 }
 
 /**
@@ -74,109 +142,122 @@ function loadYearsForNewspaper(avisID, year) {
              * @param {String[]} years
              */
             function (years) {
-            $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
-            $("#state-div").empty();
-            let $notice = $("#notice-div").empty();
-            if (year === 0) {
-                year = parseInt(years.sort()[0]);
-            }
-            const notesUrl = `api/${avisID}/notes`;
-            $.getJSON(notesUrl)
-                .done(
-                    /**
-                     * @param {Note[]} notes
-                     */
-                    function (notes) {
-                    let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
-                    let $notesButton = $("<button/>", {
-                        class: `notesButton btn ${notes.length > 0 ? "btn-warning" : "btn-primary"} btn-primary`,
-                        text: `${notes.length > 0 ? "Show " + notes.length + " notes and " : ""}create notes`
-                    });
-                    let $showNotesDiv = $("<div/>", {
-                        visible: false,
-                        class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
-                        tabindex: "100"
-                    })
-                    $showNotesDiv.offsetTop = $notesButton.offsetTop;
-                    setShowNotesFocusInAndOut($notesButton, $showNotesDiv)
-
-                    let $newspaperNotesForm = $("<form/>", {id: "newspaperNotesForm", action: "", method: "post"});
-                    const formRow1 = $("<div>", {class: "form-row form-row-upper"})
-                    const formRow2 = $("<div>", {class: "form-row form-row-lower"})
-                    $newspaperNotesForm.append(formRow1);
-                    $newspaperNotesForm.append(formRow2);
-
-                    let $newspaperDropDown = $("<select/>", {
-                        class: "form-control calendarNotesDropdown", name: "standardNote"
-                    });
-                    formRow1.append($newspaperDropDown)
-                    $newspaperDropDown.append($("<option>", {class: "", value: "", html: "", selected: "true"}));
-                    for (const option of configJson.newspaper.dropDownStandardMessages.options) {
-                        $newspaperDropDown.append($("<option>", {class: "dropdown-item", value: option, html: option}));
-                    }
-                    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
-                    formRow1.append($hiddenTextAreaValue);
-                    formRow1.append($("<span/>", {
-                        class: "userNotes calendarNotes", id: "batchNotes", type: "text"
-                    }).attr('contenteditable', true).on('input', (e) => {
-                        $hiddenTextAreaValue.val(e.target.innerText);
-                    }));
-                    formRow1.append($("<input/>", {
-                        class: "btn btn-sm btn-outline-dark",
-                        id: "newspaperNotesFormSubmit",
-                        type: "submit",
-                        name: "submit",
-                        form: "newspaperNotesForm",
-                        value: "Gem"
-                    }));
-                    $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
-
-                    $newspaperNotesForm.submit(noteNewspaperSubmitHandler);
-                    $showNotesDiv.append($newspaperNotesForm);
-                    if (notes) {
-
-                        for (let i = 0; i < notes.length; i++) {
-                            // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
-                            let $newspaperForm = $("<form>", {action: "", method: "delete"});
-                            $newspaperForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
-
-                            const note = notes[i];
-                            $newspaperForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
-
-                            const formRow = $("<div>", {class: "form-row"})
-                            $newspaperForm.append(formRow);
-
-                            let $newspaperNote = $("<span/>", {
-                                class: "userNotes",
-                                type: "text",
-                                name: "notes",
-                                text: note.note,
-                                readOnly: "true",
-                                disabled: true
+                $("#headline-div").empty().append($("<h1>").text(`År med ${avisID}`));
+                $("#state-div").empty();
+                let $notice = $("#notice-div").empty();
+                if (year === 0) {
+                    year = parseInt(years.sort()[0]);
+                }
+                const notesUrl = `api/${avisID}/notes`;
+                $.getJSON(notesUrl)
+                    .done(
+                        /**
+                         * @param {Note[]} notes
+                         */
+                        function (notes) {
+                            let $notesButtonDiv = $("<div/>", {id: "notesButtonDiv"});
+                            let $notesButton = $("<button/>", {
+                                class: `notesButton btn ${notes.length > 0 ? "btn-warning" : "btn-primary"} btn-primary`,
+                                text: `${notes.length > 0 ? "Show " + notes.length + " notes and " : ""}create notes`
                             });
-                            formRow.append($("<label/>", {
-                                for: $newspaperNote.uniqueId().attr("id"),
-                                text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-                            }))
-                            formRow.append($newspaperNote);
-                            formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
-                                "border": "none",
-                                "background-color": "transparent"
-                            }));
-                            $newspaperForm.submit(noteNewspaperDeleteHandler);
-                            $showNotesDiv.append($newspaperForm);
-                        }
-                    }
-                    $notesButtonDiv.append($notesButton)
-                    $notice.append($notesButtonDiv);
-                    $notice.append($showNotesDiv);
-                })
-            /*
+                            let $showNotesDiv = $("<div/>", {
+                                visible: false,
+                                class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
+                                tabindex: "100"
+                            })
+                            $showNotesDiv.offsetTop = $notesButton.offsetTop;
+                            setShowNotesFocusInAndOut($notesButton, $showNotesDiv)
 
-            */
-            renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
-            renderBatchTable(avisID);
-        });
+                            let $newspaperNotesForm = $("<form/>", {
+                                id: "newspaperNotesForm",
+                                action: "",
+                                method: "post"
+                            });
+                            const formRow1 = $("<div>", {class: "form-row form-row-upper"})
+                            const formRow2 = $("<div>", {class: "form-row form-row-lower"})
+                            $newspaperNotesForm.append(formRow1);
+                            $newspaperNotesForm.append(formRow2);
+
+                            let $newspaperDropDown = $("<select/>", {
+                                class: "form-control calendarNotesDropdown", name: "standardNote"
+                            });
+                            formRow1.append($newspaperDropDown)
+                            $newspaperDropDown.append($("<option>", {
+                                class: "",
+                                value: "",
+                                html: "",
+                                selected: "true"
+                            }));
+                            for (const option of configJson.newspaper.dropDownStandardMessages.options) {
+                                $newspaperDropDown.append($("<option>", {
+                                    class: "dropdown-item",
+                                    value: option,
+                                    html: option
+                                }));
+                            }
+                            let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
+                            formRow1.append($hiddenTextAreaValue);
+                            formRow1.append($("<span/>", {
+                                class: "userNotes calendarNotes", id: "batchNotes", type: "text"
+                            }).attr('contenteditable', true).on('input', (e) => {
+                                $hiddenTextAreaValue.val(e.target.innerText);
+                            }));
+                            formRow1.append($("<input/>", {
+                                class: "btn btn-sm btn-outline-dark",
+                                id: "newspaperNotesFormSubmit",
+                                type: "submit",
+                                name: "submit",
+                                form: "newspaperNotesForm",
+                                value: "Gem"
+                            }));
+                            $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
+
+                            $newspaperNotesForm.submit(noteNewspaperSubmitHandler);
+                            $showNotesDiv.append($newspaperNotesForm);
+                            if (notes) {
+
+                                for (let i = 0; i < notes.length; i++) {
+                                    // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
+                                    let $newspaperForm = $("<form>", {action: "", method: "delete"});
+                                    $newspaperForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
+
+                                    const note = notes[i];
+                                    $newspaperForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
+
+                                    const formRow = $("<div>", {class: "form-row"})
+                                    $newspaperForm.append(formRow);
+
+                                    let $newspaperNote = $("<span/>", {
+                                        class: "userNotes",
+                                        type: "text",
+                                        name: "notes",
+                                        text: note.note,
+                                        readOnly: "true",
+                                        disabled: true
+                                    });
+                                    formRow.append($("<label/>", {
+                                        for: $newspaperNote.uniqueId().attr("id"),
+                                        text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
+                                    }))
+                                    formRow.append($newspaperNote);
+                                    formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
+                                        "border": "none",
+                                        "background-color": "transparent"
+                                    }));
+                                    $newspaperForm.submit(noteNewspaperDeleteHandler);
+                                    $showNotesDiv.append($newspaperForm);
+                                }
+                            }
+                            $notesButtonDiv.append($notesButton)
+                            $notice.append($notesButtonDiv);
+                            $notice.append($showNotesDiv);
+                        })
+                /*
+
+                */
+                renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
+                renderBatchTable(avisID);
+            });
 }
 
 /**
@@ -243,13 +324,14 @@ function determineColor(dayInMonth, element, noteCount) {
     } else if (dayInMonth.state) {
         if (dayInMonth.state === "APPROVED") {
             element.css(configJson.global.calendarStyling.default);
-        }else{
+        } else {
             element.css(configJson.batch.stateButtonOptions[dayInMonth.state].calendarStyling);
         }
+
     } else {
         element.css(configJson.global.calendarStyling.default);
     }
-    if(dayInMonth.state === "APPROVED"){
+    if (dayInMonth.state === "APPROVED") {
         element.css(configJson.batch.stateButtonOptions.APPROVED.calendarStyling);
     }
     if (noteCount > 0) {

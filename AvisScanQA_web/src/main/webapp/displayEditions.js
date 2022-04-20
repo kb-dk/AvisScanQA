@@ -145,7 +145,6 @@ function initComponents() {
 function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
-
     let editions = newspaperDay.editions;
     if (editionIndex < 0 || editionIndex >= editions.length) {
         $("#primary-show").text(`Edition ${editionIndex + 1} not found. Day only has ${editions.length} editions`);

@@ -315,7 +315,8 @@ function stateSubmitHandler(event) {
 
 function handleNotesDownload(batchId) {
     $.getJSON(`api/notes/${batchId}`)
-        .done(/** @param {Note[]} notes */
+        .done(/**
+         @param {Note[]} notes */
             function (notes) {
             const items = notes;
             const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
