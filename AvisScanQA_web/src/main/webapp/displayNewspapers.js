@@ -53,9 +53,11 @@ async function loadNewspaperIDs() {
 
     await $.getJSON('api/newspaperIDs', async function (newspaperIDs) {
         let data = [];
+        console.log(newspaperIDs)
         /**
          * @param { String[] } newspaperIDs */
-        for (let newspaperID of newspaperIDs) {
+
+        for (let newspaperID of Object.keys(newspaperIDs)) {
             let tmp = {};
             tmp['avis'] = newspaperID;
             await $.getJSON(`api/years/${newspaperID}`, async function (years) {

@@ -131,16 +131,16 @@ public class NewspaperQADao {
         }
     }
 
-    public List<String> getNewspaperIDs() throws DAOFailureException {
+    public Map<String, Object> getNewspaperIDs() throws DAOFailureException {
         log.debug("Looking up newspaper ids");
         String SQL = "SELECT distinct(avisid) FROM newspaperarchive";
 
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(SQL)) {
                 try (ResultSet res = ps.executeQuery()) {
-                    List<String> list = new ArrayList<>();
+                    Map<String, Object> list = new HashMap<>();
                     while (res.next()) {
-                        list.add(res.getString(1));
+                        list.put(res.getString(1),checkNewspaperInactive(res.getString(1)));
                     }
                     return list;
                 }
@@ -151,6 +151,33 @@ public class NewspaperQADao {
         }
     }
 
+    public Object checkNewspaperInactive(String avisID) throws DAOFailureException, SQLException {
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    """
+                    SELECT (SELECT COUNT(avisid) FROM batch
+                            WHERE avisid = ?) AS avisCount,
+                           (SELECT  COUNT(state) FROM batch
+                            WHERE avisid = ? AND
+                                  state = 'APPROVED' OR
+                                    state = 'REJECTED') AS stateCount
+                                         """)) {
+            int param = 1;
+            ps.setString(param++,avisID);
+            ps.setString(param++,avisID);
+                try (ResultSet res = ps.executeQuery()) {
+                    if (res.next()) {
+                        int avisCount = res.getInt("avisCount");
+                        int stateCount = res.getInt("stateCount");
+                        return avisCount == stateCount;
+                    } else {
+                        return false;
+                    }
+
+                }
+            }
+        }
+    }
 
     public Batch getBatch(String batchID) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {
@@ -213,18 +240,18 @@ public class NewspaperQADao {
                     DaoBatchHelper.batchDays(batch).
                                   filter(date -> date.getYear() == yearInt)
                                   .forEach((LocalDate date) -> {
-                        final NewspaperDate newspaperDate = new NewspaperDate().date(date)
-                                                                               .pageCount(0)
-                                                                               .problems("")
-                                                                               .editionCount(0)
-                                                                               .notesCount(0)
-                                                                               .batchid(batch.getBatchid())
-                                                                               .avisid(batch.getAvisid())
-                                                                               .roundtrip(batch.getRoundtrip())
-                                                                               .state(batch.getState());
-                        resultMap.put(date, newspaperDate);
+                                      final NewspaperDate newspaperDate = new NewspaperDate().date(date)
+                                                                                             .pageCount(0)
+                                                                                             .problems("")
+                                                                                             .editionCount(0)
+                                                                                             .notesCount(0)
+                                                                                             .batchid(batch.getBatchid())
+                                                                                             .avisid(batch.getAvisid())
+                                                                                             .roundtrip(batch.getRoundtrip())
+                                                                                             .state(batch.getState());
+                                      resultMap.put(date, newspaperDate);
 
-                    });
+                                  });
                 }
             }
 

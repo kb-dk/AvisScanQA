@@ -18,10 +18,8 @@ import dk.kb.kula190.webservice.exception.InvalidArgumentServiceException;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import dk.kb.kula190.webservice.exception.ServiceException;
 import dk.kb.util.yaml.YAML;
-import dk.kb.util.yaml.YAMLUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.cxf.jaxrs.ext.MessageContext;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +27,6 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Context;
@@ -50,6 +47,7 @@ import java.nio.file.Path;
 import java.security.Principal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 /**
  * AvisScanQA_web
@@ -116,9 +114,9 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public List<String> getNewspaperIDs() {
+    public Map<String, Object> getNewspaperIDs() {
         try {
-            List<String> IDs = getDAO().getNewspaperIDs();
+            Map<String,Object> IDs = getDAO().getNewspaperIDs();
             return IDs;
         } catch (DAOFailureException e) {
             log.error("Could not get newspaper IDs from backend");
