@@ -77,7 +77,7 @@ async function loadNewspaperIDs() {
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`;
+                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,17)+'...' : value}</a>`;
                 },
                 sortable: true
             },
@@ -95,7 +95,7 @@ async function loadNewspaperIDs() {
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`;
+                    return `<a href= '#/newspaper/${value.length > 20 ? value.substring(0,15)+'...' : value}/0/'>${value}</a>`;
                 },
                 sortable: true
             },
