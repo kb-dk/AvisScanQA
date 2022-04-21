@@ -25,7 +25,7 @@ public class DaoBatchHelper {
                 + "where avisid = ? and "
                 + "b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)")) {
             ps.setString(1, avisID);
-            
+
             try (ResultSet res = ps.executeQuery()) {
                 while (res.next()) {
                     final SlimBatch e = readSlimBatch(conn, res);
@@ -35,8 +35,37 @@ public class DaoBatchHelper {
             return results;
         }
     }
-    
-    
+
+    /**
+     * Gets (distinct) states for all batches for the given avisID.
+     * Used to figure out if all batches (of an avisID) is "finished" or some are still in progress
+     * @param avisID the avis id to check for
+     * @param conn the connection
+     * @return List of distinct states for the batches of an avis ID
+     * @throws SQLException
+     */
+    static List<String> getBatchStatesForAvisID(String avisID, Connection conn) throws SQLException {
+        List<String> results = new ArrayList<>();
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                select distinct(state)
+                from batch b
+                where avisid = ? and
+                      b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)
+                """)) {
+            ps.setString(1, avisID);
+
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    String e = res.getString("state");
+                    results.add(e);
+                }
+            }
+            return results;
+        }
+    }
+
+
     static Batch getLatestBatch(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "select * "
@@ -44,7 +73,7 @@ public class DaoBatchHelper {
                 + "where batchid = ? and "
                 + "      b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid) limit 1")) {
             ps.setString(1, batchID);
-            
+
             try (ResultSet res = ps.executeQuery()) {
                 if (res.next()) {
                     return readBatch(conn, res);
@@ -53,8 +82,8 @@ public class DaoBatchHelper {
         }
         return null;
     }
-    
-    
+
+
     static SlimBatch getLatestSlimBatch(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "select * "
@@ -62,7 +91,7 @@ public class DaoBatchHelper {
                 + "where batchid = ? and "
                 + "      b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid) limit 1")) {
             ps.setString(1, batchID);
-            
+
             try (ResultSet res = ps.executeQuery()) {
                 if (res.next()) {
                     return readSlimBatch(conn, res);
@@ -71,32 +100,43 @@ public class DaoBatchHelper {
         }
         return null;
     }
-    
+
     static List<SlimBatch> getAllBatches(Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("SELECT * "
-                                                          + " FROM batch b1"
-                                                          + " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch b2 WHERE b1.batchid = b2.batchid)")) {
+                                                          +
+                                                          " FROM batch b1"
+                                                          +
+                                                          " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch " +
+                                                          "b2 WHERE b1.batchid = b2.batchid)")) {
             List<SlimBatch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
-                
+
                 while (res.next()) {
                     list.add(readSlimBatch(conn, res));
                 }
-                
+
             }
             return list;
         }
     }
-    
+
     static void setBatchState(String batchID, String state, String username, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
-                "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, num_problems, username, lastmodified)  "
-                + " ( SELECT batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, ?, num_problems, ?, now() "
-                + " FROM batch "
-                + " WHERE batchid=? AND "
-                + " lastmodified >= ALL("
-                + "     SELECT lastmodified FROM batch WHERE batchid=?)"
-                + "      )")) {
+                "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, " +
+                "num_problems, username, lastmodified)  "
+                +
+                " ( SELECT batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, ?, " +
+                "num_problems, ?, now() "
+                +
+                " FROM batch "
+                +
+                " WHERE batchid=? AND "
+                +
+                " lastmodified >= ALL("
+                +
+                "     SELECT lastmodified FROM batch WHERE batchid=?)"
+                +
+                "      )")) {
             int param = 1;
             ps.setString(param++, state);
             ps.setString(param++, username);
@@ -108,21 +148,21 @@ public class DaoBatchHelper {
             }
         }
     }
-    
-    
+
+
     private static Batch readBatch(Connection conn, ResultSet res) throws SQLException {
         String batchID = res.getString("batchid");
         return new Batch().batchid(batchID)
                           .avisid(res.getString("avisid"))
                           .roundtrip(res.getInt("roundtrip"))
 
-                          .notes(DaoNoteHelper.getBatchLevelNotes(batchID,conn))
+                          .notes(DaoNoteHelper.getBatchLevelNotes(batchID, conn))
                           .numNotes(DaoNoteHelper.getNumNotes(batchID, conn))
 
                           .startDate(res.getDate("start_date").toLocalDate())
                           .endDate(res.getDate("end_date").toLocalDate())
                           .deliveryDate(res.getDate("delivery_date").toLocalDate())
-                          
+
                           .problems(res.getString("problems"))
                           .numProblems(res.getInt("num_problems"))
 
@@ -130,8 +170,8 @@ public class DaoBatchHelper {
                           .username(res.getString("username"))
                           .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")));
     }
-    
-    
+
+
     private static SlimBatch readSlimBatch(Connection conn, ResultSet res) throws SQLException {
         String batchID = res.getString("batchid");
         return new SlimBatch().batchid(batchID)
@@ -152,7 +192,7 @@ public class DaoBatchHelper {
                               .username(res.getString("username"))
                               .lastModified(toOffsetDateTime(res.getTimestamp("lastmodified")));
     }
-    
+
     static <T extends SlimBatch> Stream<LocalDate> batchDays(T batch) {
         return LongStream.rangeClosed(0, ChronoUnit.DAYS.between(batch.getStartDate(), batch.getEndDate()))
                          .mapToObj((long t) -> batch.getStartDate().plusDays(t));

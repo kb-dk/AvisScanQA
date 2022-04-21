@@ -285,7 +285,7 @@ function renderBatchTable(filter) {
     }
 }
 
-function stateSubmitHandler(event) {
+async function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
 
@@ -302,8 +302,11 @@ function stateSubmitHandler(event) {
     let changeState = true;
     if(state === "APPROVED"){
         let roundTripNumber = parseInt(batch.substring(batch.length - 1)) + 1;
-        changeState = checkBatchIDExists(batch.substring(0, batch.length - 1) + roundTripNumber);
-        changeState = confirm("Der findes et nyere roundtrip, er du sikker på du vil godkende dette batch?")
+        if(await checkBatchIDExists(batch.substring(0, batch.length - 1) + roundTripNumber)){
+            if(!confirm("Der findes et nyere roundtrip, er du sikker på du vil godkende dette batch?")){
+                changeState = false
+            }
+        }
     }
     if (changeState) {
         $.ajax({
@@ -322,12 +325,15 @@ function stateSubmitHandler(event) {
 }
 
 function checkBatchIDExists(batchID) {
-    $.getJSON('api/batch/' + batchID, function () {
-            return true
-    })
-        .fail(() => {
-            return true
+    return new Promise((r)=>{
+        $.getJSON('api/batch/' + batchID, function () {
+            r(true);
         })
+            .fail(function() {
+                r(false);
+            })
+    })
+
 }
 
 function handleNotesDownload(batchId) {

@@ -53,26 +53,31 @@ async function loadNewspaperIDs() {
 
     await $.getJSON('api/newspaperIDs', async function (newspaperIDs) {
         let data = [];
-        console.log(newspaperIDs)
+        let inactiveNewspaperData = []
         /**
          * @param { String[] } newspaperIDs */
 
-        for (let newspaperID of Object.keys(newspaperIDs)) {
+        for (let newspaperID of newspaperIDs) {
             let tmp = {};
-            tmp['avis'] = newspaperID;
-            await $.getJSON(`api/years/${newspaperID}`, async function (years) {
+            tmp['avis'] = newspaperID.avisid;
+            await $.getJSON(`api/years/${newspaperID.avisid}`, async function (years) {
                 tmp['yearSpan'] = years[0] + '-' + years[years.length-1];
             })
-            data.push(tmp)
+            if(newspaperID.isInactive){
+                inactiveNewspaperData.push(tmp)
+            }else{
+                data.push(tmp)
+            }
+
 
         }
-        let $table = $("#avisIDer")
+        let $table = $("#avisIDer");
         $table.bootstrapTable({
             data: data, columns: [{
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`
+                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`;
                 },
                 sortable: true
             },
@@ -83,7 +88,25 @@ async function loadNewspaperIDs() {
                 }
 
             ]
-        })
+        });
+        let $tableArkiv = $("#avisIDerArkiv");
+        $tableArkiv.bootstrapTable({
+            data: inactiveNewspaperData, columns: [{
+                title: 'Avis',
+                field: 'avis',
+                formatter: function (value) {
+                    return `<a href= '#/newspaper/${value}/0/'>${value}</a>`;
+                },
+                sortable: true
+            },
+                {
+                    title: 'År',
+                    field: 'yearSpan',
+                    sortable: true
+                }
+
+            ]
+        });
 
     })
 

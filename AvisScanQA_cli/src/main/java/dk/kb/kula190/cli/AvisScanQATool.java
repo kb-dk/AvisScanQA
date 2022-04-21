@@ -97,17 +97,9 @@ public class AvisScanQATool {
     
     
             /*Properties emailConfig;
-            if (useYamlConfig) {
-                emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true));
-            } else {//Hardcoded email config
-                emailConfig = new Properties();
-    
-                emailConfig.setProperty("mail.smtp.auth", "false");
-                emailConfig.setProperty("mail.smtp.starttls.enable", "true");
-                emailConfig.setProperty("mail.smtp.host", "smtp.statsbiblioteket.dk");
-                emailConfig.setProperty("mail.smtp.port", "25");
-    
-            }
+
+            emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true));
+
             EmailSender.newInstance()
                        .to(recipient)
                        .from(from)

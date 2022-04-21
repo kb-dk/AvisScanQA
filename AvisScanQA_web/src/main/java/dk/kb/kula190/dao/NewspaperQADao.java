@@ -131,18 +131,22 @@ public class NewspaperQADao {
         }
     }
 
-    public Map<String, Object> getNewspaperIDs() throws DAOFailureException {
+    public List<NewspaperID> getNewspaperIDs() throws DAOFailureException {
         log.debug("Looking up newspaper ids");
-        String SQL = "SELECT distinct(avisid) FROM newspaperarchive";
 
+        List<NewspaperID> result = new ArrayList<>();
+
+        //Get all distinct newspaperIDs
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(SQL)) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT distinct(avisid) FROM batch")) {
                 try (ResultSet res = ps.executeQuery()) {
-                    Map<String, Object> list = new HashMap<>();
                     while (res.next()) {
-                        list.put(res.getString(1),checkNewspaperInactive(res.getString(1)));
+                        String avisID = res.getString(1);
+                        //For each unique avisID, check if there is any non-finished batches
+                        NewspaperID value = checkNewspaperInactive(avisID);
+                        result.add(value);
                     }
-                    return list;
+                    return result;
                 }
             }
         } catch (SQLException e) {
@@ -151,31 +155,12 @@ public class NewspaperQADao {
         }
     }
 
-    public Object checkNewspaperInactive(String avisID) throws DAOFailureException, SQLException {
+    public NewspaperID checkNewspaperInactive(String avisID) throws SQLException {
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    """
-                    SELECT (SELECT COUNT(avisid) FROM batch
-                            WHERE avisid = ?) AS avisCount,
-                           (SELECT  COUNT(state) FROM batch
-                            WHERE avisid = ? AND
-                                  state = 'APPROVED' OR
-                                    state = 'REJECTED') AS stateCount
-                                         """)) {
-            int param = 1;
-            ps.setString(param++,avisID);
-            ps.setString(param++,avisID);
-                try (ResultSet res = ps.executeQuery()) {
-                    if (res.next()) {
-                        int avisCount = res.getInt("avisCount");
-                        int stateCount = res.getInt("stateCount");
-                        return avisCount == stateCount;
-                    } else {
-                        return false;
-                    }
-
-                }
-            }
+            return new NewspaperID()
+                    .avisid(avisID)
+                    .isInactive(Set.of("APPROVED", "REJECTED")
+                                   .containsAll(DaoBatchHelper.getBatchStatesForAvisID(avisID, conn)));
         }
     }
 

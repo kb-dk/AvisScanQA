@@ -44,7 +44,7 @@ paths:
           description: ""
           content:
             application/json:
-              schema: {}
+              schema: { }
   
   /newspaperIDs:
     get:
@@ -55,8 +55,24 @@ paths:
           content:
             application/json:
               schema:
-                  type: object
-                  additionalProperties: {}
+                type: array
+                items:
+                  $ref: "#/components/schemas/NewspaperID"
+  #          content:
+  #            application/json:
+  #              schema:
+  #                type: object
+  #                additionalProperties:
+  #                  type: boolean
+
+  #          content:
+  #            application/json:
+  #              schema:
+  #                type: object
+  #                additionalProperties:
+  #                  type: object
+  #                  $ref: "#/components/schemas/NewspaperID"
+
 
 
   /batch:
@@ -337,7 +353,7 @@ paths:
       responses:
         '204':
           description: Note deleted
-          
+
   /{avisid}/notes:
     get:
       operationId: getNewspaperNotes
@@ -424,7 +440,7 @@ paths:
 
 components:
   schemas:
-  
+
     NewspaperDate:
       type: object
       properties:
@@ -447,10 +463,10 @@ components:
           type: string
         problems:
           type: string
-  
-  
-  
-  
+
+
+
+
     Note:
       type: object
       properties:
@@ -482,6 +498,16 @@ components:
         created:
           type: string
           format: date-time
+
+    NewspaperID:
+      description: "A Newspaper ID and bool:true if all batches are finished (i.e. approved or rejected)"
+      type: object
+      properties:
+        isInactive:
+          description: "True if all batches (for this avisID) is approved or rejected."
+          type: boolean
+        avisid:
+          type: string
 
 
     SlimBatch:

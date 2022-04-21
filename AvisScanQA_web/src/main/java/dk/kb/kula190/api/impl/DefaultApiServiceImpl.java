@@ -6,12 +6,7 @@ import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
 import dk.kb.kula190.dao.DaoUtils;
 import dk.kb.kula190.dao.NewspaperQADao;
-import dk.kb.kula190.model.Batch;
-import dk.kb.kula190.model.CharacterizationInfo;
-import dk.kb.kula190.model.NewspaperDate;
-import dk.kb.kula190.model.NewspaperDay;
-import dk.kb.kula190.model.Note;
-import dk.kb.kula190.model.SlimBatch;
+import dk.kb.kula190.model.*;
 import dk.kb.kula190.webservice.ServiceExceptionMapper;
 import dk.kb.kula190.webservice.exception.InternalServiceException;
 import dk.kb.kula190.webservice.exception.InvalidArgumentServiceException;
@@ -114,10 +109,10 @@ public class DefaultApiServiceImpl implements DefaultApi {
     }
     
     @Override
-    public Map<String, Object> getNewspaperIDs() {
+    public List<NewspaperID> getNewspaperIDs() {
         try {
-            Map<String,Object> IDs = getDAO().getNewspaperIDs();
-            return IDs;
+            return getDAO().getNewspaperIDs();
+
         } catch (DAOFailureException e) {
             log.error("Could not get newspaper IDs from backend");
             throw handleException(e);
