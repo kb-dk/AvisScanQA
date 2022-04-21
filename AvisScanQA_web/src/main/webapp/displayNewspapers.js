@@ -60,9 +60,9 @@ async function loadNewspaperIDs() {
         for (let newspaperID of newspaperIDs) {
             let tmp = {};
             tmp['avis'] = newspaperID.avisid;
-            await $.getJSON(`api/years/${newspaperID.avisid}`, async function (years) {
-                tmp['yearSpan'] = years[0] + '-' + years[years.length-1];
-            })
+
+            tmp['recievedDate'] = newspaperID.deliveryDate;
+
             if(newspaperID.isInactive){
                 inactiveNewspaperData.push(tmp)
             }else{
@@ -82,8 +82,8 @@ async function loadNewspaperIDs() {
                 sortable: true
             },
                 {
-                    title: 'År',
-                    field: 'yearSpan',
+                    title: 'Modtaget',
+                    field: 'recievedDate',
                     sortable: true
                 }
 
@@ -100,8 +100,8 @@ async function loadNewspaperIDs() {
                 sortable: true
             },
                 {
-                    title: 'År',
-                    field: 'yearSpan',
+                    title: 'Modtaget',
+                    field: 'recievedDate',
                     sortable: true
                 }
 

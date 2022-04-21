@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
@@ -48,9 +49,9 @@ public class DaoBatchHelper {
         List<String> results = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(
                 """
-                select distinct(state)
-                from batch b
-                where avisid = ? and
+                SELECT DISTINCT(state)
+                FROM batch b
+                WHERE avisid = ? AND
                       b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)
                 """)) {
             ps.setString(1, avisID);
@@ -62,6 +63,24 @@ public class DaoBatchHelper {
                 }
             }
             return results;
+        }
+    }
+    static LocalDate getLatestDeliveryDate(String avisID, Connection conn) throws SQLException {
+        String result = null;
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                SELECT MAX(delivery_date) AS dDate
+                FROM batch
+                WHERE avisid = ?
+                """)) {
+            ps.setString(1, avisID);
+
+            try (ResultSet res = ps.executeQuery()) {
+                while (res.next()) {
+                    result = res.getString("dDate");
+                }
+            }
+            return LocalDate.parse(result);
         }
     }
 

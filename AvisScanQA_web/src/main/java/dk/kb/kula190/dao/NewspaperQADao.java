@@ -160,7 +160,8 @@ public class NewspaperQADao {
             return new NewspaperID()
                     .avisid(avisID)
                     .isInactive(Set.of("APPROVED", "REJECTED")
-                                   .containsAll(DaoBatchHelper.getBatchStatesForAvisID(avisID, conn)));
+                                   .containsAll(DaoBatchHelper.getBatchStatesForAvisID(avisID, conn)))
+                    .deliveryDate(DaoBatchHelper.getLatestDeliveryDate(avisID, conn));
         }
     }
 

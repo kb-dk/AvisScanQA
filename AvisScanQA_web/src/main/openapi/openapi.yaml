@@ -508,6 +508,9 @@ components:
           type: boolean
         avisid:
           type: string
+        deliveryDate:
+          type: string
+          format: date
 
 
     SlimBatch:
