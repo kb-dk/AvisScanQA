@@ -4,6 +4,7 @@ import dk.kb.kula190.BasicRunnableComponent;
 import dk.kb.kula190.Batch;
 import dk.kb.kula190.DatabaseRegister;
 import dk.kb.kula190.DecoratedRunnableComponent;
+import dk.kb.kula190.EmailSender;
 import dk.kb.kula190.MultiThreadedRunnableComponent;
 import dk.kb.kula190.ResultCollector;
 import dk.kb.kula190.checkers.batchcheckers.MetsChecker;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
 
@@ -92,6 +94,29 @@ public class AvisScanQATool {
         if (config.getBoolean("jdbc.enabled")) {
             log.info("Registering results of QA on batch {} in database", batch.getFullID());
             registerResultInDB(batch, resultCollector, config);
+    
+    
+            Properties emailConfig;
+            if (useYamlConfig) {
+                emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true))
+            } else {//Hardcoded email config
+                emailConfig = new Properties();
+    
+                emailConfig.setProperty("smtp.auth", "false");
+                emailConfig.setProperty("smtp.starttls.enable", "true");
+                emailConfig.setProperty("smtp.host", "smtp.statsbiblioteket.dk");
+                emailConfig.setProperty("smtp.port", "25");
+    
+            }
+            EmailSender.newInstance()
+                       .to(recipient)
+                       .from(from)
+                       .cc(cc)
+                       .bcc(bcc)
+                       .subject(subject)
+                       .bodyText(bodyText)
+                       .attachment(pdfFile)
+                       .send(emailConfig);
         }
         
         log.info("All checks done, returning");
