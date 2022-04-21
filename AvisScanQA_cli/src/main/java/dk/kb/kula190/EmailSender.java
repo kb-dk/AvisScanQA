@@ -31,9 +31,11 @@ public class EmailSender {
     private String bcc;
     private String subject;
     private String bodyText;
+    private String mimetype;
     private Path[] attachment;
-    
-    
+
+
+
     public EmailSender() {
     }
     
@@ -43,6 +45,7 @@ public class EmailSender {
                         String bcc,
                         String subject,
                         String bodyText,
+                        String mimetype,
                         Path... attachment) {
         this.from = from;
         this.to = to;
@@ -50,6 +53,7 @@ public class EmailSender {
         this.bcc = bcc;
         this.subject = subject;
         this.bodyText = bodyText;
+        this.mimetype = mimetype;
         this.attachment = attachment;
     }
     
@@ -58,7 +62,7 @@ public class EmailSender {
     }
     
     public EmailSender cloneFromThis(){
-        return new EmailSender(from, to, cc, bcc, subject, bodyText, attachment);
+        return new EmailSender(from, to, cc, bcc, subject, bodyText, mimetype, attachment);
     }
     public EmailSender from(String from) {
         this.from = from;
@@ -84,9 +88,16 @@ public class EmailSender {
         this.subject = subject;
         return this;
     }
-    
+
     public EmailSender bodyText(String bodyText) {
         this.bodyText = bodyText;
+        this.mimetype = null;
+        return this;
+    }
+
+    public EmailSender bodyText(String bodyText, String mimetype) {
+        this.bodyText = bodyText;
+        this.mimetype = mimetype;
         return this;
     }
     
@@ -99,7 +110,7 @@ public class EmailSender {
         try {
             Session session = Session.getInstance(properties);
         
-            Message message = createEmail(session, from, to, cc, bcc, subject, bodyText, attachment );
+            Message message = createEmail(session, from, to, cc, bcc, subject, bodyText, mimetype, attachment );
             
             Transport.send(message);
         } catch (MessagingException e) {
@@ -116,6 +127,7 @@ public class EmailSender {
                                 String bcc,
                                 String subject,
                                 String bodyText,
+                                String mimetype,
                                 Path... attachments) throws MessagingException {
         
         // Create a default MimeMessage object.
@@ -139,14 +151,15 @@ public class EmailSender {
         
         // Create a multipar message
         Multipart multipart = new MimeMultipart();
-        
-        
+
         // Create the message part
         BodyPart messageBodyPart = new MimeBodyPart();
-        
         // Now set the actual message
-        messageBodyPart.setText(notNull(bodyText));
-        
+        if (mimetype == null) {
+            messageBodyPart.setText(notNull(bodyText));
+        } else {
+            messageBodyPart.setContent(notNull(bodyText), mimetype);
+        }
         // Set text message part
         multipart.addBodyPart(messageBodyPart);
     
@@ -192,12 +205,13 @@ public class EmailSender {
                Objects.equals(bcc, that.bcc) &&
                Objects.equals(subject, that.subject) &&
                Objects.equals(bodyText, that.bodyText) &&
+               Objects.equals(mimetype, that.mimetype) &&
                Arrays.equals(attachment, that.attachment);
     }
     
     @Override
     public int hashCode() {
-        return Objects.hash(from, to, cc, bcc, subject, bodyText, Arrays.hashCode(attachment));
+        return Objects.hash(from, to, cc, bcc, subject, bodyText, mimetype, Arrays.hashCode(attachment));
     }
     
     @Override
@@ -209,6 +223,7 @@ public class EmailSender {
                ", bcc='" + bcc + '\'' +
                ", subject='" + subject + '\'' +
                ", bodyText='" + bodyText + '\'' +
+               ", mimetype='" + mimetype + '\'' +
                '}';
     }
 }

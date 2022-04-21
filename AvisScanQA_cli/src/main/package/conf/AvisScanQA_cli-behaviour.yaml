@@ -29,3 +29,13 @@ iterator:
     - "transfer_acknowledged"
     - "transfer_complete"
 
+mail:
+  bcc:
+
+  smtp:
+    auth: false
+    starttls:
+      enable: true
+    host: post.kb.dk
+    port: 25
+

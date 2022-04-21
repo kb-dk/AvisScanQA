@@ -96,16 +96,16 @@ public class AvisScanQATool {
             registerResultInDB(batch, resultCollector, config);
     
     
-            Properties emailConfig;
+            /*Properties emailConfig;
             if (useYamlConfig) {
-                emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true))
+                emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true));
             } else {//Hardcoded email config
                 emailConfig = new Properties();
     
-                emailConfig.setProperty("smtp.auth", "false");
-                emailConfig.setProperty("smtp.starttls.enable", "true");
-                emailConfig.setProperty("smtp.host", "smtp.statsbiblioteket.dk");
-                emailConfig.setProperty("smtp.port", "25");
+                emailConfig.setProperty("mail.smtp.auth", "false");
+                emailConfig.setProperty("mail.smtp.starttls.enable", "true");
+                emailConfig.setProperty("mail.smtp.host", "smtp.statsbiblioteket.dk");
+                emailConfig.setProperty("mail.smtp.port", "25");
     
             }
             EmailSender.newInstance()
@@ -116,7 +116,7 @@ public class AvisScanQATool {
                        .subject(subject)
                        .bodyText(bodyText)
                        .attachment(pdfFile)
-                       .send(emailConfig);
+                       .send(emailConfig);*/
         }
         
         log.info("All checks done, returning");
