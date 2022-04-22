@@ -252,7 +252,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
             $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
         }
         $editionCol.append($noteContainer)
-        renderSections(edition, sectionIndex, pageIndex);
+        renderSections(edition, sectionIndex);
         if (edition.sections[sectionIndex].pages.length === 1) {
             renderSinglePage(edition.section[sectionIndex].pages[0]);
         } else {
@@ -271,13 +271,16 @@ function renderSections(edition, sectionIndex) {
     let $pageDisplay = $("#contentRow");
     let $sectionCol = $("<div/>", {id: "sectionCol", class: "col"});
     $pageDisplay.append($sectionCol);
+
+    let sections = edition.sections.sort((a,b) =>{return a.section < b.section ? -1 : 1});
+    console.log(sections)
     //console.log(edition)
-    for (let i = 0; i < edition.sections.length; i++) {
+    for (let i = 0; i < sections.length; i++) {
         $sectionCol.append($("<a>", {
             class: `btn btn-sm btn-outline-secondary ${i === sectionIndex ? "active" : ""}`,
             href: editSectionIndexInHash(location.hash, i),
             text: `section ${i + 1}`,
-            title: edition.sections[i].section
+            title: sections[i].section
         }));
     }
     let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
@@ -312,29 +315,29 @@ function renderSections(edition, sectionIndex) {
     $sectionNotesForm.append($("<input/>", {
         type: "hidden",
         name: "batch",
-        value: edition.sections[sectionIndex].batchid
+        value: sections[sectionIndex].batchid
     }));
     $sectionNotesForm.append($("<input/>", {
         type: "hidden",
         name: "avis",
-        value: edition.sections[sectionIndex].avisid
+        value: sections[sectionIndex].avisid
     }));
-    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: edition.sections[sectionIndex].date}));
+    $sectionNotesForm.append($("<input/>", {type: "hidden", name: "date", value: sections[sectionIndex].date}));
     $sectionNotesForm.append($("<input/>", {
         type: "hidden",
         name: "edition",
-        value: edition.sections[sectionIndex].edition
+        value: sections[sectionIndex].edition
     }));
     $sectionNotesForm.append($("<input/>", {
         type: "hidden",
         name: "section",
-        value: edition.sections[sectionIndex].section
+        value: sections[sectionIndex].section
     }));
     $sectionNotesForm.submit(noteSubmitHandler);
     $sectionCol.append($sectionNotesForm);
     let $noteContainer = $("<div/>", {class: "noteContainer"});
-    for (let i = 0; i < edition.sections[sectionIndex].notes.length; i++) {
-        $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.sections[sectionIndex].notes[i]));
+    for (let i = 0; i < sections[sectionIndex].notes.length; i++) {
+        $noteContainer.append(createDisplayNoteForm(edition.batchid, sections[sectionIndex].notes[i]));
     }
     $sectionCol.append($noteContainer)
 }
