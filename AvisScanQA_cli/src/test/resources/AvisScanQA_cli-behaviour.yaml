@@ -28,3 +28,19 @@ iterator:
     - "checksums.txt"
     - "transfer_acknowledged"
     - "transfer_complete"
+
+mail:
+  to: pabr@kb.dk
+  from: avisScanQA@kb.dk
+  cc: ""
+  bcc: ""
+  subject: test
+  bodyText: "<p>New batch checked. Link to batch:</p>"
+  URL: "http://canopus.statsbiblioteket.dk:9631/AvisScanQA_web/#/batch/suedtondernschezeitung_19210701_19211231_RT1/"
+
+  smtp:
+    auth: false
+    starttls:
+      enable: true
+    host: post.kb.dk
+    port: 25

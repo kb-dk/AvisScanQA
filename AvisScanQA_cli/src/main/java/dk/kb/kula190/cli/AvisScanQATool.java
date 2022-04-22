@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.function.Function;
@@ -95,20 +96,21 @@ public class AvisScanQATool {
             log.info("Registering results of QA on batch {} in database", batch.getFullID());
             registerResultInDB(batch, resultCollector, config);
     
-    
-            /*Properties emailConfig;
+config.get("mail");
+            Properties emailConfig;
 
             emailConfig = dk.kb.util.yaml.YAMLUtils.toProperties(config.getSubMap("mail.smtp", true));
-
             EmailSender.newInstance()
-                       .to(recipient)
-                       .from(from)
-                       .cc(cc)
-                       .bcc(bcc)
-                       .subject(subject)
-                       .bodyText(bodyText)
-                       .attachment(pdfFile)
-                       .send(emailConfig);*/
+                       .to(config.getString("mail.to"))
+                       .from(config.getString("mail.from"))
+                       .cc(config.getString("mail.cc"))
+                       .bcc(config.getString("mail.bcc"))
+                       .subject(config.getString("mail.subject"))
+                       .bodyText(config.getString("mail.bodyText")+" <a href='"+config.getString("mail.URL")+batch+"'>"+batch+"</a>",
+                                 "text/html")
+                       //.attachment(Path.of(config.getString("mail.attachment")))
+                       .send(emailConfig);
+
         }
         
         log.info("All checks done, returning");
