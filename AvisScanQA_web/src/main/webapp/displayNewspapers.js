@@ -44,21 +44,28 @@ function noteNewspaperDeleteHandler(event) {
     });
     return false;  // <- cancel event
 }
+function getNewspaperIDs(){
+    return new Promise((r) =>{
+        $.getJSON('api/newspaperIDs',
+            /**
+             * @param {NewspaperID[]} newspaperIDs
+             */
+            function (newspaperIDs){
+                r(newspaperIDs);
+        })
+    });
+}
+
 /*
 * Loads newspaperID data from API.
 * Crates data array for sidebar newspaper tables.
 * inactiveNewspaperData is when the newspaper's batches are all either approved or rejected.
 * */
 async function loadNewspaperIDs() {
-    await $.getJSON('api/newspaperIDs',
-        /**
-         * @param {NewspaperID[]} newspaperIDs
-         */
-        async function (newspaperIDs) {
         let data = [];
         let inactiveNewspaperData = []
 
-        for (let newspaperID of newspaperIDs) {
+        for (let newspaperID of await getNewspaperIDs()) {
             let tmp = {};
             tmp['avis'] = newspaperID.avisid;
             tmp['recievedDate'] = newspaperID.deliveryDate;
@@ -103,7 +110,6 @@ async function loadNewspaperIDs() {
                 }
             ]
         });
-    });
 }
 /*
 * Creates display for the whole newspaper.
