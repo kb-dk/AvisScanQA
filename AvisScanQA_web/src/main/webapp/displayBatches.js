@@ -71,7 +71,7 @@ function loadBatchForNewspaper(batchID) {
                     $notice.append($("<p>").text(`Total Problems found: ${batch.numProblems}`));
 
                     if (batch.problems) {
-                        var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
+                        let output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
 
                         $notice.append($("<p>").text("Batch Problems:"));
                         $notice.append($("<pre/>", {id: "batchProblemsPre"}).text(output));
@@ -163,11 +163,12 @@ function loadBatchForNewspaper(batchID) {
                 $notice.append($showNotesDiv);
                 renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));
                 renderBatchTable(batch.avisid);
-
             });
 }
 
 /**
+ * Events for when one focuses on one element, sets another element to active and focus on it.
+ * When clicking outside the focused element, the element should no longer be active
  * @param {jQuery|HTMLElement} focusInEl
  * @param {jQuery|HTMLElement} focusOutEl
  * */
@@ -193,6 +194,7 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
     });
 }
 /**
+ * Checks if an HTML element is within an HTML collection
  * @param {HTMLCollection} collection
  * @param {jQuery|HTMLElement} element
  * @param {jQuery|HTMLElement} form
@@ -222,8 +224,11 @@ function* range(start, end) {
         yield i;
     }
 }
-
-
+/**
+ * Creates table with link to batches
+ * Except for dashboard, the table only shows batches from one newspaper
+ * @param {String} filter
+ */
 function renderBatchTable(filter) {
     let $table = $("#batchOverview-table");
 
@@ -232,7 +237,6 @@ function renderBatchTable(filter) {
         filterControl: true,
         detailView: true,
         detailFormatter: function (i, r) {
-            console.log(r)
             return "State description: " + batchConfig.stateButtonOptions[r.state].description;
         },
         columns: [{

@@ -1,6 +1,7 @@
 let editionJsonData;
 
 /**
+ * Creates the top row for the edition display
  * @param { String } batchID
  * @param {string} avisID
  * @param {*} date
@@ -12,7 +13,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
     let day = moment(date).format('YYYY-MM-DD');
     let nextDay = moment(date).add(1, 'd').format("YYYY-MM-DD")
     let pastDay = moment(date).subtract(1, 'd').format("YYYY-MM-DD")
-    var url = `api/batch/${batchID}/${avisID}/${day}`
+    let url = `api/batch/${batchID}/${avisID}/${day}`
     $("#notice-div").empty();
     $("#state-div").empty();
     $("#batchOverview-table").empty();
@@ -62,7 +63,6 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
             }
             $headline.append($buttonBack)
             $headline.append($("<h1>").text(`Editions for ${avisID} on ${day}`));
-            // console.log("Starting rendering of entites.");
             renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex);
         })
         .fail(function (jqxhr, textStatus, error) {
@@ -77,7 +77,7 @@ function noteSubmitHandler(event, url) {
     const data = new FormData(event.target);
     let batchID = data.get('batch')
     let parts = ["api", "notes", batchID]
-    var query = new URLSearchParams();
+    let query = new URLSearchParams();
 
     query.append("avis", data.get('avis'));
     query.append("date", data.get('date'));
@@ -105,7 +105,7 @@ function noteDeleteHandler(event) {
     const data = new FormData(event.target);
 
     let parts = ["api", "notes", data.get('batch')]
-    var query = new URLSearchParams();
+    let query = new URLSearchParams();
     let noteID = data.get('id');
     query.append("id", noteID);
 
@@ -141,6 +141,7 @@ function initComponents() {
 }
 
 /**
+ * Creates the day column and the edition column with its content
  * @param {NewspaperDay} newspaperDay
  * @param {number} editionIndex
  * @param {number} sectionIndex
@@ -266,7 +267,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
 }
 
 /**
- *
+ * Creates the section column
  * @param {NewspaperEdition} edition
  * @param {Number} sectionIndex
  */
@@ -343,7 +344,7 @@ function renderSections(edition, sectionIndex) {
 }
 
 /**
- *
+ * Creates the page column
  * @param {NewspaperPage} page
  */
 function renderSinglePage(page) {
@@ -426,7 +427,8 @@ function renderSinglePage(page) {
 }
 
 /**
- *
+ * Creates the note display with a given note.
+ * puts the note into a form, which has a delete eventhandler.
  * @param {string} batchid
  * @param {Note} note
  * @returns {jQuery|HTMLElement}
@@ -512,7 +514,8 @@ function renderSection(entity, pageIndex) {
 }
 
 /**
- *
+ * Made to handle if an edition contains too many pages.
+ * Creates the buttons to switch between the pages on an edition.
  * @param {NewspaperPage[]} pages
  * @param {jQuery|HTMLElement} parent
  * @param {number} page
