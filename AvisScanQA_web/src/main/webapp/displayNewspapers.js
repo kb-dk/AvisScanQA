@@ -1,75 +1,73 @@
 let configJson;
-$.getJSON("api/config.json").done((data) => configJson = data)
+$.getJSON("api/config.json").done((data) => configJson = data);
 
+/*
+* Event handler for note on newspaper level.
+* */
 function noteNewspaperSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
-
     let parts = ["api", data.get('avis'), "notes"]
-
     let url = parts.join("/");
-
     const notes = data.get('standardNote') + " " + data.get('notes');
 
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
-            alert("notes updated")
+            alert("notes updated");
             location.reload();
         }, dataType: "json", contentType: "application/json"
     });
-    //location.reload();
-    // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
+/*
+* Event handler for deleting a note on newspaper level.
+* */
 
 function noteNewspaperDeleteHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
-
-    let parts = ["api", data.get('avis'), "notes"]
-    var query = new URLSearchParams();
+    let parts = ["api", data.get('avis'), "notes"];
+    let query = new URLSearchParams();
 
     query.append("id", data.get('id'));
 
-    // let url = parts.filter(x => x).join("/")
     let url = parts.join("/") + "?" + query.toString();
-
     const notes = data.get('notes');
 
     $.ajax({
         type: "DELETE", url: url, data: notes, success: function () {
-            alert("note deleted")
-            location.reload()
+            alert("note deleted");
+            location.reload();
         }, dataType: "json", contentType: "application/json"
     });
-    //location.reload();
-    // alert('Handler for .submit() called.');
     return false;  // <- cancel event
 }
-
+/*
+* Loads newspaperID data from API.
+* Crates data array for sidebar newspaper tables.
+* inactiveNewspaperData is when the newspaper's batches are all either approved or rejected.
+* */
 async function loadNewspaperIDs() {
-
-    await $.getJSON('api/newspaperIDs', async function (newspaperIDs) {
+    await $.getJSON('api/newspaperIDs',
+        /**
+         * @param {NewspaperID[]} newspaperIDs
+         */
+        async function (newspaperIDs) {
         let data = [];
         let inactiveNewspaperData = []
-        /**
-         * @param { String[] } newspaperIDs */
 
         for (let newspaperID of newspaperIDs) {
             let tmp = {};
             tmp['avis'] = newspaperID.avisid;
-
             tmp['recievedDate'] = newspaperID.deliveryDate;
 
             if(newspaperID.isInactive){
-                inactiveNewspaperData.push(tmp)
+                inactiveNewspaperData.push(tmp);
             }else{
-                data.push(tmp)
+                data.push(tmp);
             }
-
-
         }
         let $table = $("#avisIDer");
         $table.bootstrapTable({
@@ -86,7 +84,6 @@ async function loadNewspaperIDs() {
                     field: 'recievedDate',
                     sortable: true
                 }
-
             ]
         });
         let $tableArkiv = $("#avisIDerArkiv");
@@ -95,7 +92,7 @@ async function loadNewspaperIDs() {
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value.length > 20 ? value.substring(0,15)+'...' : value}/0/'>${value}</a>`;
+                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,17)+'...' : value}</a>`;
                 },
                 sortable: true
             },
@@ -104,14 +101,13 @@ async function loadNewspaperIDs() {
                     field: 'recievedDate',
                     sortable: true
                 }
-
             ]
         });
-
-    })
-
+    });
 }
-
+/*
+* Creates display for the whole newspaper.
+* */
 /**
  * @param {String} avisID
  * @param {Number} year
@@ -146,9 +142,9 @@ function loadYearsForNewspaper(avisID, year) {
                                 visible: false,
                                 class: `showNotesDiv ${(this.visible == 'true' ? "active" : "")}`,
                                 tabindex: "100"
-                            })
+                            });
                             $showNotesDiv.offsetTop = $notesButton.offsetTop;
-                            setShowNotesFocusInAndOut($notesButton, $showNotesDiv)
+                            setShowNotesFocusInAndOut($notesButton, $showNotesDiv);
 
                             let $newspaperNotesForm = $("<form/>", {
                                 id: "newspaperNotesForm",
@@ -163,7 +159,7 @@ function loadYearsForNewspaper(avisID, year) {
                             let $newspaperDropDown = $("<select/>", {
                                 class: "form-control calendarNotesDropdown", name: "standardNote"
                             });
-                            formRow1.append($newspaperDropDown)
+                            formRow1.append($newspaperDropDown);
                             $newspaperDropDown.append($("<option>", {
                                 class: "",
                                 value: "",
@@ -193,20 +189,18 @@ function loadYearsForNewspaper(avisID, year) {
                                 value: "Gem"
                             }));
                             $newspaperNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
-
                             $newspaperNotesForm.submit(noteNewspaperSubmitHandler);
                             $showNotesDiv.append($newspaperNotesForm);
                             if (notes) {
 
                                 for (let i = 0; i < notes.length; i++) {
-                                    // let $pageFormDiv = $("<div/>", {class: "pageFormDiv"});
                                     let $newspaperForm = $("<form>", {action: "", method: "delete"});
                                     $newspaperForm.append($("<input/>", {type: "hidden", name: "avis", value: avisID}));
 
                                     const note = notes[i];
                                     $newspaperForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
 
-                                    const formRow = $("<div>", {class: "form-row"})
+                                    const formRow = $("<div>", {class: "form-row"});
                                     $newspaperForm.append(formRow);
 
                                     let $newspaperNote = $("<span/>", {
@@ -230,18 +224,14 @@ function loadYearsForNewspaper(avisID, year) {
                                     $showNotesDiv.append($newspaperForm);
                                 }
                             }
-                            $notesButtonDiv.append($notesButton)
+                            $notesButtonDiv.append($notesButton);
                             $notice.append($notesButtonDiv);
                             $notice.append($showNotesDiv);
                         })
-                /*
-
-                */
                 renderNewspaperForYear(years, year, `api/dates/${avisID}/${year}`);
                 renderBatchTable(avisID);
             });
 }
-
 /**
  * @param {iterable<Number>} years array of years to render (either Generator<int, void, int> or int[])
  * @param {Number} currentyear current year
@@ -252,14 +242,14 @@ function renderNewspaperForYear(years, currentyear, url) {
         class: 'btn-group mr-2 d-flex justify-content-evenly flex-wrap',
         id: 'year-nav'
     });
-    var nav = $("<div/>", {
+    let nav = $("<div/>", {
         class: 'btn-toolbar mb-2 mb-md-0'
     }).append(yearNav);
 
     let $primary = $("#primary-show");
     $primary.html(nav);
 
-    const yearShow = $("<div/>", {id: 'year-show'})
+    const yearShow = $("<div/>", {id: 'year-show'});
     const heading = $("<h1/>", {text: "show me a newspaper"});
     yearShow.append(heading);
     $primary.append(yearShow);
@@ -276,10 +266,9 @@ function renderNewspaperForYear(years, currentyear, url) {
     // var url = 'api/dates/' + newspaper + '/' + currentyear;
     $.getJSON(url)
         .done(function (dates) {
-
             let datesInYear = splitDatesIntoMonths(dates);
             $("#year-show").load("calendarDisplay.html", function () {
-                for (var i = 0; i < datesInYear.length; i++) {
+                for (let i = 0; i < datesInYear.length; i++) {
                     const calElem = "#month" + i;
                     let datesInYearElement = datesInYear[i];
                     let html = "<h3>" + datesInYearElement.name + "</h3>";
@@ -289,12 +278,13 @@ function renderNewspaperForYear(years, currentyear, url) {
             });
         });
 }
-
 /**
- *
  * @param { {state: string, problems: string, count: number} } dayInMonth
  * @param { jQuery|HTMLElement } element
  * @param {number} noteCount
+ * Depending on batch state, or some conditions
+ * The styling on the element are changed
+ * Usage on newspaper, batch calendar and edition page buttons.
  */
 function determineColor(dayInMonth, element, noteCount) {
     if (dayInMonth.state === "") {
@@ -320,7 +310,12 @@ function determineColor(dayInMonth, element, noteCount) {
         element.css(configJson.global.calendarStyling.containsNotes);
     }
 }
-
+/**
+ * @param {number} year
+ * @param {number} month
+ * @param {NewspaperDate[]} availableDates
+ * @returns {string}
+ */
 function buildCalendar(year, month, availableDates) {
 
     let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
@@ -344,7 +339,6 @@ function buildCalendar(year, month, availableDates) {
     }
     for (let availableDate of availableDates) {
         //overwrite days where we have content
-
         let element = daysInMonth[availableDate.day.date() - 1];
         element.available = true;
         element.count = availableDate.count;
@@ -354,8 +348,6 @@ function buildCalendar(year, month, availableDates) {
         element.notesCount = availableDate.notesCount;
         element.avisid = availableDate.avisid;
         element.batchid = availableDate.batchid;
-
-
     }
 
     let calHtml = "";
@@ -372,24 +364,19 @@ function buildCalendar(year, month, availableDates) {
             calHtml += "<div class='col-sm-1'>&nbsp;</div>";
         }
     }
-
     for (let d = 0; d < daysInMonth.length; d++) {
-        var colIdx = (firstWeekdayOfMonth + d) % 7;
+        let colIdx = (firstWeekdayOfMonth + d) % 7;
         if (colIdx === 0) {
             if (d !== 0) {
                 calHtml += "</div>";
             }
             calHtml += "<div class='row'>";
         }
-
         let dayInMonth = daysInMonth[d];
-
         let date = ("0" + dayInMonth.day.date());
         //Ensure same width of date numbers
         date = date.substring(date.length - 2);
-
-
-        calHtml += "<div class='col-sm-1' >"
+        calHtml += "<div class='col-sm-1' >";
 
         let button;
         if (dayInMonth.available) {
@@ -408,12 +395,8 @@ function buildCalendar(year, month, availableDates) {
         determineColor(dayInMonth, button, dayInMonth.notesCount)
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
-
-
     }
-
     calHtml += "</div>";
-
     return calHtml;
 }
 

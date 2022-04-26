@@ -23,7 +23,11 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
     })
 
     $.getJSON(url)
-        .done(function (newspaperDay) {
+        .done(
+        /**
+         * @param {NewspaperDay} newspaperDay
+         * */
+        function (newspaperDay) {
 
             $headline.append($("<a/>", {
                 class: "btn btn-secondary",
@@ -151,7 +155,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         return;
     }
     const edition = editions[editionIndex];
-    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
+    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"});
     const $dayCol = $("#dayCol");
     let $dayNotesTextArea = $("<span/>", {
         class: "userNotes", id: "dayNotes", type: "text"
@@ -161,8 +165,8 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
 
     let $dayNotesForm = $("<form>", {id: "dayNotesForm", action: "", method: "post"});
 
-    const formRow1 = $("<div>", {class: "form-row"})
-    const formRow2 = $("<div>", {class: "form-row"})
+    const formRow1 = $("<div>", {class: "form-row"});
+    const formRow2 = $("<div>", {class: "form-row"});
     $dayNotesForm.append(formRow1);
     $dayNotesForm.append(formRow2);
 
@@ -174,7 +178,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $dropDownDayNotes.append($("<option>", {value: option, html: option}));
     }
 
-    formRow1.append($dropDownDayNotes)
+    formRow1.append($dropDownDayNotes);
     formRow1.append($("<label/>", {for: "dayNotes"}).text("Day notes"));
     formRow2.append($hiddenTextAreaValue);
     formRow2.append($dayNotesTextArea);
@@ -222,8 +226,8 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
 
         let $editionNotesForm = $("<form>", {id: "editionNotesForm", action: "api/editionNotes", method: "post"});
 
-        const formRow1 = $("<div>", {class: "form-row"})
-        const formRow2 = $("<div>", {class: "form-row"})
+        const formRow1 = $("<div>", {class: "form-row"});
+        const formRow2 = $("<div>", {class: "form-row"});
         $editionNotesForm.append(formRow1);
         $editionNotesForm.append(formRow2);
 
@@ -233,8 +237,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         for (let option of editionJsonData.dropDownStandardMessage.udgDropDown.options) {
             $dropDownEditionNotes.append($("<option>", {value: option, html: option}));
         }
-
-        formRow1.append($dropDownEditionNotes)
+        formRow1.append($dropDownEditionNotes);
         formRow1.append($("<label/>", {for: "editionNotes"}).text("Edition notes"));
         formRow2.append($editionNotesTextArea);
         formRow2.append($hiddenTextAreaValue);
@@ -251,7 +254,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         for (let i = 0; i < edition.notes.length; i++) {
             $noteContainer.append(createDisplayNoteForm(edition.batchid, edition.notes[i]));
         }
-        $editionCol.append($noteContainer)
+        $editionCol.append($noteContainer);
         renderSections(edition, sectionIndex);
         if (edition.sections[sectionIndex].pages.length === 1) {
             renderSinglePage(edition.section[sectionIndex].pages[0]);
@@ -273,8 +276,7 @@ function renderSections(edition, sectionIndex) {
     $pageDisplay.append($sectionCol);
 
     let sections = edition.sections.sort((a,b) =>{return a.section < b.section ? -1 : 1});
-    console.log(sections)
-    //console.log(edition)
+
     for (let i = 0; i < sections.length; i++) {
         $sectionCol.append($("<a>", {
             class: `btn btn-sm btn-outline-secondary ${i === sectionIndex ? "active" : ""}`,
@@ -288,9 +290,7 @@ function renderSections(edition, sectionIndex) {
         class: "userNotes", id: "sectionNotes", type: "text"
     }).attr('contenteditable', true).on('input', (e) => {
         $hiddenTextAreaValue.val(e.target.innerText);
-    })
-
-
+    });
     let $sectionNotesForm = $("<form>", {id: "sectionNotesForm", action: "api/sectionNotes", method: "post"});
 
     const formRow1 = $("<div>", {class: "form-row"})
@@ -354,8 +354,8 @@ function renderSinglePage(page) {
 
     let $pageNotesForm = $("<form>", {id: "pageNotesForm", action: "", method: "post"});
 
-    const formRow1 = $("<div>", {class: "form-row"})
-    const formRow2 = $("<div>", {class: "form-row"})
+    const formRow1 = $("<div>", {class: "form-row"});
+    const formRow2 = $("<div>", {class: "form-row"});
     $pageNotesForm.append(formRow1);
     $pageNotesForm.append(formRow2);
     let $standardMessageSelect = $("<select/>", {
@@ -364,14 +364,12 @@ function renderSinglePage(page) {
     for (let option of editionJsonData.dropDownStandardMessage.pageDropDown.options) {
         $standardMessageSelect.append($("<option>", {
             value: option, html: option
-        }))
+        }));
     }
-    formRow1.append($standardMessageSelect)
-
-
+    formRow1.append($standardMessageSelect);
     formRow1.append($("<label/>", {for: "pageNotes"}).text("Page notes"));
 
-    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
+    let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"});
     formRow2.append($hiddenTextAreaValue);
     let $pageNotesTextArea = $("<span/>", {
         class: "userNotes", id: "pageNotes", type: "text"
@@ -379,11 +377,10 @@ function renderSinglePage(page) {
     $pageNotesTextArea.attr('contenteditable', true).on('input', (e) => {
         $hiddenTextAreaValue.val(e.target.innerText);
     });
-    formRow2.append($pageNotesTextArea)
+    formRow2.append($pageNotesTextArea);
     formRow2.append($("<input/>", {
         id: "pageNotesFormSubmit", type: "submit", name: "submit", form: "pageNotesForm", value: "Gem"
     }));
-
     $pageNotesForm.append($("<input/>", {type: "hidden", name: "batch", value: page.batchid}));
     $pageNotesForm.append($("<input/>", {type: "hidden", name: "avis", value: page.avisid}));
     $pageNotesForm.append($("<input/>", {type: "hidden", name: "date", value: page.editionDate}));
@@ -402,17 +399,15 @@ function renderSinglePage(page) {
     let $contentRow = $("#contentRow");
     $contentRow.append($pageCol);
 
-    let $fileAndProblemsCol = $("<div/>", {class: "col-8"})
+    let $fileAndProblemsCol = $("<div/>", {class: "col-8"});
 
     if (page.problems) {
         $fileAndProblemsCol.append($("<p>").text("Problems: ").append($("<pre>").text(JSON.stringify(JSON.parse(page.problems), ['type', 'filereference', 'description'], 2))));
     }
-
     loadImage(page.origRelpath, $fileAndProblemsCol);
 
     let $infoDumpRow = $("<div/>", {class: "row"});
     $infoDumpRow.append($fileAndProblemsCol);
-
 
     let $entityInfoCol = $("<div/>", {class: "col-4"});
     let infoHtml = `Edition titel: ${page.editionTitle}<br>`;
@@ -441,7 +436,7 @@ function createDisplayNoteForm(batchid, note) {
     $pageForm.append($("<input/>", {type: "hidden", name: "batch", value: batchid}));
     $pageForm.append($("<input/>", {type: "hidden", name: "id", value: note.id}));
 
-    const formRow = $("<div>", {id: `noteRow${note.id}`, class: "form-row"})
+    const formRow = $("<div>", {id: `noteRow${note.id}`, class: "form-row"});
     $pageForm.append(formRow);
 
     let $pageNote = $("<span/>", {
@@ -455,7 +450,7 @@ function createDisplayNoteForm(batchid, note) {
     formRow.append($("<label/>", {
         for: $pageNote.uniqueId().attr("id"),
         text: `-${note.username} ${moment(note.created).format("DD/MM/YYYY HH:mm:ss")}`
-    }))
+    }));
     formRow.append($pageNote);
     formRow.append($("<button/>", {class: "bi bi-x-circle-fill", type: "submit"}).css({
         "border": "none",
@@ -479,10 +474,10 @@ function loadImage(filename, element) {
         type: "GET", url: url, xhrFields: {responseType: 'arraybuffer'}, beforeSend: function () {
             result.text(`Loading Page`);
         }, success: function (data) {
-            var tiff = new Tiff({buffer: data});
-            var width = tiff.width();
-            var height = tiff.height();
-            var canvas = tiff.toCanvas();
+            let tiff = new Tiff({buffer: data});
+            let width = tiff.width();
+            let height = tiff.height();
+            let canvas = tiff.toCanvas();
             if (canvas) {
                 canvas.setAttribute('style', `width:100%;`);
                 canvas.download = filename;
@@ -506,7 +501,7 @@ function loadImage(filename, element) {
 function renderSection(entity, pageIndex) {
     let $pageNav = $("#page-nav");
     let pages = entity.pages;
-    createPageButtons(pages, $pageNav, pageIndex)
+    createPageButtons(pages, $pageNav, pageIndex);
 
     if (pageIndex >= 0 && pageIndex < pages.length) {
         renderSinglePage(pages[pageIndex]);
@@ -538,10 +533,9 @@ function createPageButtons(pages, parent, page) {
                 href: editPageIndexInHash(location.hash, p),
 
                 class: `btn btn-sm btn-outline-secondary ${active}`
-            }).text(p + 1)
-            determineColor(pages[p], link, pages[p].notes.length)
-
-            parent.append(link)
+            }).text(p + 1);
+            determineColor(pages[p], link, pages[p].notes.length);
+            parent.append(link);
         }
     } else {
         let link = $("<a/>", {
@@ -549,22 +543,21 @@ function createPageButtons(pages, parent, page) {
             href: editPageIndexInHash(location.hash, 0)
         }).text(1);
 
-        determineColor(pages[0], link, pages[0].notes.length)
+        determineColor(pages[0], link, pages[0].notes.length);
 
-
-        parent.append(link)
+        parent.append(link);
         if (page > 2) {
             parent.append($("<a/>", {
                 class: "btn btn-sm out-of-range",
                 href: editPageIndexInHash(location.hash, page - 2)
-            }).text("..."))
+            }).text("..."));
         }
 
         if (page === 0) {
             cutHigh = page + 2;
         }
         if (page === pages.length - 1) {
-            cutLow = page - 2
+            cutLow = page - 2;
         }
 
         for (let p = cutLow < 0 ? 0 : cutLow; p <= cutHigh; p++) {
@@ -574,19 +567,18 @@ function createPageButtons(pages, parent, page) {
                     href: editPageIndexInHash(location.hash, p),
 
                     class: `btn btn-sm btn-outline-secondary ${active}`
-                }).text(p + 1)
-                determineColor(pages[p], link, pages[p].notes.length)
+                }).text(p + 1);
+                determineColor(pages[p], link, pages[p].notes.length);
 
-                parent.append(link)
+                parent.append(link);
             }
         }
-        //console.log(page)
         if (page < pages.length - 2) {
             if (page < pages.length - 3) {
                 parent.append($("<a/>", {
                     class: "btn btn-sm out-of-range",
                     href: editPageIndexInHash(location.hash, page + 2)
-                }).text("..."))
+                }).text("..."));
             }
 
         }
@@ -594,15 +586,13 @@ function createPageButtons(pages, parent, page) {
             class: `btn btn-sm btn-outline-secondary ${page === pages.length - 1 ? "active" : ""}`,
             href: editPageIndexInHash(location.hash, pages.length - 1)
         }).text(pages.length);
-
-        determineColor(pages[pages.length - 1], link, pages[pages.length - 1].notes.length)
-
-        parent.append(link)
+        determineColor(pages[pages.length - 1], link, pages[pages.length - 1].notes.length);
+        parent.append(link);
     }
     parent.append($("<a/>", {
         class: "btn btn-sm btn-outline-secondary bi bi-arrow-right nextAndPreviousPage",
         href: page === pages.length - 1 ? editPageIndexInHash(location.hash, page) : editPageIndexInHash(location.hash, page + 1)
-    }))
+    }));
 }
 
 /**
@@ -611,7 +601,7 @@ function createPageButtons(pages, parent, page) {
  * @returns {string}
  */
 function editEntityIndexInHash(origHash, newEntityIndex) {
-    var hashParts = origHash.split("/");
+    let hashParts = origHash.split("/");
     hashParts[hashParts.length - 4] = newEntityIndex;
     //Reset to section 0 and page 0, to ensure that we do not try to open a page/section that does not exist
     return editPageIndexInHash(editSectionIndexInHash(hashParts.join("/"), 0), 0);
@@ -623,7 +613,7 @@ function editEntityIndexInHash(origHash, newEntityIndex) {
  * @returns {string}
  */
 function editSectionIndexInHash(origHash, newSectionIndex) {
-    var hashParts = origHash.split("/");
+    let hashParts = origHash.split("/");
     hashParts[hashParts.length - 3] = newSectionIndex;
     //Reset to page 0, to ensure that we do not try to open a page that does not exist in this section
     return editPageIndexInHash(hashParts.join("/"), 0);
@@ -635,7 +625,7 @@ function editSectionIndexInHash(origHash, newSectionIndex) {
  * @returns {string}
  */
 function editPageIndexInHash(origHash, newPageIndex) {
-    var hashParts = origHash.split("/");
+    let hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newPageIndex;
     return hashParts.join("/");
 }

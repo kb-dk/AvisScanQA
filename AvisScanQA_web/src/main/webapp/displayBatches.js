@@ -1,14 +1,14 @@
 let batchConfig;
-$.getJSON("api/config.json", function (data) {
-    batchConfig = data.batch;
-})
+$.getJSON("api/config.json",
+    function (data) {
+        batchConfig = data.batch;
+    });
 
 /**
  * @param {String} batchID
  */
 function loadBatchForNewspaper(batchID) {
     let url = `api/batch/${batchID}`;
-
     let $state = $("#state-div").empty();
     const $headline = $("#headline-div").empty();
     let $notice = $("#notice-div").empty();
@@ -36,20 +36,21 @@ function loadBatchForNewspaper(batchID) {
                     $("#stateFormBatchID").val(batch.batchid);
                     const $stateForm = $("#stateForm");
                     let $dropDownState = $("#dropDownState");
-                    $dropDownState.text(batchConfig.stateButtonOptions[batch.state].name)
+                    $dropDownState.text(batchConfig.stateButtonOptions[batch.state].name);
                     let stateButtonColors = batchConfig.stateButtonOptions[batch.state].styling;
                     $dropDownState.css(stateButtonColors);
 
-                    for (let [option, val] of Object.entries(batchConfig.stateButtonOptions)) {
-                        $stateDropDownMenu.append($("<button/>", {
-                            type: "submit",
-                            class: "dropdown-item",
-                            title: val.description,
-                            form: "stateForm",
-                            value: `${option}`,
-                            html: `${val.name}`,
-                        }));
-
+                    for (let [option, val] of Object.entries(batchConfig.stateButtonOptions).sort()) {
+                        if (option !== '1IN_PROGRESS') {
+                            $stateDropDownMenu.append($("<button/>", {
+                                type: "submit",
+                                class: "dropdown-item",
+                                title: val.description,
+                                form: "stateForm",
+                                value: `${option}`,
+                                html: `${val.name}`,
+                            }));
+                        }
                     }
 
                     $(`[value="${batch.state}"`).css("font-weight", "Bold");
@@ -62,7 +63,7 @@ function loadBatchForNewspaper(batchID) {
                     $notice.append($("<a>", {
                         href: `#/batch/${batch.batchid}/notes`,
                         target: "_blank"
-                    }).text(`Get Notes (${batch.numNotes})`))
+                    }).text(`Get Notes (${batch.numNotes})`));
                 }
 
                 if (batch.numProblems > 0) {
@@ -72,7 +73,7 @@ function loadBatchForNewspaper(batchID) {
                     if (batch.problems) {
                         var output = JSON.parse(batch.problems).map(entry => JSON.stringify(entry, ['type', 'filereference', 'description'], 4).replaceAll("\\n", "\n")).join(",\n")
 
-                        $notice.append($("<p>").text("Batch Problems:"))
+                        $notice.append($("<p>").text("Batch Problems:"));
                         $notice.append($("<pre/>", {id: "batchProblemsPre"}).text(output));
 
                     }
@@ -91,8 +92,8 @@ function loadBatchForNewspaper(batchID) {
                 setShowNotesFocusInAndOut($notesButton, $showNotesDiv);
 
                 let $batchNotesForm = $("<form/>", {id: "batchNotesForm", action: "", method: "post"});
-                const formRow1 = $("<div>", {class: "form-row form-row-upper"})
-                const formRow2 = $("<div>", {class: "form-row form-row-lower"})
+                const formRow1 = $("<div>", {class: "form-row form-row-upper"});
+                const formRow2 = $("<div>", {class: "form-row form-row-lower"});
                 $batchNotesForm.append(formRow1);
                 $batchNotesForm.append(formRow2);
                 let $batchDropDown = $("<select/>", {
@@ -102,16 +103,16 @@ function loadBatchForNewspaper(batchID) {
                 for (const option of batchConfig.dropDownStandardMessages.options) {
                     $batchDropDown.append($("<option>", {value: option, html: option}));
                 }
-                formRow1.append($batchDropDown)
-                let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
-                formRow1.append($hiddenTextAreaValue)
+                formRow1.append($batchDropDown);
+                let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"});
+                formRow1.append($hiddenTextAreaValue);
                 let $batchNotesTextArea = $("<span/>", {
                     class: "userNotes calendarNotes", id: "batchNotes", type: "text"
                 }).attr('contenteditable', true).on('input', (e) => {
                     $hiddenTextAreaValue.val(e.target.innerText);
                 });
 
-                formRow1.append($batchNotesTextArea)
+                formRow1.append($batchNotesTextArea);
                 formRow1.append($("<input/>", {
                     class: "btn btn-sm btn-outline-dark",
                     id: "batchNotesFormSubmit",
@@ -166,6 +167,10 @@ function loadBatchForNewspaper(batchID) {
             });
 }
 
+/**
+ * @param {jQuery|HTMLElement} focusInEl
+ * @param {jQuery|HTMLElement} focusOutEl
+ * */
 function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
     focusInEl.focusin((e) => {
         focusOutEl.addClass("active");
@@ -176,7 +181,7 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
         if (bool) {
             focusOutEl.removeClass("active");
         } else {
-            bool = focusOutEl[0] != e.relatedTarget
+            bool = focusOutEl[0] !== e.relatedTarget;
             if (bool) {
                 if (!htmlElementWithinCollection(focusOutEl[0].children, e.relatedTarget, e.relatedTarget.form)) {
                     focusOutEl.removeClass("active");
@@ -187,15 +192,19 @@ function setShowNotesFocusInAndOut(focusInEl, focusOutEl) {
         }
     });
 }
-
+/**
+ * @param {HTMLCollection} collection
+ * @param {jQuery|HTMLElement} element
+ * @param {jQuery|HTMLElement} form
+ * */
 function htmlElementWithinCollection(collection, element, form) {
     for (let i = 0; i < collection.length; i++) {
-        if (collection.item(i) == form || collection.item(i) == element) {
-            return true
+        if (collection.item(i) === form || collection.item(i) === element) {
+            return true;
         }
         if (collection.item(i).children.length > 0) {
             if (htmlElementWithinCollection(collection.item(i).children, element)) {
-                return true
+                return true;
             }
         }
     }
@@ -268,43 +277,41 @@ function renderBatchTable(filter) {
             sortable: true,
             filterControl: "input"
         }]
-    })
+    });
 
     $table.bootstrapTable('refreshOptions', {
         filterOptions: {
             filterAlgorithm: 'or'
         }
-    })
+    });
     if (filter != null) {
         //If we view a certain batch or newspaper, we only want batches from the same newspaper
         $table.bootstrapTable('filterBy', {
             avisid: filter
-        })
+        });
     } else {
-        $table.bootstrapTable('filterBy', {})
+        $table.bootstrapTable('filterBy', {});
     }
 }
 
 async function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
-
-
     const data = new FormData(event.target);
     const state = event.originalEvent.submitter.value;
     const batch = data.get('batch');
 
-    let parts = ["api", "batch", batch]
-    var query = new URLSearchParams();
+    let parts = ["api", "batch", batch];
+    let query = new URLSearchParams();
 
     query.append("state", state);
     let url = parts.join("/") + "?" + query.toString();
 
     let changeState = true;
-    if(state === "APPROVED"){
+    if (state === "APPROVED") {
         let roundTripNumber = parseInt(batch.substring(batch.length - 1)) + 1;
-        if(await checkBatchIDExists(batch.substring(0, batch.length - 1) + roundTripNumber)){
-            if(!confirm("Der findes et nyere roundtrip, er du sikker på du vil godkende dette batch?")){
-                changeState = false
+        if (await checkBatchIDExists(batch.substring(0, batch.length - 1) + roundTripNumber)) {
+            if (!confirm("Der findes et nyere roundtrip, er du sikker på du vil godkende dette batch?")) {
+                changeState = false;
             }
         }
     }
@@ -323,19 +330,23 @@ async function stateSubmitHandler(event) {
     }
     return false;  // <- cancel event
 }
-
+/**
+ * @param {string} batchID
+ **/
 function checkBatchIDExists(batchID) {
-    return new Promise((r)=>{
+    return new Promise((r) => {
         $.getJSON('api/batch/' + batchID, function () {
             r(true);
         })
-            .fail(function() {
+            .fail(function () {
                 r(false);
             })
     })
 
 }
-
+/**
+ * @param {string} batchId
+ * */
 function handleNotesDownload(batchId) {
     $.getJSON(`api/notes/${batchId}`)
         .done(/**
@@ -344,14 +355,12 @@ function handleNotesDownload(batchId) {
             const items = notes;
             const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
             if (items.length > 0) {
-                const header = Object.keys(items[0])
+                const header = Object.keys(items[0]);
                 const csv = [
                     header.join(','), // header row first
                     ...items.map(row => header.map(fieldName => JSON.stringify(row[fieldName], replacer)).join(','))
-                ].join('\r\n')
+                ].join('\r\n');
 
-
-                console.log(csv)
                 let link = document.createElement("a");
                 link.download = `${batchId}.csv`;
                 link.href = `data:text/csv,${csv}`;
@@ -361,6 +370,6 @@ function handleNotesDownload(batchId) {
                 link.remove();
             }
             //Close the window, but wait 100 ms to ensure that the download have started
-            setTimeout("window.close()", 100)
+            setTimeout("window.close()", 100);
         });
 }
