@@ -151,10 +151,9 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
     let editions = newspaperDay.editions;
-    if (editionIndex < 0 || editionIndex >= editions.length) {
-        $("#primary-show").text(`Edition ${editionIndex + 1} not found. Day only has ${editions.length} editions`);
-        return;
-    }
+    // if (editionIndex < 0 || editionIndex >= editions.length) {
+    //     $("#primary-show").text(`Edition ${editionIndex + 1} not found. Day only has ${editions.length} editions`);
+    // }
     const edition = editions[editionIndex];
     let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"});
     const $dayCol = $("#dayCol");
@@ -197,7 +196,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $noteContainer.append(createDisplayNoteForm(newspaperDay.batch.batchid, newspaperDay.notes[i]));
     }
     $dayCol.append($noteContainer);
-
+    if (editionIndex < 0 || editionIndex >= editions.length) {return;}
     const $editionCol = $("#editionCol");
 
     const $editionNav = $("<div/>", {class: 'btn-toolbar mb-2 mb-md-0'})

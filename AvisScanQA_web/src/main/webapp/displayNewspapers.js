@@ -8,7 +8,7 @@ function noteNewspaperSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
-    let parts = ["api", data.get('avis'), "notes"]
+    let parts = ["api", data.get('avis'), "notes"];
     let url = parts.join("/");
     const notes = data.get('standardNote') + " " + data.get('notes');
 
@@ -52,7 +52,7 @@ function getNewspaperIDs(){
              */
             function (newspaperIDs){
                 r(newspaperIDs);
-        })
+        });
     });
 }
 
@@ -63,7 +63,7 @@ function getNewspaperIDs(){
 * */
 async function loadNewspaperIDs() {
         let data = [];
-        let inactiveNewspaperData = []
+        let inactiveNewspaperData = [];
 
         for (let newspaperID of await getNewspaperIDs()) {
             let tmp = {};
@@ -386,6 +386,7 @@ function buildCalendar(year, month, availableDates) {
 
         let button;
         if (dayInMonth.available) {
+            console.log(dayInMonth)
             button = $("<a/>", {
                 href: "#/newspapers/" + dayInMonth.batchid + "/" + dayInMonth.avisid + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/0/",
                 title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)\n" + dayInMonth.notesCount + " note(s)"
@@ -398,7 +399,7 @@ function buildCalendar(year, month, availableDates) {
         button.attr("style", 'padding-left: 0; padding-right: 0')
             .text(date)
             .addClass("btn btn-sm");
-        determineColor(dayInMonth, button, dayInMonth.notesCount)
+        determineColor(dayInMonth, button, dayInMonth.notesCount);
         calHtml += button.prop('outerHTML');
         calHtml += "</div>";
     }
@@ -412,7 +413,8 @@ function buildCalendar(year, month, availableDates) {
  * @returns {*[]}
  */
 function splitDatesIntoMonths(dates) {
-    var months = [];
+    let
+        months = [];
     months[0] = {name: "Januar", days: []};
     months[1] = {name: "Februar", days: []};
     months[2] = {name: "Marts", days: []};
@@ -452,7 +454,7 @@ function splitDatesIntoMonths(dates) {
  * @returns {String}
  */
 function editYearIndexInHash(origHash, newIndex) {
-    var hashParts = origHash.split("/");
+    let hashParts = origHash.split("/");
     hashParts[hashParts.length - 2] = newIndex; // there's an empty place..
     return hashParts.join("/");
 }
