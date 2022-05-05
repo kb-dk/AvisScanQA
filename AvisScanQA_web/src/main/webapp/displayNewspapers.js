@@ -273,12 +273,12 @@ function renderNewspaperForYear(years, currentyear, url) {
     $.getJSON(url)
         .done(function (dates) {
             let datesInYear = splitDatesIntoMonths(dates);
-            $("#year-show").load("calendarDisplay.html", function () {
+            $("#year-show").load("calendarDisplay.html", async function () {
                 for (let i = 0; i < datesInYear.length; i++) {
                     const calElem = "#month" + i;
                     let datesInYearElement = datesInYear[i];
                     let html = "<h3>" + datesInYearElement.name + "</h3>";
-                    html += buildCalendar(currentyear, (i + 1), datesInYearElement.days);
+                    html += await buildCalendar(currentyear, (i + 1), datesInYearElement.days);
                     $(calElem).html(html);
                 }
             });
@@ -322,7 +322,8 @@ function determineColor(dayInMonth, element, noteCount) {
  * @param {NewspaperDate[]} availableDates
  * @returns {string}
  */
-function buildCalendar(year, month, availableDates) {
+async function buildCalendar(year, month, availableDates) {
+
 
     let firstDayOfThisMonth = moment(year + "-" + month + "-01", "YYYY-MM-DD");
     let daysInMonth = [];
@@ -380,13 +381,18 @@ function buildCalendar(year, month, availableDates) {
         }
         let dayInMonth = daysInMonth[d];
         let date = ("0" + dayInMonth.day.date());
+        let month = ("0" + dayInMonth.day.month());
         //Ensure same width of date numbers
         date = date.substring(date.length - 2);
+        month = month.substring(date.length - 2);
+        if (dayInMonth.available && dayInMonth.editionCount === 0) {
+            let noEditionDate = `${dayInMonth.day.format('YYYY-MM-DD')}`;
+            dayInMonth.notesCount = await getNoteCountForNoEdition(dayInMonth.batchid, dayInMonth.avisid, noEditionDate);
+        }
         calHtml += "<div class='col-sm-1' >";
 
         let button;
         if (dayInMonth.available) {
-            console.log(dayInMonth)
             button = $("<a/>", {
                 href: "#/newspapers/" + dayInMonth.batchid + "/" + dayInMonth.avisid + "/" + dayInMonth.day.format('YYYY-MM-DD') + "/0/0/0/",
                 title: dayInMonth.count + " page(s) \n" + dayInMonth.editionCount + " edition(s)\n" + dayInMonth.notesCount + " note(s)"
@@ -406,7 +412,17 @@ function buildCalendar(year, month, availableDates) {
     calHtml += "</div>";
     return calHtml;
 }
-
+/**
+ * @returns {Promise}
+ * */
+function getNoteCountForNoEdition(batchID,newspaperID,date){
+     return new Promise((r) => {
+         $.getJSON(`api/noEditionNoteCount/${newspaperID}/${batchID}/${date}`,
+             function (noteCount) {
+                 r(noteCount);
+             });
+     });
+}
 /**
  *
  * @param {NewspaperDate[] } dates

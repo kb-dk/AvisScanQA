@@ -222,8 +222,32 @@ paths:
                 items:
                   $ref: '#/components/schemas/NewspaperDate'
 
-
-
+  /noEditionNoteCount/{newspaperID}/{batchID}/{date}:
+    get:
+      operationId: getNoteCount
+      parameters:
+        - name: newspaperID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: integer
 
 
   /entity/{handle}/url/{type}:

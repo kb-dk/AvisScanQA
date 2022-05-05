@@ -3,6 +3,7 @@ package dk.kb.kula190.dao;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import dk.kb.kula190.model.*;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
+import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -615,6 +617,15 @@ public class NewspaperQADao {
         } catch (SQLException e) {
             log.error("Failed to lookup newspaper ids", e);
             throw new DAOFailureException("Err deleting note from id", e);
+        }
+    }
+
+    public Integer getNoteCount(String newspaperID, String batchID, String date) throws SQLException {
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoNoteHelper.getAllNumNotesForDay(batchID,
+                                                      newspaperID,
+                                                      LocalDate.parse(date,DateTimeFormatter.ISO_LOCAL_DATE),
+                                                      conn);
         }
     }
 

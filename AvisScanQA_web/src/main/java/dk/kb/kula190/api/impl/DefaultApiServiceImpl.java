@@ -4,6 +4,7 @@ import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.kula190.JsonYamlUtils;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
+import dk.kb.kula190.dao.DaoNoteHelper;
 import dk.kb.kula190.dao.DaoUtils;
 import dk.kb.kula190.dao.NewspaperQADao;
 import dk.kb.kula190.model.*;
@@ -37,9 +38,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Path;
 import java.security.Principal;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +130,15 @@ public class DefaultApiServiceImpl implements DefaultApi {
                       avisID, e);
             throw handleException(e);
         }
+    }
+
+    @Override public Integer getNoteCount(String newspaperID, String batchID, String date) {
+        try {
+            return getDAO().getNoteCount(newspaperID, batchID, date);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     @Override
