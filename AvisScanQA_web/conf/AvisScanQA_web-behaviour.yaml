@@ -125,6 +125,7 @@ avischk-web-qa:
           options:
             - "Udkom ikke pgr. af strejke"
             - "Udkom ikke pgr. af særlig lejlighed"
+            - "Udgivelsen haves ikke"
         udgDropDown:
           options:
             - "Ugyldig edition"
