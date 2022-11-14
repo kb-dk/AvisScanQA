@@ -33,18 +33,20 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
             batchName.set(lastName);
             batchLocation.set(event.getLocation());
             handleBatch(event);
-        } else if (isMETS(event)) {
-            this.handleMets(event);
-        } else if (isMODS(event)) {
-            handleMods(event);
-        } else if (isEdition(event)) {
-            handleEdition(event);
-        } else if (isSection(event)) {
-            handleSection(event);
-        } else if (isPage(event)) {
-            handlePage(event);
-        } else if (event.getName().equals(batchName.get())) {
-            handleBatch(event);
+        } else if (!isToBeIgnored(event)) {
+            if (isMETS(event)) {
+                this.handleMets(event);
+            } else if (isMODS(event)) {
+                handleMods(event);
+            } else if (isEdition(event)) {
+                handleEdition(event);
+            } else if (isSection(event)) {
+                handleSection(event);
+            } else if (isPage(event)) {
+                handlePage(event);
+            } else if (event.getName().equals(batchName.get())) {
+                handleBatch(event);
+            }
         }
     }
 
@@ -149,57 +151,61 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
         try {
             final String name = event.getName();
             String extension = EventHandlerUtils.getExtension(name);
+            File file = new File(event.getLocation());
+            if(!file.getParentFile().getName().equals("Unmatched")) {
+                DecoratedAttributeParsingEvent decoratedEvent = new DecoratedAttributeParsingEvent(event);
 
-            DecoratedAttributeParsingEvent decoratedEvent = new DecoratedAttributeParsingEvent(event);
-
-            switch (extension) {
-                case "mets" -> metsFile(decoratedEvent,
-                                        decoratedEvent.getAvis(),
-                                        decoratedEvent.getRoundTrip(),
-                                        decoratedEvent.getStartDate(),
-                                        decoratedEvent.getEndDate());
-                case "mods" -> modsFile(decoratedEvent,
-                                        decoratedEvent.getAvis(),
-                                        decoratedEvent.getRoundTrip(),
-                                        decoratedEvent.getStartDate(),
-                                        decoratedEvent.getEndDate());
-                case "alto" -> altoFile(decoratedEvent,
-                                        decoratedEvent.getAvis(),
-                                        decoratedEvent.getEditionDate(),
-                                        decoratedEvent.getUdgave(),
-                                        decoratedEvent.getSectionName(),
-                                        decoratedEvent.getPageNumber());
-                case "mix" -> mixFile(decoratedEvent,
-                                      decoratedEvent.getAvis(),
-                                      decoratedEvent.getEditionDate(),
-                                      decoratedEvent.getUdgave(),
-                                      decoratedEvent.getSectionName(),
-                                      decoratedEvent.getPageNumber());
-                case "tif","tiff" -> tiffFile(decoratedEvent,
-                                       decoratedEvent.getAvis(),
-                                       decoratedEvent.getEditionDate(),
-                                       decoratedEvent.getUdgave(),
-                                       decoratedEvent.getSectionName(),
-                                       decoratedEvent.getPageNumber());
-                case "pdf" -> pdfFile(decoratedEvent,
-                                      decoratedEvent.getAvis(),
-                                      decoratedEvent.getEditionDate(),
-                                      decoratedEvent.getUdgave(),
-                                      decoratedEvent.getSectionName(),
-                                      decoratedEvent.getPageNumber());
-                case "injected" -> {
-                    String injectedType = ((InjectedAttributeParsingEvent) event).getInjectedType();
-                    injectedFile(decoratedEvent,
-                                 injectedType,
-                                 decoratedEvent.getAvis(),
-                                 decoratedEvent.getEditionDate(),
-                                 decoratedEvent.getUdgave(),
-                                 decoratedEvent.getSectionName(),
-                                 decoratedEvent.getPageNumber());
+                switch (extension) {
+                    case "mets" -> metsFile(decoratedEvent,
+                                            decoratedEvent.getAvis(),
+                                            decoratedEvent.getRoundTrip(),
+                                            decoratedEvent.getStartDate(),
+                                            decoratedEvent.getEndDate());
+                    case "mods" -> modsFile(decoratedEvent,
+                                            decoratedEvent.getAvis(),
+                                            decoratedEvent.getRoundTrip(),
+                                            decoratedEvent.getStartDate(),
+                                            decoratedEvent.getEndDate());
+                    case "alto" -> altoFile(decoratedEvent,
+                                            decoratedEvent.getAvis(),
+                                            decoratedEvent.getEditionDate(),
+                                            decoratedEvent.getUdgave(),
+                                            decoratedEvent.getSectionName(),
+                                            decoratedEvent.getPageNumber());
+                    case "mix" -> mixFile(decoratedEvent,
+                                          decoratedEvent.getAvis(),
+                                          decoratedEvent.getEditionDate(),
+                                          decoratedEvent.getUdgave(),
+                                          decoratedEvent.getSectionName(),
+                                          decoratedEvent.getPageNumber());
+                    case "tif", "tiff" -> tiffFile(decoratedEvent,
+                                                   decoratedEvent.getAvis(),
+                                                   decoratedEvent.getEditionDate(),
+                                                   decoratedEvent.getUdgave(),
+                                                   decoratedEvent.getSectionName(),
+                                                   decoratedEvent.getPageNumber());
+                    case "pdf" -> pdfFile(decoratedEvent,
+                                          decoratedEvent.getAvis(),
+                                          decoratedEvent.getEditionDate(),
+                                          decoratedEvent.getUdgave(),
+                                          decoratedEvent.getSectionName(),
+                                          decoratedEvent.getPageNumber());
+                    case "injected" -> {
+                        String injectedType = ((InjectedAttributeParsingEvent) event).getInjectedType();
+                        injectedFile(decoratedEvent,
+                                     injectedType,
+                                     decoratedEvent.getAvis(),
+                                     decoratedEvent.getEditionDate(),
+                                     decoratedEvent.getUdgave(),
+                                     decoratedEvent.getSectionName(),
+                                     decoratedEvent.getPageNumber());
+                    }
+                    case "md5", "Unmatched" -> {
+                    }
+                    default -> addFailure(event,
+                                          FailureType.UNKNOWN_FILETYPE_ERROR,
+                                          "Encountered unexpected file");
                 }
-                default -> addFailure(event,
-                                      FailureType.UNKNOWN_FILETYPE_ERROR,
-                                      "Encountered unexpected file");
             }
         } catch (IOException e) {
             addExceptionalFailure(event, e);
@@ -227,6 +233,12 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
 
     boolean isMODS(ParsingEvent event) {
         return getLevel(event) == 1 && Objects.equals("MODS", EventHandlerUtils.lastName(event.getName()));
+    }
+
+    boolean isToBeIgnored(ParsingEvent event){
+        //System.out.println("_____________TEST__________");
+        //System.out.println(EventHandlerUtils.lastName(event.getName()));
+        return Objects.equals("Unmatched",EventHandlerUtils.lastName(event.getName()));
     }
 
     public final int getLevel(ParsingEvent event) {

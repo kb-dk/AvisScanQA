@@ -9,7 +9,7 @@ public class MainInvoker {
     
     private static final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
+            = new File(System.getenv("HOME") + "/AvisScanQA_cli/lastTIme/data2/freja1849_18491022_18501231_RT1");
     
     public static void main(String[] args) throws IOException, URISyntaxException {
         Main.main(specificBatch.getAbsolutePath());

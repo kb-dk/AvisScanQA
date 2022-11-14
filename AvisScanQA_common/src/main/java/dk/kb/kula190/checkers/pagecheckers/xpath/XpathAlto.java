@@ -28,7 +28,7 @@ public class XpathAlto {
     private String pageID;
     private String quality;
     private List<String> processingStepSettings;
-    
+    private String physical_img_nr;
     
     public XpathAlto() {
     }
@@ -64,7 +64,8 @@ public class XpathAlto {
         //Checks page ID is corresponding with filename.
     
         pageID = pageNode.getAttributes().getNamedItem("ID").getNodeValue();
-        
+
+        physical_img_nr = pageNode.getAttributes().getNamedItem("PHYSICAL_IMG_NR").getNodeValue();
         
         //TODO alto: before each in that xpath
         processingStepSettings = Arrays.stream(xpath.selectString(document,
@@ -115,7 +116,9 @@ public class XpathAlto {
     public String getPageID() {
         return pageID;
     }
-    
+    public String getPhysical_img_nr(){
+        return physical_img_nr;
+    }
     public String getQuality() {
         return quality;
     }

@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.io.FilenameUtils.isExtension;
 
 public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implements DecoratedParsingEvent {
@@ -29,7 +30,6 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
         //modersmaalet_19060701_19061231_RT1.mods.xml
     
         final String lastName = EventHandlerUtils.removeExtension(EventHandlerUtils.lastName(delegate.getName()));
-    
         String avis = null;
         LocalDate editionDate = null;
         String udgave = null;

@@ -19,89 +19,100 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileNamingChecker extends DefaultTreeEventHandler {
-    
+
     private final DateTimeFormatter localDateFormatter;
-    
-    
+
+
     private String batchName;
     private Path batchFolder;
     private String newspaperName;
     private Pattern fileNamePattern;
     private LocalDate batchStartDate;
     private LocalDate batchEndDate;
-    
-    
+
+
     public FileNamingChecker(ResultCollector resultCollector) {
         super(resultCollector);
-        
+
         localDateFormatter = new DateTimeFormatterBuilder().appendValue(ChronoField.YEAR, 4)
                                                            .appendValue(ChronoField.MONTH_OF_YEAR, 2)
                                                            .appendValue(ChronoField.DAY_OF_MONTH, 2)
                                                            .toFormatter();
     }
-    
+
     @Override
     public void handleNodeBegin(NodeBeginsParsingEvent event) {
-        
+
         String folderName = EventHandlerUtils.lastName(event.getName());
         if (batchName == null) {
-            batchFolder = Path.of(event.getLocation() );
+            batchFolder = Path.of(event.getLocation());
             batchName = folderName;
             final String[] batchNameSplits = batchName.split("_", 5);
-            newspaperName   = batchNameSplits[0];
-            fileNamePattern = Pattern.compile(Pattern.quote(newspaperName )+ "_(\\d{8})_udg\\d{2}_[^_]+_\\d{4}");
+            newspaperName = batchNameSplits[0];
+            fileNamePattern = Pattern.compile(Pattern.quote(newspaperName) + "_(\\d{8})_udg\\d{2}_[^_]+_\\d{4}");
             batchStartDate = LocalDate.parse(batchNameSplits[1], localDateFormatter);
-            batchEndDate   = LocalDate.parse(batchNameSplits[2], localDateFormatter);
+            batchEndDate = LocalDate.parse(batchNameSplits[2], localDateFormatter);
             return;
         }
-        
+
         String parentName = new File(event.getLocation()).getParentFile().getName();
-        
-        
+
+
         checkEquals(event,
                     FailureType.FILE_STRUCTURE_ERROR,
-                    "Appendix H – File structure: Parent dir {actual} should always be batch dir {expected}, i.e. only one level of " + "folders",
+                    "Appendix H – File structure: Parent dir {actual} should always be batch dir {expected}, i.e. " +
+                    "only one level of " +
+                    "folders",
                     parentName,
                     batchName);
-        
-        
+
+
         //Only ALTO, METS, MIX, MODS, PDF, TIFF allowed here
         checkInSet(event,
                    FailureType.FILE_STRUCTURE_ERROR,
                    "Appendix H – File structure: Folder name {0}/{actual} must be in one of {set}",
                    folderName,
-                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF"),
+                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF", "Unmatched"),
                    batchFolder);
     }
-    
+
     @Override
     public void handleAttribute(AttributeParsingEvent event) throws IOException {
         final File file = new File(event.getLocation());
         String fileName = file.getName();
         File parent = file.getParentFile();
         String parentName = file.getParentFile().getName();
-        
+
         String extension = EventHandlerUtils.getExtension(fileName);
         String nameWithoutExtension = EventHandlerUtils.removeExtension(fileName);
-        
+        if(fileOrFolderToIgnore(file)){return;}
         checkExtensionMatchFolder(event, parent, extension);
         checkNameMachPattern(event, extension, nameWithoutExtension);
-        
+
+
+
     }
-    
+private Boolean fileOrFolderToIgnore(File file){
+
+        if(file.getParentFile().getName().equals("Unmatched")){return true;}
+    return EventHandlerUtils.getExtension(file.getName()).equals("md5");
+
+}
     private void checkNameMachPattern(AttributeParsingEvent event, String extension, String nameWithoutExtension) {
         //modersmaalet_19060701_udg01_MODERSMAALETS Søndagsblad_0003.md5
         switch (extension) {
             case "mods", "mets" -> checkEquals(event,
                                                FailureType.FILE_STRUCTURE_ERROR,
-                                               "Appendix H – File structure: MODS/METS file '{actual}' must have same name as batch '{expected}'",
+                                               "Appendix H – File structure: MODS/METS file '{actual}' must have same" +
+                                               " name as batch '{expected}'",
                                                nameWithoutExtension,
                                                batchName);
             case "mix", "pdf", "tif", "tiff", "alto" -> {
-                
+
                 Matcher matcher = checkRegExp(event,
                                               FailureType.FILE_STRUCTURE_ERROR,
-                                              "Appendix B – File names: Page-file file {actual} must have same name as batch {expected}",
+                                              "Appendix B – File names: Page-file file {actual} must have same name " +
+                                              "as batch {expected}",
                                               nameWithoutExtension,
                                               fileNamePattern);
                 if (matcher.matches()) {
@@ -111,15 +122,16 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                                  date,
                                  batchStartDate,
                                  batchEndDate,
-                                 "Appendix B – File names: Page have date {actual} outside of batch date interval {requiredMin} - {requiredMax}");
+                                 "Appendix B – File names: Page have date {actual} outside of batch date interval " +
+                                 "{requiredMin} - {requiredMax}");
                 }
-                
+
             }
             default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,
                                   "Extension {0} is not expected here", extension);
         }
     }
-    
+
     private void checkExtensionMatchFolder(AttributeParsingEvent event, File parentName, String extension) {
         switch (parentName.getName()) {
             case "ALTO" -> checkInSet(event,
@@ -163,15 +175,17 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                                      Set.of("pdf"),
                                      parentName);
             case "TIFF" -> checkInSet(event,
-                                      FailureType.FILE_STRUCTURE_ERROR,
+                                                   FailureType.FILE_STRUCTURE_ERROR,
                                       "Appendix H – File structure: File in folder {0}"
                                       + " must have one of these extensions "
                                       + "{expected} but has {actual}",
-                                      extension,
-                                      Set.of("tif", "tiff"),
-                                      parentName);
-            default -> addFailure(event, FailureType.FILE_STRUCTURE_ERROR,
-                                  "Appendix H – File structure: File not allowed in folder {0}",batchFolder.getParent().relativize(Path.of(event.getLocation())).getParent());
+                                                   extension,
+                                                   Set.of("tif", "tiff"),
+                                                   parentName);
+            default -> addFailure(event,
+                                  FailureType.FILE_STRUCTURE_ERROR,
+                                  "Appendix H – File structure: File not allowed in folder {0}",
+                                  batchFolder.getParent().relativize(Path.of(event.getLocation())).getParent());
         }
     }
 }

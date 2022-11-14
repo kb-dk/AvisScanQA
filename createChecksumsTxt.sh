@@ -2,7 +2,7 @@
 
 #Started with
 # cd /home/avisscqa/data/avis-scanner-prod/_07-levering-fra-Ninestars/Shipment_2021-07-19
-# set -e; for dir in *_RT*; do echo "$dir"; pushd "$dir";  createChecksumsTxt.sh; popd; done  &> checksums.log &
+# set -e; for dir in *_RT*; do echo "$dir"; pushd "$dir"; /home/pabr/Projects/AvisScanQA/createChecksumsTxt.sh; popd; done  &> checksums.log &
 
 set -e
 set -x
@@ -20,7 +20,7 @@ rm -f checksums.txt
 
 # Generate new checksums.txt file
 find ./ \
-    -type f -o -type l \
+    -type f \
     -not -name 'checksums.txt' \
     -print0  | \
   sed -e 's/^/\x0/' \

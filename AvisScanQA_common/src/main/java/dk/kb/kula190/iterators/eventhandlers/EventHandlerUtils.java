@@ -43,6 +43,8 @@ public class EventHandlerUtils {
     public static String getExtension(String filename) {
         if (Set.of("xml").contains(FilenameUtils.getExtension(filename))) {
             return getExtension(FilenameUtils.removeExtension(filename));
+        } else if (Set.of("txt").contains(FilenameUtils.getExtension(filename))) {
+            return getExtension(FilenameUtils.removeExtension(filename));
         } else {
             return FilenameUtils.getExtension(filename);
         }

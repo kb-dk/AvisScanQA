@@ -14,7 +14,9 @@ CREATE TABLE newspaperarchive (
 	delivery_date DATE NOT NULL,
 	handle BIGSERIAL,
 	side_label VARCHAR(255),
-	fraktur BOOLEAN
+	fraktur BOOLEAN,
+    problems text not null,
+    batchid varchar(255) not null
 );
 
 CREATE INDEX avisid_date_index ON newspaperarchive(avisid, edition_date);

@@ -110,7 +110,7 @@ Image:
       max: 230 (0.901961)
       mean: 175.025 (0.686373)
       standard deviation: 32.8324 (0.128754)
-      kurtosis: 1.61023
+      kurtosis: 1.61023Beautify
       skewness: -1.3146
       entropy: 0.732287
   Rendering intent: Perceptual

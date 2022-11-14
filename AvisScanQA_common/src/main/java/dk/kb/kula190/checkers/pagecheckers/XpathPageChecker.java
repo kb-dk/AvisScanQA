@@ -37,7 +37,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
     //It is here we compare values between them
     
     private ThreadLocal<XpathAlto> Alto = new ThreadLocal<>();
-    private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
+    //private ThreadLocal<XpathMix> Mix = new ThreadLocal<>();
     private ThreadLocal<XpathTiff> Tiff = new ThreadLocal<>();
     private ThreadLocal<XpathMetsMix> MetsMix = new ThreadLocal<>();
 
@@ -51,12 +51,12 @@ public class XpathPageChecker extends DecoratedEventHandler {
                            Integer pageNumber) throws IOException {
         
         //clear state
-        Mix.set(new XpathMix());
+        //Mix.set(new XpathMix());
         Alto.set(new XpathAlto());
         Tiff.set(new XpathTiff());
         MetsMix.set(new XpathMetsMix());
     }
-    
+    /*
     @Override
     public void mixFile(DecoratedAttributeParsingEvent event,
                         String newspaper,
@@ -78,7 +78,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
                    );
     
     }
-    
+    */
     @Override
     public void tiffFile(DecoratedAttributeParsingEvent event,
                          String newspaper,
@@ -113,7 +113,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
         //Checks page ID is corresponding with filename.
         checkEquals(event,
                     FailureType.INVALID_ALTO_ERROR,
-                    "Appendix F – metadata per page ALTO: ALTO Page ID is not {required} but was {actual}",
+                    "Appendix F – metadata per page ALTO: ALTO Page ID is not {expected} but was {actual}",
                     xpathAlto.getPageID(),
                     "P" + pageNumber
                    );
@@ -154,12 +154,12 @@ public class XpathPageChecker extends DecoratedEventHandler {
                          String section,
                          Integer pageNumber) {
         
-        XpathMix xpathMix = Mix.get();
+        //XpathMix xpathMix = Mix.get();
         XpathTiff xpathTiff = Tiff.get();
         XpathAlto xpathAlto = Alto.get();
-        XpathMetsMix xpathMetsMix = MetsMix.get();
+        //XpathMetsMix xpathMetsMix = MetsMix.get();
 
-        metsMixAndMixCheck(event, xpathMetsMix, xpathMix);
+        //metsMixAndMixCheck(event, xpathMetsMix, xpathMix);
 
         boolean injectedDataSupplied = xpathTiff.isInjectedDataSupplied();
         
@@ -170,9 +170,9 @@ public class XpathPageChecker extends DecoratedEventHandler {
         if (injectedDataSupplied) {
             
             
-            checkTiffMix(event, xpathMix, xpathTiff);
+            //checkTiffMix(event, xpathMix, xpathTiff);
     
-            checkTiffMixAlto(event, xpathMix, xpathTiff, xpathAlto);
+            //checkTiffMixAlto(event, xpathMix, xpathTiff, xpathAlto);
         }
         
     }

@@ -11,7 +11,7 @@
 
 
 jdbc:
-  enabled: true
+  enabled: false
   jdbc-connection-string: "jdbc:postgresql://canopus.statsbiblioteket.dk:5432/avisscqa-devel"
   jdbc-user: "avisscqa"
   jdbc-password: ""
@@ -21,13 +21,15 @@ states:
   finished-batch-state: "2IN_PROGRESS" #vigtigt at batch states stemmer overens med config i web delen
 
 iterator:
-  numThreads: 2 # If set, controls the number of threads. Default is Runtime.getRuntime().availableProcessors()
+  numThreads: 4 # If set, controls the number of threads. Default is Runtime.getRuntime().availableProcessors()
   checksumFile: "checksums.txt"
   acknowledgmentFile: "transfer_acknowledged"
   filesToIgnore:
     - "checksums.txt"
     - "transfer_acknowledged"
     - "transfer_complete"
+    - "*.md5.txt"
+    - "/Unmatched"
 
 mail:
   to: pabr@kb.dk

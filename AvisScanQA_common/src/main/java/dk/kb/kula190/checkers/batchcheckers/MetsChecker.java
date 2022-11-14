@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class MetsChecker extends DecoratedEventHandler {
     
@@ -257,11 +258,11 @@ public class MetsChecker extends DecoratedEventHandler {
                     metadataDC.getFormats(),
                     Set.of("text", "image/tif", "electronic"));
         
-        checkEquals(decoratedEvent,
+        checkAllInSet(decoratedEvent,
                     FailureType.INVALID_METS_ERROR,
                     "Mets dc type should have been {expected} but was {actual}",
-                    metadataDC.getTypes(),
-                    Set.of("newspaper", "text"));
+                    metadataDC.getTypes().stream().map(String::toLowerCase).collect(Collectors.toSet()),
+                    Set.of("newspaper","text"));
         
         
         checkInSet(decoratedEvent,

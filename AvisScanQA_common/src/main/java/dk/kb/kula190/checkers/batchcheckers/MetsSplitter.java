@@ -15,6 +15,7 @@ import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -76,16 +77,21 @@ public class MetsSplitter extends InjectingTreeEventHandler {
             return;
         }
         String extension = EventHandlerUtils.getExtension(event.getName());
-        //As M is before T, we will always have one thread parsing the Mets file before any threads start on the Tiff
-        // files
-        //But we need locks to ensure that the "Mets" thread complete before the "Tiff" threads start
-        if (extension.equals("mets")) {
-            log.trace("Found mets file");
-            metsFile(event);
-            log.trace("Done mets file");
-        } else if (extension.equals("tif")) {
-            tiffFile(event);
+        String unmatched = new File(event.getLocation()).getParentFile().getName();
+
+        if(!unmatched.equals("Unmatched")){
+            //As M is before T, we will always have one thread parsing the Mets file before any threads start on the Tiff
+            // files
+            //But we need locks to ensure that the "Mets" thread complete before the "Tiff" threads start
+            if (extension.equals("mets")) {
+                log.trace("Found mets file");
+                metsFile(event);
+                log.trace("Done mets file");
+            } else if (extension.equals("tif")) {
+                tiffFile(event);
+            }
         }
+
     }
     
     private XPathSelector getXpath() {

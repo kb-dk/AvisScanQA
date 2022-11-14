@@ -65,7 +65,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
                                Object actual,
                                Object expected,
                                Object... extraValues) {
-        String actualString = asString(actual);
+        String actualString = asString(actual).toLowerCase();
         String expectedString = asString(expected);
         if (!Objects.equals(actual, expected) && !actualString.equalsIgnoreCase(expectedString)) {
             addFailure(event,

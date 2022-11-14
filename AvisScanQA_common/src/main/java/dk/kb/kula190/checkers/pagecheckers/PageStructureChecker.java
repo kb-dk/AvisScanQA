@@ -38,7 +38,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
                          String edition,
                          String section,
                          Integer pageNumber) {
-        checkEquals(event, FailureType.MISSING_FILE_ERROR,"Appendix H – File structure: Page does not contains all expected file {expected}. Files were {actual}", types.get(), Set.of("MIX", "ALTO", "TIFF", "MIX/METS") );
+        checkEquals(event, FailureType.MISSING_FILE_ERROR,"Appendix H – File structure: Page does not contains all expected file {expected}. Files were {actual}", types.get(), Set.of("ALTO", "TIFF", "METS") );
     }
     
     
@@ -83,7 +83,7 @@ public class PageStructureChecker extends DecoratedEventHandler {
         
         switch (injectedType) {
             case MetsSplitter.INJECTED_TYPE_MIX -> { //MIX FROM METS FILE
-                types.get().add("MIX/METS");
+                types.get().add("METS");
             }
         }
     }

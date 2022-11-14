@@ -16,6 +16,6 @@ for batch in $batchesReady; do
   flock --nonblock \
         --conflict-exit-code 0 \
         "/tmp/$(basename '$batch').lockfile" \
-        -c "$HOME/AvisScanQA_cli/bin/performCheck.sh '$batch'"
+        -c "$PWD/performCheck.sh '$batch'"
 done
 IFS="$OLDIFS" # reset
