@@ -14,7 +14,7 @@
     <packaging>pom</packaging>
     <scm>
         <connection>scm:git:https://github.com/kb-dk/AvisScanQA</connection>
-        <developerConnection>scm:git:git@github.com/kb-dk/AvisScanQA</developerConnection>
+        <developerConnection>scm:git:git@github.com:kb-dk/AvisScanQA</developerConnection>
         <tag>AvisScanQA-1.0</tag>
     </scm>
 
