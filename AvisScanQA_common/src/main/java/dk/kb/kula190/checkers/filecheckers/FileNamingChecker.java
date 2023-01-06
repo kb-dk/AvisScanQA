@@ -95,6 +95,8 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
 private Boolean fileOrFolderToIgnore(File file){
 
         if(file.getParentFile().getName().equals("Unmatched")){return true;}
+        else if (EventHandlerUtils.getExtension(file.getName()).equals("jpeg")) {return true;}
+        else if (EventHandlerUtils.getExtension(file.getName()).equals("jpg")) {return true;}
     return EventHandlerUtils.getExtension(file.getName()).equals("md5");
 
 }

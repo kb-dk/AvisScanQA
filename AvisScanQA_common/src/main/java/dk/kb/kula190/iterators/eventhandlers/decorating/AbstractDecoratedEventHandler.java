@@ -200,7 +200,7 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                      decoratedEvent.getSectionName(),
                                      decoratedEvent.getPageNumber());
                     }
-                    case "md5", "Unmatched" -> {
+                    case "md5", "Unmatched","jpeg","jpg" -> {
                     }
                     default -> addFailure(event,
                                           FailureType.UNKNOWN_FILETYPE_ERROR,

@@ -30,6 +30,8 @@ iterator:
     - "transfer_complete"
     - "*.md5.txt"
     - "/Unmatched"
+    - "*.jpeg"
+    - "*.jpg"
 
 mail:
   to: pabr@kb.dk
