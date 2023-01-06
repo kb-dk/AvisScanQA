@@ -83,7 +83,7 @@ avischk-web-qa:
           description: "The batch has yet to go through the automated checkers"
           styling:
             backgroundColor: "#007bff"
-            borderColor: "#007bff"
+            borderColor: "#007baarhusstiftstidende/pages/20210108_aarhusstiftstidende_section10_page006…ff"
           calendarStyling:
             color: "white"
             backgroundColor: "#28a745"
@@ -125,7 +125,7 @@ avischk-web-qa:
           options:
             - "Udkom ikke pgr. af strejke"
             - "Udkom ikke pgr. af særlig lejlighed"
-            - "Udgivelsen haves ikke"
+            - "Udgivelsen haveaarhusstiftstidende/pages/20210108_aarhusstiftstidende_section10_page006…s ikke"
         udgDropDown:
           options:
             - "Ugyldig edition"
