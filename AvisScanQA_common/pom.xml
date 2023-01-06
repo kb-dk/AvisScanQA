@@ -5,11 +5,11 @@
     <parent>
         <groupId>dk.kb.kula190</groupId>
         <artifactId>AvisScanQA</artifactId>
-        <version>1.0</version>
+        <version>1.1-SNAPSHOT</version>
     </parent>
 
     <artifactId>AvisScanQA_common</artifactId>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <build>
         <plugins>
             <plugin>
