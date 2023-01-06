@@ -14,6 +14,11 @@
     <artifactId>AvisScanQA</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
+    <scm>
+        <connection>scm:git:https://github.com/kb-dk/AvisScanQA</connection>
+        <developerConnection>scm:git:git@github.com/kb-dk/AvisScanQA</developerConnection>
+        <tag>sbforge-parent-22</tag>
+    </scm>
 
     <properties>
         <!-- Specify java version here, to support forbiddenapis plugin -->
