@@ -10,7 +10,7 @@
 
     <groupId>dk.kb.kula190</groupId>
     <artifactId>AvisScanQA</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <packaging>pom</packaging>
     <scm>
         <url>https://github.com/kb-dk/AvisScanQA</url>
