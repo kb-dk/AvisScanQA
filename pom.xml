@@ -10,13 +10,13 @@
 
     <groupId>dk.kb.kula190</groupId>
     <artifactId>AvisScanQA</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <scm>
         <url>https://github.com/kb-dk/AvisScanQA</url>
         <connection>scm:git:https://github.com/kb-dk/AvisScanQA.git</connection>
         <developerConnection>scm:git:git@github.com:kb-dk/AvisScanQA.git</developerConnection>
-        <tag>sbforge-parent-22</tag>
+        <tag>AvisScanQA-1.1</tag>
     </scm>
 
     <properties>
@@ -68,7 +68,7 @@
             <dependency>
                 <groupId>dk.kb.util</groupId>
                 <artifactId>kb-util</artifactId>
-                <version>1.4.7-SNAPSHOT</version>
+                <version>1.4.7</version>
             </dependency>
 
         </dependencies>
