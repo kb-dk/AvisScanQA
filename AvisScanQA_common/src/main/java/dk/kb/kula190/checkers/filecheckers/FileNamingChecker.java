@@ -67,12 +67,12 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
                     batchName);
 
 
-        //Only ALTO, METS, MIX, MODS, PDF, TIFF allowed here
+        //Only ALTO, METS, MIX, MODS, PDF, TIFF, JPEG allowed here
         checkInSet(event,
                    FailureType.FILE_STRUCTURE_ERROR,
                    "Appendix H – File structure: Folder name {0}/{actual} must be in one of {set}",
                    folderName,
-                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF", "Unmatched"),
+                   Set.of("ALTO", "METS", "MIX", "MODS", "PDF", "TIFF", "Unmatched","JPEG"),
                    batchFolder);
     }
 
