@@ -16,7 +16,7 @@
         <url>https://github.com/kb-dk/AvisScanQA</url>
         <connection>scm:git:https://github.com/kb-dk/AvisScanQA.git</connection>
         <developerConnection>scm:git:git@github.com:kb-dk/AvisScanQA.git</developerConnection>
-        <tag>AvisScanQA-1.1</tag>
+        <tag>AvisScanQA-1.2</tag>
     </scm>
 
     <properties>
