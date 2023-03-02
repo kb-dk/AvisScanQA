@@ -107,7 +107,6 @@ body {
 }
 .userNotes{
   width: 20em;
-  display: table;
   overflow: hidden;
   resize: both;
   min-height: fit-content;

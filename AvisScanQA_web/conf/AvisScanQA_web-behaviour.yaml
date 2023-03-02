@@ -125,7 +125,6 @@ avischk-web-qa:
           options:
             - "Udkom ikke pgr. af strejke"
             - "Udkom ikke pgr. af særlig lejlighed"
-            - "Udgivelsen haveaarhusstiftstidende/pages/20210108_aarhusstiftstidende_section10_page006…s ikke"
         udgDropDown:
           options:
             - "Ugyldig edition"

@@ -101,10 +101,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                   + batchName.get(), e);
         }
 
-        Path ackFile = Paths.get(event.getLocation(), acknowledgmentFile);
-        log.debug("Finished handling of batch {} so writing acknowledgmentFile {}", batchName.get(), ackFile);
-        FileUtils.touch(ackFile.toFile());
-        log.info("Finished handling of batch {} so wrote acknowledgmentFile {}", batchName.get(), ackFile);
+//        Path ackFile = Paths.get(event.getLocation(), acknowledgmentFile);
+//        log.debug("Finished handling of batch {} so writing acknowledgmentFile {}", batchName.get(), ackFile);
+//        FileUtils.touch(ackFile.toFile());
+//        log.info("Finished handling of batch {} so wrote acknowledgmentFile {}", batchName.get(), ackFile);
     }
 
     private void updateBatchState(String newspaper,
