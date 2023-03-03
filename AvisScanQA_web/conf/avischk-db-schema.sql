@@ -33,8 +33,7 @@ CREATE TABLE newspaperarchive
     side_label    VARCHAR(255),
     fraktur       BOOLEAN,
     problems      TEXT         NOT NULL,
-    batchid       VARCHAR(255) NOT NULL,
-    FOREIGN KEY (batchid) REFERENCES batch (batchid)
+    batchid       VARCHAR(255) NOT NULL
 );
 
 
