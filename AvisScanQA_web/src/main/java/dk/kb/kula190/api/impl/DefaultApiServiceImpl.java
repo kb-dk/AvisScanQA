@@ -238,8 +238,8 @@ public class DefaultApiServiceImpl implements DefaultApi {
     public StreamingOutput getTiffFile(String relPath) {
         return output -> {
             Path batchesFolder = new File(getBatchesFolder()).toPath().toAbsolutePath().normalize();
-            Path file = batchesFolder.resolve(relPath).toAbsolutePath().normalize();
-            if (file.startsWith(batchesFolder)) {
+            Path file = new File(relPath).toPath().toAbsolutePath().normalize();
+            if (file.toFile().isFile()) {
                 httpServletResponse.setHeader("Content-disposition",
                                               "inline; filename=\"" + file.getFileName().toString() + "\"");
         

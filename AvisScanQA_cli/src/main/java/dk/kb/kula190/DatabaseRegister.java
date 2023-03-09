@@ -239,8 +239,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
-                preparedStatement.setString(param++,
-                                            event.getLocation().substring(event.getLocation().indexOf(newspaper)));
+                preparedStatement.setString(param++, event.getLocation());
                 //format_type
                 preparedStatement.setString(param++, "tiff");
                 //edition_date
