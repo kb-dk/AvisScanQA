@@ -19,9 +19,9 @@ public class Main {
                                            .getResource("AvisScanQA_cli-behaviour.yaml")
                                            .toURI()).getParentFile();
         YAML config = YAML.resolveLayeredConfigs(configFolder.getAbsolutePath() + "/AvisScanQA_cli-*.yaml");
-        
+        String[] batchName = args[0].split("/");
         AvisScanQATool tool = new AvisScanQATool(config,
-                                                 config.getString("iterator.checksumFile"),
+                                                 batchName[batchName.length-1]+".md5.txt",
                                                  config.getString("iterator.acknowledgmentFile"),
                                                  config.getList("iterator.filesToIgnore"));
         

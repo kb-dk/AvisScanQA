@@ -42,6 +42,7 @@ public class BasicRunnableComponent {
         this.eventRunnerFactory  = eventRunnerFactory;
         this.checksumFile = checksumFile;
         this.filesToIgnore = filesToIgnore;
+        this.filesToIgnore.add(checksumFile);
     }
     
     

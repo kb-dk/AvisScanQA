@@ -46,12 +46,13 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             altoValidator = setErrorHandler("Alto", schemaStream);
         } catch (IOException | SAXException e) {
             addExceptionalFailure(event, e);
+            log.warn("Alto schema failed getting read. Xlink need connection to http://www.loc.gov/standards/xlink/xlink.xsd");
         }
         
         try (InputStream schemaStream = Thread.currentThread()
                                               .getContextClassLoader()
                                               .getResourceAsStream("MetadataSchema/MixSchema.xsd")) {
-            mixValidator = setErrorHandler("Alto", schemaStream);
+            mixValidator = setErrorHandler("Mix", schemaStream);
         } catch (IOException | SAXException e) {
             addExceptionalFailure(event, e);
         }
@@ -95,7 +96,7 @@ public class XmlSchemaChecker extends DecoratedEventHandler {
             addExceptionalFailure(parsingEvent.get(), e);
         }
     }
-    
+
     @Override
     public synchronized void altoFile(DecoratedAttributeParsingEvent event,
                                       String newspaper,
