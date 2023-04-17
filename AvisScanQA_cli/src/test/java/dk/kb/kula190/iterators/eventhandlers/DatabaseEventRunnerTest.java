@@ -23,11 +23,13 @@ import java.util.concurrent.Executors;
 
 class DatabaseEventRunnerTest {
     
-    private final File
+//    private final File
+//            specificBatch
+//            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
+
+    private static final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Projects/AvisScanQA/data/orig/modersmaalet_19060701_19060709_RT1");
-    
-    
+            = new File(System.getenv("HOME") + "/Documents/ribesocialdemokrat_19100101_19100531_RT2");
     @Test
     void run() throws Exception {
         

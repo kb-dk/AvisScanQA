@@ -257,7 +257,7 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         $editionCol.append($noteContainer);
         renderSections(edition, sectionIndex);
         if (edition.sections[sectionIndex].pages.length === 1) {
-            renderSinglePage(edition.section[sectionIndex].pages[0]);
+            renderSinglePage(edition.sections[sectionIndex].pages[0]);
         } else {
             renderSection(edition.sections[sectionIndex], pageIndex);
         }
@@ -470,7 +470,8 @@ function createDisplayNoteForm(batchid, note) {
 function loadImage(filename, element) {
     let result = $("<div>");
     element.append(result);
-    const url = "api/file/?file=" + filename;
+    encodeURIComponent(filename)
+    const url = "api/file/?file=" + encodeURIComponent(filename);
     return $.ajax({
         type: "GET", url: url, xhrFields: {responseType: 'arraybuffer'}, beforeSend: function () {
             result.text(`Loading Page`);
