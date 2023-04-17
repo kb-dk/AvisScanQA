@@ -36,8 +36,8 @@ while IFS= read -r -d '' BATCH_DIR; do
     #     continue
     # fi
 
-    if [ ! -f "$BATCH_DIR/transfer_completed" ]; then
-        echo "No transfer_completed file. Skipping batch."
+    if [ ! -f "$BATCH_DIR/transfer_complete" ]; then
+        echo "No transfer_complete file. Skipping batch."
         continue
     fi
 

@@ -52,7 +52,7 @@ public class XpathPageChecker extends DecoratedEventHandler {
         
         //clear state
         //Mix.set(new XpathMix());
-        Alto.set(new XpathAlto());
+        Alto.set(new XpathAlto(getResultCollector()));
         Tiff.set(new XpathTiff());
         MetsMix.set(new XpathMetsMix());
     }

@@ -7,9 +7,12 @@ import java.net.URISyntaxException;
 public class MainInvoker {
     
     
+//    private static final File
+//            specificBatch
+//            = new File(System.getenv("HOME") + "/AvisScanQA_cli/lastTIme/data2/freja1849_18491022_18501231_RT1");
     private static final File
             specificBatch
-            = new File(System.getenv("HOME") + "/AvisScanQA_cli/lastTIme/data2/freja1849_18491022_18501231_RT1");
+            = new File(System.getenv("HOME") + "/Documents/schleswigschegrenzpost_18650103_18700306_RT2");
     
     public static void main(String[] args) throws IOException, URISyntaxException {
         Main.main(specificBatch.getAbsolutePath());
