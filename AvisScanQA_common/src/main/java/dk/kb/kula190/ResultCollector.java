@@ -9,6 +9,7 @@ import dk.kb.kula190.generated.Reference;
 import dk.kb.kula190.generated.Result;
 import dk.kb.kula190.iterators.common.ParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedParsingEvent;
+import dk.kb.kula190.iterators.filesystem.FileAttributeParsingEvent;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 
@@ -181,7 +182,7 @@ public class ResultCollector {
             Reference reference = createSpecificReference(decoratedParsingEvent);
             failure.setReference(reference);
         }
-        
+
         failure.setType(type);
         failure.setComponent(component);
         failure.setDescription(description);
@@ -224,7 +225,6 @@ public class ResultCollector {
         
         return reference;
     }
-    
     
     /**
      * Get the list of failures. This method is only meant to be used for merging purposes

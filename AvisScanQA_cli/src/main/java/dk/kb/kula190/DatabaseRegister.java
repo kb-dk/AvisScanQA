@@ -206,7 +206,8 @@ public class DatabaseRegister extends DecoratedEventHandler {
     }
 
     private boolean matchThisPage(Reference reference, DecoratedParsingEvent event) {
-        return Objects.equals(event.getAvis(), reference.getAvis())
+        return reference != null
+               && Objects.equals(event.getAvis(), reference.getAvis())
                && Objects.equals(event.getEditionDate().toString(),
                                  reference.getEditionDate())
                && Objects.equals(event.getUdgave(), reference.getUdgave())

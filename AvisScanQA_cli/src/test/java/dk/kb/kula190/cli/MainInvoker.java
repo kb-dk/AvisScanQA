@@ -12,9 +12,12 @@ public class MainInvoker {
     //    private static final File
 //            specificBatch
 //            = new File(System.getenv("HOME") + "/AvisScanQA_cli/lastTIme/data2/freja1849_18491022_18501231_RT1");
+//    private static final File
+//            specificBatch
+//            = new File(System.getenv("HOME") + "/Documents/ribesocialdemokrat_19100101_19100531_RT2");
     private static final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Documents/ribesocialdemokrat_19100101_19100531_RT2");
+            = new File(System.getenv("HOME") + "/Documents/ribesocialdemokrat_19300101_19300331_RT1");
 //    private static final File
 //            specificBatch
 //            = new File(System.getenv("HOME") + "/Documents/this is a + test folder/schleswigschegrenzpost_18650103_18700306_RT2");
