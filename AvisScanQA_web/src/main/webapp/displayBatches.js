@@ -280,7 +280,13 @@ function renderBatchTable(filter) {
             field: 'numProblems',
             sortable: true,
             filterControl: "input"
-        }]
+        },{
+            title: 'Number of Notes',
+            field: 'numNotes',
+            sortable: true,
+            filterControl: "input"
+        }
+        ]
     });
 
     $table.bootstrapTable('refreshOptions', {
@@ -376,4 +382,53 @@ function handleNotesDownload(batchId) {
             //Close the window, but wait 100 ms to ensure that the download have started
             setTimeout("window.close()", 100);
         });
+}
+
+function handleStatisticsDownload(){
+    console.log("HELLO")
+    $.ajax({url:`api/statistics`,success:
+        function (data) {
+            console.log(data)
+            const items = data;
+            // const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+            if (items.length > 0) {
+                let csvData = [["Month","Number of completed batches"]]
+
+                for (let i = 0; i < data.length-1; i++) {
+                    let splittedData = data[i].split("|");
+                    csvData[i+1] = [splittedData[0],splittedData[1]]
+                }
+                let csv = csvData
+                    .map((item) => {
+
+                        // Here item refers to a row in that 2D array
+                        let row = item;
+
+                        // Now join the elements of row with "," using join function
+                        return row.join(",");
+                    }) // At this point we have an array of strings
+                    .join("\r\n");
+                console.log(csvData)
+                console.log(csv)
+                // const replacer = (key, value) => value === null ? '' : value
+                // let csvString = JSON.stringify( csvData, replacer );
+                // csvString = csvString.replaceAll('"', '')
+                // csvString = csvString.replaceAll(" ", ',')
+                // console.log(csvString)
+                let link = document.createElement("a");
+                let now = new Date(Date.now());
+                link.download = `${now.toLocaleDateString()}_year_statistics.csv`;
+                link.href = `data:text/csv,${encodeURIComponent(csv)}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                link.remove();
+            }
+            //Close the window, but wait 100 ms to ensure that the download have started
+            setTimeout("window.close()", 100);
+        },error:function (){
+            console.log("failed to get statistics")
+    }
+    })
+
 }

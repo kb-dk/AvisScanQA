@@ -4,7 +4,6 @@ import dk.kb.avischk.qa.web.ContentLocationResolver;
 import dk.kb.kula190.JsonYamlUtils;
 import dk.kb.kula190.api.DefaultApi;
 import dk.kb.kula190.dao.DAOFailureException;
-import dk.kb.kula190.dao.DaoNoteHelper;
 import dk.kb.kula190.dao.DaoUtils;
 import dk.kb.kula190.dao.NewspaperQADao;
 import dk.kb.kula190.model.*;
@@ -38,14 +37,12 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Path;
 import java.security.Principal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 /**
  * AvisScanQA_web
@@ -219,7 +216,15 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
         
     }
-    
+
+    @Override public List<String> getStatistics() {
+        try {
+            return getDAO().getStatistics();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     @Override
     public Object getConfig() {
         try {
@@ -242,7 +247,7 @@ public class DefaultApiServiceImpl implements DefaultApi {
             if (file.toFile().isFile()) {
                 httpServletResponse.setHeader("Content-disposition",
                                               "inline; filename=\"" + file.getFileName().toString() + "\"");
-        
+
                 try (InputStream buffer = IOUtils.buffer(new FileInputStream(file.toFile()))) {
                     IOUtils.copy(buffer, output);
                 } catch (FileNotFoundException e) {
@@ -253,7 +258,31 @@ public class DefaultApiServiceImpl implements DefaultApi {
             }
         };
     }
-    
+    @Override public StreamingOutput getJpegPath(String file) {
+            return output -> {
+                try{
+                    Path batchesFolder = new File(getBatchesFolder()).toPath().toAbsolutePath().normalize();
+                    Path jpegFile = new File(getDAO().getJpegPath(file)).toPath().toAbsolutePath().normalize();
+                    if (jpegFile.toFile().isFile()) {
+                        httpServletResponse.setHeader("Content-disposition",
+                                                      "inline; filename=\"" + jpegFile.getFileName().toString() + "\"");
+
+                        try (InputStream buffer = IOUtils.buffer(new FileInputStream(jpegFile.toFile()))) {
+                            IOUtils.copy(buffer, output);
+                        } catch (FileNotFoundException e) {
+                            throw new NotFoundServiceException("File '" + jpegFile + "' not found on system", e);
+                        }
+                    } else {
+                        throw new InvalidArgumentServiceException("File '" + jpegFile + "' does not work with " + batchesFolder);
+                    }
+                }catch (SQLException e){
+                    log.error("Could not get Jpeg path from backend");
+                    throw handleException(e);
+                }
+
+            };
+    }
+
     
     @Override
     public void setNotes(String batchID,
@@ -317,7 +346,19 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
+
+    @Override public String getAlto(String dir) {
+        try {
+            return getDAO().getAlto(dir);
+        }catch (SQLException e){
+            log.error("Could not get Alto path from backend");
+            throw handleException(e);
+        }
+
+    }
+
+
+
     @Override
     public Batch getBatch(String batchID) {
         try {
@@ -396,8 +437,9 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
-    
-    
+
+
+
     /**
      * This method simply converts any Exception into a Service exception
      *

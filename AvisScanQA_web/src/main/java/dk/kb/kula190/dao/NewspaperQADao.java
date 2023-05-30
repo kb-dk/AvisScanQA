@@ -4,11 +4,27 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 import dk.kb.kula190.model.*;
 import dk.kb.kula190.webservice.exception.NotFoundServiceException;
 import io.swagger.models.auth.In;
+//import lu.bnl.xml.AltoXMLParserHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import dk.kb.util.xml.XPathSelector;
+import dk.kb.util.xml.XpathUtils;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.ws.rs.core.StreamingOutput;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.xpath.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -17,6 +33,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -37,6 +55,107 @@ public class NewspaperQADao {
         } catch (SQLException e) {
             log.error("Failed to retrieve notes from {}", batchID, e);
             throw new DAOFailureException("Failed to retrieve notes from " + batchID, e);
+        }
+
+    }
+    public List<String> getStatistics() throws SQLException {
+        List<String> result = new ArrayList<>();
+        LocalDate limiter = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).minusMonths(1).minusYears(1);
+
+        LocalDate min = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
+        LocalDate max = LocalDate.now().with(TemporalAdjusters.firstDayOfNextMonth()).minusDays(1);
+
+        while (!min.equals(limiter)){
+            //int compared = min.getMonth().compareTo(LocalDate.now().getMonth());
+            try(Connection conn = connectionPool.getConnection()){
+                try(PreparedStatement ps = conn.prepareStatement("""
+                                                                SELECT  COUNT("batchid") AS numComplete FROM batch WHERE state = 'APPROVED' AND lastmodified > ? AND lastmodified < ?
+                                                                 """
+                                                                )){
+                    int param = 1;
+                    ps.setDate(param++, Date.valueOf(min));
+                    ps.setDate(param++, Date.valueOf(max));
+                    try(ResultSet res = ps.executeQuery()){
+                        while(res.next()){
+                            result.add(min+" - "+max +"|"+res.getString("numComplete"));
+                        }
+                    }
+
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            min = min.minusMonths(1);
+            max = max.minusMonths(1);
+        }
+        return result;
+    }
+
+    public String getJpegPath(String dir) throws SQLException {
+        String result = "";
+        try(Connection conn = connectionPool.getConnection()){
+            try(PreparedStatement ps = conn.prepareStatement("""
+                                                            SELECT jpeg_relpath FROM newspaperarchive
+                                                            WHERE orig_relpath = ?
+                                                            """)) {
+                int param = 1;
+                ps.setString(param++,dir);
+                try(ResultSet res = ps.executeQuery()) {
+                    while (res.next()){
+                        result = res.getString("jpeg_relpath");
+                        return result;
+                    }
+                }
+
+            }
+        }
+        return result;
+    }
+
+    public String getAlto(String dir) throws SQLException {
+        try(Connection conn = connectionPool.getConnection()){
+            StringBuilder result = new StringBuilder();
+            try(PreparedStatement ps = conn.prepareStatement("""
+                                                                SELECT alto_relpath FROM newspaperarchive
+                                                                WHERE orig_relpath = ?
+                                                                """)){
+                int param = 1;
+                ps.setString(param++,dir);
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        String altoPath = res.getString("alto_relpath");
+                        try(FileInputStream is = new FileInputStream(altoPath)){
+                            DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+                            dbf.setNamespaceAware(false);
+                            Document document = dbf.newDocumentBuilder().parse(is);
+                            XPathFactory xf = XPathFactory.newInstance();
+                            XPath xPath = xf.newXPath();
+                            XPathExpression xExp = xPath.compile("/alto/Layout/Page/PrintSpace/TextBlock/TextLine");
+                            NodeList nl = (NodeList) xExp.evaluate(document, XPathConstants.NODESET);
+                            for (int index = 0; index < nl.getLength(); index++) {
+                                NodeList nodeList = nl.item(index).getChildNodes();
+                                String tempResult = "";
+                                for (int i = 1; i < nodeList.getLength();i++) {
+                                    Node node = nodeList.item(i);
+
+                                    if(node.getNodeName().equals("String")){
+                                        tempResult += node.getAttributes().getNamedItem("CONTENT").getNodeValue() + " ";
+                                    }
+                                }
+                                result.append(tempResult);
+                                result.append("\n");
+                            }
+
+                        } catch (ParserConfigurationException | SAXException | XPathExpressionException | IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                }
+
+
+            }
+            return result.toString();
+
         }
 
     }

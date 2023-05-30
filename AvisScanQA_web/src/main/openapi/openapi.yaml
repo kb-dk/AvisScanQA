@@ -35,6 +35,24 @@ paths:
               schema:
                 type: string
                 format: binary
+  /jpegFile/:
+    get:
+      operationId: getJpegPath
+      x-streamingOutput: true # If enabled the method will return StreamingOutput.
+      parameters:
+        - name: file
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A pdf with attached page
+          content:
+            image/tif:
+              schema:
+                type: string
+                format: binary
 
   /config.json:
     get:
@@ -293,6 +311,38 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/CharacterizationInfo'
+
+  /alto/:
+    get:
+      operationId: getAlto
+      x-streamingOutput: false # If enabled the method will return StreamingOutput.
+      parameters:
+        - name: file
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            text/plain:
+              schema:
+                type: string
+  /statistics:
+    get:
+      operationId: getStatistics
+      summary: ""
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
 
 
   /notes/{batchID}:

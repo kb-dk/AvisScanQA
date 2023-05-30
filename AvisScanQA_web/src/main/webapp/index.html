@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="da">
 <head>
     <title>QA tool til avis arkiver</title>
@@ -104,6 +105,7 @@
 <script src="displayBatches.js"></script>
 <script src="displayEditions.js"></script>
 <script src="displayNewspapers.js"></script>
+<script src="libs/decode-tiff.min.js"></script>
 
 <script>
 
@@ -117,7 +119,10 @@
 
     $.routes.add('/dashboard/', function () {
         clearAll();
-        $("#primary-show").html("Vælg avis i menuen til venstre");
+        // $("#primary-show").html("Vælg avis i menuen til venstre");
+        // $("#primary-show").append($("<a/>",{href:"#/batch/statistics"}).text("Download statistics for a year"))
+        let $statisticsBtn = $("<a/>",{target:"_blank",href:"#/statistics",type:"button",class:"btn btn-info"}).text("Download statistics for a year");
+        $("#primary-show").append($statisticsBtn);
         renderBatchTable();
     });
 
@@ -140,6 +145,10 @@
     $.routes.add('/batch/{batchid:string}/notes', function () {
         handleNotesDownload(this.batchid);
     })
+    $.routes.add("/statistics",function (){
+        console.log("Worked?")
+       handleStatisticsDownload();
+    });
 
     $(document).ready(function () {
         moment.locale("da");

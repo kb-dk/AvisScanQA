@@ -6,6 +6,7 @@ import dk.kb.kula190.iterators.common.AttributeParsingEvent;
 import dk.kb.kula190.iterators.common.NodeBeginsParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.DefaultTreeEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
+import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +50,7 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
             batchName = folderName;
             final String[] batchNameSplits = batchName.split("_", 5);
             newspaperName = batchNameSplits[0];
-            fileNamePattern = Pattern.compile(Pattern.quote(newspaperName) + "_(\\d{8})_udg\\d{2}_[^_]+_\\d{4}");
+            fileNamePattern = Pattern.compile(Pattern.quote(newspaperName) + "_(\\d{4,8})_udg\\d{2}_[^_]+_\\d{4}");
             batchStartDate = LocalDate.parse(batchNameSplits[1], localDateFormatter);
             batchEndDate = LocalDate.parse(batchNameSplits[2], localDateFormatter);
             return;
@@ -85,6 +86,9 @@ public class FileNamingChecker extends DefaultTreeEventHandler {
 
         String extension = EventHandlerUtils.getExtension(fileName);
         String nameWithoutExtension = EventHandlerUtils.removeExtension(fileName);
+        if(extension.equals("jpeg") || extension.equals("jpg")){
+            DecoratedAttributeParsingEvent.addJpegPath(nameWithoutExtension,event.getLocation());
+        }
         if(fileOrFolderToIgnore(file)){return;}
         checkExtensionMatchFolder(event, parent, extension);
         checkNameMachPattern(event, extension, nameWithoutExtension);
@@ -97,6 +101,8 @@ private Boolean fileOrFolderToIgnore(File file){
         if(file.getParentFile().getName().equals("Unmatched")){return true;}
         else if (EventHandlerUtils.getExtension(file.getName()).equals("jpeg")) {return true;}
         else if (EventHandlerUtils.getExtension(file.getName()).equals("jpg")) {return true;}
+        else if (file.getName().equals(".XnViewSort")) {return true;}
+        else if (file.getName().equals("Thumbs.db")) {return true;}
     return EventHandlerUtils.getExtension(file.getName()).equals("md5");
 
 }
@@ -118,7 +124,13 @@ private Boolean fileOrFolderToIgnore(File file){
                                               nameWithoutExtension,
                                               fileNamePattern);
                 if (matcher.matches()) {
-                    LocalDate date = LocalDate.parse(matcher.group(1), localDateFormatter);
+                    LocalDate date;
+                    if (matcher.group(1).length() == 4){
+                        date = LocalDate.parse(matcher.group(1)+"0101", localDateFormatter);
+                    }else{
+                        date = LocalDate.parse(matcher.group(1), localDateFormatter);
+                    }
+
                     checkBetween(event,
                                  FailureType.FILE_STRUCTURE_ERROR,
                                  date,

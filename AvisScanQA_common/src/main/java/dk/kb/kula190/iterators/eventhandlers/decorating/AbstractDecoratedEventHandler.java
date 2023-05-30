@@ -14,8 +14,12 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
+import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHandler {
 
@@ -166,12 +170,18 @@ public abstract class AbstractDecoratedEventHandler extends DefaultTreeEventHand
                                             decoratedEvent.getRoundTrip(),
                                             decoratedEvent.getStartDate(),
                                             decoratedEvent.getEndDate());
-                    case "alto" -> altoFile(decoratedEvent,
+                    case "alto" -> {
+                        altoFile(decoratedEvent,
                                             decoratedEvent.getAvis(),
                                             decoratedEvent.getEditionDate(),
                                             decoratedEvent.getUdgave(),
                                             decoratedEvent.getSectionName(),
                                             decoratedEvent.getPageNumber());
+                        DecoratedAttributeParsingEvent.addAltoPath(removeExtension(removeExtension(lastName(event.getLocation()))),
+                                                                   event.getLocation());
+
+
+                    }
                     case "mix" -> mixFile(decoratedEvent,
                                           decoratedEvent.getAvis(),
                                           decoratedEvent.getEditionDate(),

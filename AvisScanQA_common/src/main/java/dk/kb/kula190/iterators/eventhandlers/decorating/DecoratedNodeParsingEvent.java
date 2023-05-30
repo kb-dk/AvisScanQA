@@ -46,6 +46,9 @@ public class DecoratedNodeParsingEvent extends NodeParsingEvent implements Decor
             String[] splits = lastName.split("_", 5);
             if (splits.length > 1) {
                 avis        = splits[0];
+                if (splits[1].length() == 4){
+                    splits[1] = splits[1]+"0101";
+                }
                 editionDate = LocalDate.parse(splits[1], EventHandlerUtils.dateFormatter);
                 udgave      = splits[2];
                 if (splits.length > 3) {

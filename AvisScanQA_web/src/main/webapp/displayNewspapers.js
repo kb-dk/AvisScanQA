@@ -51,7 +51,7 @@ function getNewspaperIDs(){
              * @param {NewspaperID[]} newspaperIDs
              */
             function (newspaperIDs){
-                r(newspaperIDs);
+                r(newspaperIDs.sort((a,b) =>{return a.avisid > b.avisid}));
         });
     });
 }
@@ -78,19 +78,14 @@ async function loadNewspaperIDs() {
         }
         let $table = $("#avisIDer");
         $table.bootstrapTable({
-            data: data, columns: [{
+            data: data.sort(), columns: [{
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,17)+'...' : value}</a>`;
+                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 40 ? value.substring(0,37)+'...' : value}</a>`;
                 },
                 sortable: true
-            },
-                {
-                    title: 'Modtaget',
-                    field: 'recievedDate',
-                    sortable: true
-                }
+            }
             ]
         });
         let $tableArkiv = $("#avisIDerArkiv");
@@ -102,12 +97,7 @@ async function loadNewspaperIDs() {
                     return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,17)+'...' : value}</a>`;
                 },
                 sortable: true
-            },
-                {
-                    title: 'Modtaget',
-                    field: 'recievedDate',
-                    sortable: true
-                }
+            }
             ]
         });
 }

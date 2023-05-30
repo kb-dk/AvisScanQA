@@ -32,6 +32,8 @@ iterator:
     - "/Unmatched"
     - "*.jpeg"
     - "*.jpg"
+    - ".XnViewSort"
+    - "Thumbs.db"
 
 mail:
   to: pabr@kb.dk

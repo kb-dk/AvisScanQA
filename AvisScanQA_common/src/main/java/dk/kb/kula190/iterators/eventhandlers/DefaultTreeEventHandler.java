@@ -86,6 +86,7 @@ public abstract class DefaultTreeEventHandler implements TreeEventHandler {
         Matcher matcher = null;
         if (expected != null) {
             matcher = expected.matcher(actual);
+            boolean matches = matcher.matches();
             if (!expected.matcher(actual).matches()) {
                 addFailure(event,
                            type,

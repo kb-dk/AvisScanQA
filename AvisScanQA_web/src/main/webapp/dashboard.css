@@ -55,7 +55,9 @@ body {
 .sidebar .nav-link.active .feather {
   color: inherit;
 }
-
+.infoCol{
+  white-space: pre-wrap;
+}
 .sidebar-heading {
   font-size: .75rem;
   text-transform: uppercase;
@@ -198,4 +200,7 @@ body {
 }
 .noteContainer *{
   margin-left: 1px;
+}
+.pageImage{
+  width: 100%;
 }

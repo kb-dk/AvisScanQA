@@ -1,6 +1,7 @@
 package dk.kb.kula190.checkers.pagecheckers.xpath;
 
 import dk.kb.kula190.checkers.pagecheckers.XpathPageChecker;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.util.yaml.YAML;
 
@@ -36,7 +37,6 @@ public class XpathTiff {
                                  Integer pageNumber) throws IOException {
         //This is called with the actual tiff file
         TifSizeActual = (int) new File(event.getLocation()).length();
-
         String tiffFileName = removeExtension(lastName(event.getLocation()));
         TifFileName = tiffFileName;
 

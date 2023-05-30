@@ -91,7 +91,6 @@ function noteSubmitHandler(event, url) {
 
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
-            alert("Note added");
             location.reload();
             //event.target.parentNode.append(createDisplayNoteForm(batchID,data))
         }, dataType: "json", contentType: "application/json"
@@ -113,13 +112,15 @@ function noteDeleteHandler(event) {
     let url = parts.join("/") + "?" + query.toString();
 
     const notes = data.get('notes');
+    if(confirm("Delete message?")){
+        $.ajax({
+            type: "DELETE", url: url, data: notes, success: function () {
+            }, dataType: "json", contentType: "application/json"
+        });
+        $(`#noteRow${noteID}`).remove();
+    }
 
-    $.ajax({
-        type: "DELETE", url: url, data: notes, success: function () {
-            alert("note deleted")
-        }, dataType: "json", contentType: "application/json"
-    });
-    $(`#noteRow${noteID}`).remove();
+
     return false;  // <- cancel event
 }
 
@@ -409,7 +410,10 @@ function renderSinglePage(page) {
     let $infoDumpRow = $("<div/>", {class: "row"});
     $infoDumpRow.append($fileAndProblemsCol);
 
-    let $entityInfoCol = $("<div/>", {class: "col-4"});
+    let $entityInfoCol = $("<div/>", {class: "col-4 infoCol"});
+    let $ocrAccordion = $("<div/>", {id:"ocrAccordion",class:"accordion"});
+    let $ocrAccordionItem = $("<div/>",{class: "card"}).append("<div/>",{class:"card-header"}).append($("<h3/>",{class:"mb-0"}).append($("<button/>",{class:"btn btn-block text-left",type:"button","data-toggle":"collapse","data-target":"#collapseOne"}).text("OCR TEXT")));
+
     let infoHtml = `Edition titel: ${page.editionTitle}<br>`;
     infoHtml += `Section titel: ${page.sectionTitle}<br>`;
     infoHtml += `Side nummer: ${page.pageNumber}<br>`;
@@ -417,11 +421,18 @@ function renderSinglePage(page) {
     infoHtml += `Afleverings dato: ${moment(page.deliveryDate).format("YYYY-MM-DD")}<br>`;
     infoHtml += `Udgivelses dato: ${date}<br>`;
     infoHtml += `Format type: ${page.formatType}<br>`;
+    dir = page.origRelpath;
+    altoUrl = "api/alto/?file=" + dir;
 
     $entityInfoCol.html(infoHtml);
     $infoDumpRow.append($entityInfoCol);
-    $pageDisplay.append($infoDumpRow);
 
+    $.ajax({type: "GET",url:altoUrl,success:function (data){
+            $ocrAccordionItem.append($("<div/>",{id:"collapseOne",class:"collapse","data-parent":"#ocrAccordion"}).append($("<div/>",{class:"card-body"}).text(data)))
+            $ocrAccordion.append($ocrAccordionItem);
+            $entityInfoCol.append($ocrAccordion);
+            $pageDisplay.append($infoDumpRow);
+        }})
 
 }
 
@@ -469,29 +480,30 @@ function createDisplayNoteForm(batchid, note) {
  */
 function loadImage(filename, element) {
     let result = $("<div>");
-    element.append(result);
-    encodeURIComponent(filename)
+    let downloadLink = $("<div/>")
+    element.append(downloadLink)
     const url = "api/file/?file=" + encodeURIComponent(filename);
+    const jpegUrl = "api/jpegFile/?file="+encodeURIComponent(filename);
+    downloadLink.append($("<a>", {href: url}).text("Download Tiff"));
     return $.ajax({
-        type: "GET", url: url, xhrFields: {responseType: 'arraybuffer'}, beforeSend: function () {
+        type: "GET", url: jpegUrl, xhrFields: {responseType: 'arraybuffer'}, beforeSend: function () {
             result.text(`Loading Page`);
+
         }, success: function (data) {
-            let tiff = new Tiff({buffer: data});
-            let width = tiff.width();
-            let height = tiff.height();
-            let canvas = tiff.toCanvas();
-            if (canvas) {
-                canvas.setAttribute('style', `width:100%;`);
-                canvas.download = filename;
-                canvas.title = filename;
-                canvas.filename = filename;
-                result.empty().append($("<a>", {href: url}).text(filename)).append(canvas);
-            }
+            let arrayBufferView = new Uint8Array( data );
+            let blob = new Blob( [ arrayBufferView ], { type: "image/jpeg" } );
+            let urlCreator = window.URL || window.webkitURL;
+            let imageUrl = urlCreator.createObjectURL( blob );
+            let img = $("<img/>",{class:"pageImage",type:"image/jpeg"}).attr("src",imageUrl);
+            result.empty().append(img)
+            element.append(result);
         }, error: function (jqXHR, errorType, exception) {
             result.empty().text(`Failed to read file ${filename}`);
         }
 
     });
+
+
 
 }
 

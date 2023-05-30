@@ -6,7 +6,7 @@ import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.*;
 
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.apache.commons.io.FilenameUtils.isExtension;
@@ -22,7 +22,9 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
     private final String udgave;
     private final String sectionName;
     private final Integer pageNumber;
-    
+    private static final Map<String,String> jpegPaths = new HashMap<>();
+    private static final Map<String,String> altoPaths = new HashMap<>();
+
     public DecoratedAttributeParsingEvent(AttributeParsingEvent delegate) {
         super(delegate.getName(), delegate.getLocation());
     
@@ -51,6 +53,9 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
             //page: modersmaalet_19060706_udg01_1.sektion_001
             String[] splits = lastName.split("_", 5);
             avis        = splits[0];
+            if (splits[1].length() == 4){
+                splits[1] = splits[1]+"0101";
+            }
             editionDate = LocalDate.parse(splits[1], EventHandlerUtils.dateFormatter);
             udgave      = splits[2];
             if (splits.length > 3) {
@@ -124,7 +129,25 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
     public Integer getPageNumber() {
         return pageNumber;
     }
-    
+
+    public static String getJpegPath(String filename){
+        return jpegPaths.get(filename);
+    }
+    public static String addJpegPath(String filename,String path){
+        return jpegPaths.put(filename,path);
+    }
+    public static String getAltoPath(String filename){
+        return altoPaths.get(filename);
+    }
+    public static String addAltoPath(String filename,String path){
+        return altoPaths.put(filename,path);
+    }
+    public static Map<String,String> getJpegPaths(){
+        return jpegPaths;
+    }
+    public static Map<String,String> getAltoPaths(){
+        return altoPaths;
+    }
     @Override
     public String toString() {
         return "DecoratedAttributeParsingEvent{" +

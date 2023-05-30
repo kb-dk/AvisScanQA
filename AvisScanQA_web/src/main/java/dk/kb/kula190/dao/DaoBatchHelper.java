@@ -126,7 +126,8 @@ public class DaoBatchHelper {
                                                           " FROM batch b1"
                                                           +
                                                           " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch " +
-                                                          "b2 WHERE b1.batchid = b2.batchid)")) {
+                                                          "b2 WHERE b1.batchid = b2.batchid)"+
+                                                         " ORDER BY batchid ASC")) {
             List<SlimBatch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
 

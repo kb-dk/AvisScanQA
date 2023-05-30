@@ -17,6 +17,7 @@
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>dk.kb.util</groupId>
             <artifactId>kb-util</artifactId>
@@ -120,14 +121,14 @@
             <!--For the swagger UI endpoint /api-docs?url=openapi.json-->
             <groupId>org.webjars</groupId>
             <artifactId>swagger-ui</artifactId>
-            <version>3.52.5</version>
+            <version>4.18.1</version>
         </dependency>
 
         <!-- openapitools dependency -->
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-jaxrs</artifactId>
-            <version>1.6.5</version>
+            <version>1.6.8</version>
             <exclusions>
                 <exclusion>
                     <artifactId>jsr311-api</artifactId>
@@ -139,9 +140,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-
-
-
         <!-- Logging dependencies -->
         <dependency>
             <groupId>org.slf4j</groupId>

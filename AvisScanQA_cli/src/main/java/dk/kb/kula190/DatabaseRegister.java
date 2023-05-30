@@ -2,6 +2,7 @@ package dk.kb.kula190;
 
 import dk.kb.kula190.generated.Failure;
 import dk.kb.kula190.generated.Reference;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
@@ -23,11 +24,11 @@ import java.sql.Driver;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils.lastName;
+import static org.apache.commons.io.FilenameUtils.removeExtension;
 
 //Not multithreaded...
 public class DatabaseRegister extends DecoratedEventHandler {
@@ -153,6 +154,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
             preparedStatement.setString(param++, System.getenv("USER"));
 
             boolean result = preparedStatement.execute();
+            String tetts;
         }
         connection.commit();
     }
@@ -228,15 +230,14 @@ public class DatabaseRegister extends DecoratedEventHandler {
                                                                                             event))
                                                            .toList();
         registeredFailures.addAll(failuresForThisPage);
-
         String failuresMessage = orEmpty(failuresForThisPage);
-
+        String filename = removeExtension(lastName(event.getLocation()));
         try (Connection connection = dataSource.getConnection()) {
 
             try (PreparedStatement preparedStatement = connection.prepareStatement(
                     "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, "
                     + "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, "
-                    + "fraktur, problems, batchid) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
+                    + "fraktur, problems, batchid,jpeg_relpath,alto_relpath) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
                     + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
                 int param = 1;
                 //orig_relpath
@@ -271,6 +272,10 @@ public class DatabaseRegister extends DecoratedEventHandler {
 
                 //Batch-reference
                 preparedStatement.setString(param++, batchName.get());
+                //Jpeg relpath
+                preparedStatement.setString(param++, DecoratedAttributeParsingEvent.getJpegPath(filename));
+                //Alto relpath
+                preparedStatement.setString(param++, DecoratedAttributeParsingEvent.getAltoPath(filename) != null ? DecoratedAttributeParsingEvent.getAltoPath(filename) : "");
 
                 boolean result = preparedStatement.execute();
             }

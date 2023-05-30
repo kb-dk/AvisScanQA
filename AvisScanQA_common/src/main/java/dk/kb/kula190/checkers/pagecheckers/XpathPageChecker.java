@@ -8,9 +8,11 @@ import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMetsMix;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathMix;
 import dk.kb.kula190.checkers.pagecheckers.xpath.XpathTiff;
 import dk.kb.kula190.generated.FailureType;
+import dk.kb.kula190.iterators.eventhandlers.EventHandlerUtils;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedAttributeParsingEvent;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedEventHandler;
 import dk.kb.kula190.iterators.eventhandlers.decorating.DecoratedNodeParsingEvent;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -99,7 +101,6 @@ public class XpathPageChecker extends DecoratedEventHandler {
         
         XpathAlto xpathAlto = Alto.get();
         xpathAlto.setAltoXpathData(event, newspaper, editionDate, edition, section, pageNumber);
-        
         
         //TODO better checks of actual values https://sbprojects.statsbiblioteket.dk/jira/browse/IOF-33
         checkEquals(event,
