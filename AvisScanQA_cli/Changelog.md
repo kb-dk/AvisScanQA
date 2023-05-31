@@ -9,3 +9,4 @@ Version 1.0: Newspaper QA with CLI and web application
 1.8: Fixed web error in http get with foldername containing special character. Fixed issue if batch only contains 1 page, previously unable to read it.
 1.9: During matching of event and reference in DatabaseRegister. Reference is null, if the error is an checksumerror. And thereby fails.
 1.10: Now supports batch filenames only containing a year. Statistics of completed batches per month for a year can be downloaded as a csv file in webQA. WebQA user experience updates, sorted tables, unneeded alert removed, deletion of notes alert. WebQA can now display alto text contents. WebQA now displays jpeg rather than tiff.
+1.11: Updated SQL schema. Removed unused library of Tiff integration. 
