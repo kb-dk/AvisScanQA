@@ -100,12 +100,9 @@
 
 <script src="libs/jquery.routes.js"></script>
 
-<script src="libs/tiff.min.js"></script>
-
 <script src="displayBatches.js"></script>
 <script src="displayEditions.js"></script>
 <script src="displayNewspapers.js"></script>
-<script src="libs/decode-tiff.min.js"></script>
 
 <script>
 
@@ -146,13 +143,11 @@
         handleNotesDownload(this.batchid);
     })
     $.routes.add("/statistics",function (){
-        console.log("Worked?")
        handleStatisticsDownload();
     });
 
     $(document).ready(function () {
         moment.locale("da");
-        Tiff.initialize({TOTAL_MEMORY: 19777216 * 10});
         loadNewspaperIDs();
         $.routes.load('#/dashboard/');
     });

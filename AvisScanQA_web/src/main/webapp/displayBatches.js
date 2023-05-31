@@ -385,12 +385,9 @@ function handleNotesDownload(batchId) {
 }
 
 function handleStatisticsDownload(){
-    console.log("HELLO")
     $.ajax({url:`api/statistics`,success:
         function (data) {
-            console.log(data)
             const items = data;
-            // const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
             if (items.length > 0) {
                 let csvData = [["Month","Number of completed batches"]]
 
@@ -408,13 +405,6 @@ function handleStatisticsDownload(){
                         return row.join(",");
                     }) // At this point we have an array of strings
                     .join("\r\n");
-                console.log(csvData)
-                console.log(csv)
-                // const replacer = (key, value) => value === null ? '' : value
-                // let csvString = JSON.stringify( csvData, replacer );
-                // csvString = csvString.replaceAll('"', '')
-                // csvString = csvString.replaceAll(" ", ',')
-                // console.log(csvString)
                 let link = document.createElement("a");
                 let now = new Date(Date.now());
                 link.download = `${now.toLocaleDateString()}_year_statistics.csv`;

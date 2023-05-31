@@ -16,24 +16,26 @@ create table batch
 );
 
 
-CREATE TABLE newspaperarchive
+create table newspaperarchive
 (
-    orig_relpath  VARCHAR(1024) PRIMARY KEY,
-    format_type   VARCHAR(10)  NOT NULL,
-    edition_date  DATE         NOT NULL,
-    single_page   BOOLEAN      NOT NULL,
-    page_number   INTEGER,
-    avisid        VARCHAR(255) NOT NULL,
-    avistitle     VARCHAR(255) NOT NULL,
-    shadow_path   TEXT         NOT NULL,
-    section_title VARCHAR(255),
-    edition_title VARCHAR(255),
-    delivery_date DATE         NOT NULL,
-    handle        BIGSERIAL,
-    side_label    VARCHAR(255),
-    fraktur       BOOLEAN,
-    problems      TEXT         NOT NULL,
-    batchid       VARCHAR(255) NOT NULL
+    orig_relpath  varchar(1024) primary key,
+    format_type   varchar(10)   not null,
+    edition_date  date          not null,
+    single_page   boolean       not null,
+    page_number   integer,
+    avisid        varchar(255)  not null,
+    avistitle     varchar(255)  not null,
+    shadow_path   text          not null,
+    section_title varchar(255),
+    edition_title varchar(255),
+    delivery_date date          not null,
+    handle        bigserial,
+    side_label    varchar(255),
+    fraktur       boolean,
+    problems      text          not null,
+    batchid       varchar(255)  not null,
+    jpeg_relpath  varchar(1024) not null,
+    alto_relpath  varchar(1024)
 );
 
 

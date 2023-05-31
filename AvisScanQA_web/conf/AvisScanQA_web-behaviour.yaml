@@ -16,14 +16,6 @@ avischk-web-qa:
 
   batchesFolder: "/home/pabr/AvisScanQA_cli/lastTIme/data2/"
 
-#  predefinedNotes:
-#    dayNotes:
-#      - "Udkom ikke pga. strejke"
-#    editionNotes:
-#      - "Edition dropdown note"
-#    pageNotes:
-#      - "Siden er ikke god?"
-
   http-content-base-string: ""
   image-content-base-string: ""
   iipsrv-base-string: ""
