@@ -38,8 +38,8 @@ avischk-web-qa:
           borderColor: "#f8f9fa"
         noPageWithin:
           color: "white"
-          backgroundColor: "#6c757d"
-          borderColor: "#6c757d"
+          backgroundColor: "rgb(150,150,150)"
+          borderColor: "rgb(150,150,150)"
         containsNotes:
           color: "yellow"
           fontWeight: "bold"
@@ -90,26 +90,26 @@ avischk-web-qa:
             color: "white"
             backgroundColor: "#28a745"
             borderColor: "#28a745"
-        3IN_PROGRESS:
-          name: "Missing Dates Verified"
-          description: "The batch has gone through automated checkers"
-          styling:
-            backgroundColor: "#007bff"
-            borderColor: "#007bff"
-          calendarStyling:
-            color: "white"
-            backgroundColor: "#28a745"
-            borderColor: "#28a745"
-        4IN_PROGRESS:
-          name: "OCR verified"
-          description: "The batch has gone through automated checkers"
-          styling:
-            backgroundColor: "#007bff"
-            borderColor: "#007bff"
-          calendarStyling:
-            color: "white"
-            backgroundColor: "#28a745"
-            borderColor: "#28a745"
+#        3IN_PROGRESS:
+#          name: "Missing Dates Verified"
+#          description: "The batch has gone through automated checkers"
+#          styling:
+#            backgroundColor: "#007bff"
+#            borderColor: "#007bff"
+#          calendarStyling:
+#            color: "white"
+#            backgroundColor: "#28a745"
+#            borderColor: "#28a745"
+#        4IN_PROGRESS:
+#          name: "OCR verified"
+#          description: "The batch has gone through automated checkers"
+#          styling:
+#            backgroundColor: "#007bff"
+#            borderColor: "#007bff"
+#          calendarStyling:
+#            color: "white"
+#            backgroundColor: "#28a745"
+#            borderColor: "#28a745"
 
     edition:
       dropDownStandardMessage:
@@ -119,10 +119,13 @@ avischk-web-qa:
             - "Udkom ikke pgr. af særlig lejlighed"
         udgDropDown:
           options:
-            - "Ugyldig edition"
+            - "Trykt forkert dato"
+            - "Side(r) mangler"
         sectionDropDown:
           options:
-            - "Ugyldig section"
+            - "Forkert sektionsnummer"
         pageDropDown:
           options:
-            - "Utydelig side"
+            - "Defekt original"
+            - "Gammel tape"
+            - "Tryk utydelig"

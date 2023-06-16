@@ -8,7 +8,8 @@ $.getJSON("api/config.json",
  * @param {String} batchID
  */
 function loadBatchForNewspaper(batchID) {
-    let url = `api/batch/${batchID}`;
+    let hashedLocations = location.hash.split("/");
+    let url =  `api/batch/${batchID}`;
     let $state = $("#state-div").empty();
     const $headline = $("#headline-div").empty();
     let $notice = $("#notice-div").empty();
@@ -24,7 +25,7 @@ function loadBatchForNewspaper(batchID) {
                 let /*int*/ fromYEAR = moment(batch.startDate).format("YYYY");
                 let /*int*/ toYEAR = moment(batch.endDate).format("YYYY");
 
-                let currentNewspaperYear = fromYEAR;
+                let currentNewspaperYear = hashedLocations[3].length > 0 ? hashedLocations[3] : fromYEAR;
 
                 let newspaperYears = range(fromYEAR, toYEAR);
 
@@ -389,11 +390,11 @@ function handleStatisticsDownload(){
         function (data) {
             const items = data;
             if (items.length > 0) {
-                let csvData = [["Month","Number of completed batches"]]
+                let csvData = [["Month","Number of approved batches","Number of pages approved"]]
 
-                for (let i = 0; i < data.length-1; i++) {
+                for (let i = 0; i <= data.length-1; i++) {
                     let splittedData = data[i].split("|");
-                    csvData[i+1] = [splittedData[0],splittedData[1]]
+                    csvData[i+1] = [splittedData[0],splittedData[1],splittedData[2]]
                 }
                 let csv = csvData
                     .map((item) => {

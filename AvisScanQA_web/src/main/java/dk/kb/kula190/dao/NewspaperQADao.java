@@ -60,34 +60,47 @@ public class NewspaperQADao {
     }
     public List<String> getStatistics() throws SQLException {
         List<String> result = new ArrayList<>();
-        LocalDate limiter = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth()).minusMonths(1).minusYears(1);
 
-        LocalDate min = LocalDate.now().with(TemporalAdjusters.firstDayOfMonth());
-        LocalDate max = LocalDate.now().with(TemporalAdjusters.firstDayOfNextMonth()).minusDays(1);
+        try(Connection conn = connectionPool.getConnection()){
+            try(PreparedStatement ps = conn.prepareStatement(
+                                                            """
+            WITH batchAndMonth AS
+                (SELECT count(*) AS numBatches,
+                        concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')) AS month
+                      FROM batch
+                      WHERE state = 'APPROVED'
+                        AND now() - interval '1 year' < lastmodified
+                      GROUP BY date_part('month', lastmodified),
+                               concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month'))),
+                pages AS(
+                    SELECT count(newspaperarchive.orig_relpath) AS numPages,
+                        concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')) AS pagesMonth 
+                    FROM batch, newspaperarchive
+                    WHERE batch.state = 'APPROVED' AND 
+                        now() - interval '1 year' < batch.lastmodified AND
+                        batch.batchid = newspaperarchive.batchid
+                    GROUP BY date_part('month',batch.lastmodified),
+                            concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month'))
+                )
+            SELECT batchAndMonth.month,batchAndMonth.numBatches,pages.numPages 
+            FROM batchAndMonth JOIN pages ON 
+                batchAndMonth.month = pages.pagesMonth 
+            ORDER BY batchAndMonth DESC ;
+                                                            """
+                                                            )){
 
-        while (!min.equals(limiter)){
-            //int compared = min.getMonth().compareTo(LocalDate.now().getMonth());
-            try(Connection conn = connectionPool.getConnection()){
-                try(PreparedStatement ps = conn.prepareStatement("""
-                                                                SELECT  COUNT("batchid") AS numComplete FROM batch WHERE state = 'APPROVED' AND lastmodified > ? AND lastmodified < ?
-                                                                 """
-                                                                )){
-                    int param = 1;
-                    ps.setDate(param++, Date.valueOf(min));
-                    ps.setDate(param++, Date.valueOf(max));
-                    try(ResultSet res = ps.executeQuery()){
-                        while(res.next()){
-                            result.add(min+" - "+max +"|"+res.getString("numComplete"));
-                        }
+                try(ResultSet res = ps.executeQuery()){
+                    while(res.next()){
+                        result.add(res.getString("month") +"|"+res.getString("numbatches")+"|"+res.getString("numpages"));
                     }
-
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
                 }
+
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
-            min = min.minusMonths(1);
-            max = max.minusMonths(1);
+
         }
+
         return result;
     }
 
@@ -259,7 +272,7 @@ public class NewspaperQADao {
 
         //Get all distinct newspaperIDs
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement("SELECT distinct(avisid) FROM batch")) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT distinct(avisid) FROM batch ORDER BY avisid ASC")) {
                 try (ResultSet res = ps.executeQuery()) {
                     while (res.next()) {
                         String avisID = res.getString(1);
