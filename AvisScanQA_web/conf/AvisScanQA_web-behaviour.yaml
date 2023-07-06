@@ -117,6 +117,7 @@ avischk-web-qa:
           options:
             - "Udkom ikke pgr. af strejke"
             - "Udkom ikke pgr. af særlig lejlighed"
+            - "Udgave haves ikke"
         udgDropDown:
           options:
             - "Trykt forkert dato"

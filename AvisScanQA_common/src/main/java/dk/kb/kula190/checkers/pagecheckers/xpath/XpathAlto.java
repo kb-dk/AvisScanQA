@@ -60,8 +60,8 @@ public class XpathAlto {
         } catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain ACCURACY",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain ACCURACY");
         }
 
 
@@ -70,8 +70,8 @@ public class XpathAlto {
         } catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain QUALITY",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain QUALITY");
         }
 
 
@@ -80,8 +80,8 @@ public class XpathAlto {
         } catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain HEIGHT",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain HEIGHT");
         }
 
 
@@ -90,8 +90,8 @@ public class XpathAlto {
         } catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain WIDTH",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain WIDTH");
         }
 
         //Checks page ID is corresponding with filename.
@@ -100,8 +100,8 @@ public class XpathAlto {
         } catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain ID",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain ID");
         }
 
         try {
@@ -109,8 +109,8 @@ public class XpathAlto {
         }catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Page node in alto, did not contain PHYSICAL_IMG_NR",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Page node in alto, did not contain PHYSICAL_IMG_NR");
         }
 
 
@@ -123,8 +123,8 @@ public class XpathAlto {
         }catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "Alto file does not contain processingStepSettings",
-                                       "");
+                                       this.getClass().toString(),
+                                       "Alto file does not contain processingStepSettings");
         }
 
 
@@ -138,8 +138,8 @@ public class XpathAlto {
         }catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "processingStepSettings in alto file does not contain width",
-                                       "");
+                                       this.getClass().toString(),
+                                       "processingStepSettings in alto file does not contain width");
         }
 
         //Line is "height:2786" | gets -1
@@ -152,8 +152,8 @@ public class XpathAlto {
         }catch (Exception e) {
             resultCollector.addFailure(event,
                                        FailureType.INVALID_ALTO_ERROR,
-                                       "processingStepSettings in alto file does not contain height",
-                                       "");
+                                       this.getClass().toString(),
+                                       "processingStepSettings in alto file does not contain height");
         }
 
         //ALTO PAGE HEIGHT / (ALTO MEASUREMENT UNIT / DPI) = TIFF HEIGHT

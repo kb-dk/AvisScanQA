@@ -461,6 +461,6 @@ function splitDatesIntoMonths(dates) {
  */
 function editYearIndexInHash(origHash, newIndex) {
     let hashParts = origHash.split("/");
-    hashParts[hashParts.length - 1] = newIndex; // there's an empty place..
+    hashParts.length === 5 ? hashParts[hashParts.length - 2] = newIndex :hashParts[hashParts.length - 1] = newIndex;
     return hashParts.join("/");
 }
