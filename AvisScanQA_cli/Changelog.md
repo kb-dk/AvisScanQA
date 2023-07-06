@@ -11,5 +11,4 @@ Version 1.0: Newspaper QA with CLI and web application
 1.10: Now supports batch filenames only containing a year. Statistics of completed batches per month for a year can be downloaded as a csv file in webQA. WebQA user experience updates, sorted tables, unneeded alert removed, deletion of notes alert. WebQA can now display alto text contents. WebQA now displays jpeg rather than tiff.
 1.11: Updated SQL schema. Removed unused library of Tiff integration. 
 1.12: Statistics updated to show correct date. Added completed pages to statistics. Color changes. Changed default note dropdowns content. Fixed bug with changing years in calendar.
-1.13: Newspaper calendar now changes year correctly.
-1.14: Updated error reporting for autoQA, added dropdown option for day notes. Bug fix for calendar year changes
+1.13: Updated error reporting for autoQA, added dropdown option for day notes. Bug fix for calendar year changes
