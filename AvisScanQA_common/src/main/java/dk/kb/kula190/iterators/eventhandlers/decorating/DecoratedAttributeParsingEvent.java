@@ -54,7 +54,8 @@ public class DecoratedAttributeParsingEvent extends AttributeParsingEvent implem
             String[] splits = lastName.split("_", 5);
             avis        = splits[0];
             if (splits[1].length() == 4){
-                splits[1] = splits[1]+"0101";
+                String batchStartDate = batch.split("_")[1].substring(4);
+                splits[1] = splits[1]+batchStartDate;
             }
             editionDate = LocalDate.parse(splits[1], EventHandlerUtils.dateFormatter);
             udgave      = splits[2];

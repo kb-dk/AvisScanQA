@@ -126,7 +126,7 @@ private Boolean fileOrFolderToIgnore(File file){
                 if (matcher.matches()) {
                     LocalDate date;
                     if (matcher.group(1).length() == 4){
-                        date = LocalDate.parse(matcher.group(1)+"0101", localDateFormatter);
+                        date = LocalDate.parse(matcher.group(1)+String.format("%02d",batchStartDate.getMonthValue())+String.format("%02d",batchStartDate.getDayOfMonth()), localDateFormatter);
                     }else{
                         date = LocalDate.parse(matcher.group(1), localDateFormatter);
                     }
