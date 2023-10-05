@@ -238,7 +238,7 @@ public class DatabaseRegister extends DecoratedEventHandler {
                     "INSERT INTO newspaperarchive(orig_relpath, format_type, edition_date, single_page, page_number, "
                     + "avisid, avistitle, shadow_path, section_title, edition_title, delivery_date, side_label, "
                     + "fraktur, problems, batchid,jpeg_relpath,alto_relpath) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?) "
-                    + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems")) {
+                    + "ON CONFLICT (orig_relpath) DO UPDATE SET problems = excluded.problems, jpeg_relpath = excluded.jpeg_relpath")) {
                 int param = 1;
                 //orig_relpath
                 preparedStatement.setString(param++, event.getLocation());

@@ -169,6 +169,9 @@ body {
   margin-bottom: 0.5em;
 }
 
+#year-show{
+  height: 38em;
+}
 
 .bootstrap-table .fixed-table-container .fixed-table-body{
   /*Override bootstrap tables as it seems to make the page WAY too long*/

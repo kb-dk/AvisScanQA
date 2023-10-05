@@ -1,5 +1,5 @@
 let configJson;
-$.getJSON("api/config.json").done((data) => configJson = data);
+await $.getJSON("api/config.json").done((data) => configJson = data);
 
 /*
 * Event handler for note on newspaper level.

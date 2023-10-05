@@ -1,5 +1,5 @@
 let batchConfig;
-$.getJSON("api/config.json",
+await $.getJSON("api/config.json",
     function (data) {
         batchConfig = data.batch;
     });

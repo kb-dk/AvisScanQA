@@ -9,7 +9,7 @@ let editionJsonData;
  * @param {number} sectionIndex
  * @param {number} pageIndex
  */
-function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sectionIndex, pageIndex) {
+async function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sectionIndex, pageIndex) {
     let day = moment(date).format('YYYY-MM-DD');
     let nextDay = moment(date).add(1, 'd').format("YYYY-MM-DD")
     let pastDay = moment(date).subtract(1, 'd').format("YYYY-MM-DD")
@@ -19,7 +19,7 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
     $("#batchOverview-table").empty();
     const $headline = $("#headline-div").empty();
     $("#primary-show").empty();
-    $.getJSON("api/config.json").done(function (data) {
+    await $.getJSON("api/config.json").done(function (data) {
         editionJsonData = data.edition
     })
 
@@ -29,14 +29,15 @@ function loadEditionsForNewspaperOnDate(batchID, avisID, date, editionIndex, sec
          * @param {NewspaperDay} newspaperDay
          * */
         function (newspaperDay) {
-
+            console.log();
             $headline.append($("<a/>", {
                 class: "btn btn-secondary",
                 text: "Back to newspaper year",
                 href: `#/newspaper/${avisID}/${day.split('-')[0]}/`
             }))
             $headline.append($("<a/>", {
-                class: "btn btn-secondary", text: "Back to batch", href: `#/batch/${batchID}/`
+
+                class: "btn btn-secondary", text: "Back to batch", href: `#/batch/${batchID}/${day.split('-')[0]}`
             }))
             let $buttonForward = $("<a/>", {
                 class: "btn btn-secondary bi bi-caret-right",
@@ -75,12 +76,13 @@ function noteSubmitHandler(event, url) {
     event.preventDefault(); // <- cancel event
 
     const data = new FormData(event.target);
-    let batchID = data.get('batch')
-    let parts = ["api", "notes", batchID]
+    let batchID = data.get('batch');
+    let date = data.get('date');
+    let parts = ["api", "notes", batchID];
     let query = new URLSearchParams();
 
     query.append("avis", data.get('avis'));
-    query.append("date", data.get('date'));
+    query.append("date", date);
     query.append("edition", data.get('edition'));
     query.append("section", data.get('section'));
     query.append("page", data.get('page'));
@@ -91,8 +93,7 @@ function noteSubmitHandler(event, url) {
 
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
-            location.reload();
-            //event.target.parentNode.append(createDisplayNoteForm(batchID,data))
+            location.href = `#/batch/${batchID}/${date.split("-")[0]}`
         }, dataType: "json", contentType: "application/json"
     });
     return false;  // <- cancel event
