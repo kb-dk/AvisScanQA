@@ -93,7 +93,12 @@ function noteSubmitHandler(event, url) {
 
     $.ajax({
         type: "POST", url: url, data: notes, success: function () {
-            location.href = `#/batch/${batchID}/${date.split("-")[0]}`
+            if(date){
+                location.href = `#/batch/${batchID}/${date.split("-")[0]}`;
+            }else{
+                location.reload();
+            }
+
         }, dataType: "json", contentType: "application/json"
     });
     return false;  // <- cancel event
@@ -152,7 +157,7 @@ function initComponents() {
 function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     $("#primary-show").empty();
     initComponents();
-    let editions = newspaperDay.editions;
+    let editions = newspaperDay.editions.sort((e1,e2) => {return e1.edition < e2.edition ? -1 : e1.edition > e2.edition ? 1 : 0});
     // if (editionIndex < 0 || editionIndex >= editions.length) {
     //     $("#primary-show").text(`Edition ${editionIndex + 1} not found. Day only has ${editions.length} editions`);
     // }
@@ -209,14 +214,22 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
 
     const editionShow = $("<div/>", {id: 'edition-show'}).append($("<h1>", {text: "show me a newspaper"}));
     $editionCol.append(editionShow);
-
-    for (let i = 0; i < editions.length; i++) {
-        const edition = editions[i];
-        const link = $("<a/>").attr({
-            href: editEntityIndexInHash(location.hash, i),
-            class: `btn btn-sm btn-outline-secondary ${(i === editionIndex ? "active" : "")}`,
-        }).text(edition.edition);
-        $editionNav.append(link);
+    if(editions.length < 7){
+        createEditionNavigationButtons($editionNav,editions,editionIndex)
+    }else{
+        let $dropdownDiv = $("<div/>",{class:"editionDropdown"}).text("Editions")
+        let $editionMenu = $("<div/>",{id:"editionMenu",class:"edition-menu-inactive"});
+        $dropdownDiv.on("mouseover",function (){
+            $editionMenu.removeClass("edition-menu-inactive")
+            $editionMenu.attr("class","edition-menu-active")
+        })
+        $editionMenu.on("mouseout",function (){
+            $editionMenu.removeClass("edition-menu-active");
+            $editionMenu.addClass("edition-menu-inactive")
+        })
+        createEditionNavigationButtons($editionMenu,editions,editionIndex)
+        $dropdownDiv.append($editionMenu)
+        $editionNav.append($dropdownDiv)
     }
     $("#edition-show").load("editionDisplay.html", function () {
         let $hiddenTextAreaValue = $("<input/>", {type: "hidden", name: "notes"})
@@ -265,6 +278,17 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
         }
 
     });
+}
+
+function createEditionNavigationButtons(parentElement,editions,editionIndex){
+    for (let i = 0; i < editions.length; i++) {
+        const edition = editions[i];
+        const link = $("<a/>").attr({
+            href: editEntityIndexInHash(location.hash, i),
+            class: `btn btn-sm btn-outline-secondary ${(i === editionIndex ? "active" : "")}`,
+        }).text(edition.edition);
+        parentElement.append(link);
+    }
 }
 
 /**

@@ -129,6 +129,10 @@ public class DefaultApiServiceImpl implements DefaultApi {
         }
     }
 
+    @Override public Batch getNextBatch(String batchID, String newspaperID) {
+        return getDAO().getNextBatch(batchID,newspaperID);
+    }
+
     @Override public Integer getNoteCount(String newspaperID, String batchID, String date) {
         try {
             return getDAO().getNoteCount(newspaperID, batchID, date);
@@ -215,6 +219,10 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
         
+    }
+
+    @Override public Batch getPreviousBatch(String batchID, String newspaperID) {
+        return getDAO().getPreviousBatch(batchID,newspaperID);
     }
 
     @Override public List<String> getStatistics() {

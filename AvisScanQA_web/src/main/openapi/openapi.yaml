@@ -143,6 +143,48 @@ paths:
           description: Batch updated
 
 
+  /nextBatch/{batchID}/{newspaperID}:
+    get:
+      operationId: getNextBatch
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: newspaperID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
+  /previousBatch/{batchID}/{newspaperID}:
+    get:
+      operationId: getPreviousBatch
+      parameters:
+        - name: batchID
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: newspaperID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Batch"
 
   /batch/{batchID}/{year}:
     get:

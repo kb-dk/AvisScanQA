@@ -1,5 +1,5 @@
 let batchConfig;
-await $.getJSON("api/config.json",
+$.getJSON("api/config.json",
     function (data) {
         batchConfig = data.batch;
     });
@@ -159,7 +159,25 @@ function loadBatchForNewspaper(batchID) {
                     $batchForm.submit(noteDeleteHandler);
                     $showNotesDiv.append($batchForm);
                 }
-                $notesButtonDiv.append($notesButton)
+                let prevBatchBtn = $("<button/>",{id:"prevBatch",class:"btn btn-secondary"}).text("Previous batch");
+                prevBatchBtn.on("click",function(){
+                    $.ajax({url:`api/previousBatch/${batchID}/${batch.avisid}`,success(data){
+                            console.log(data)
+                            location.href = `#/batch/${data.batchid}/`
+                            location.reload()
+                        }})
+                })
+                let nextBatchBtn = $("<button/>",{id:"nextBatch",class:"btn btn-secondary"}).text("Next batch");
+                nextBatchBtn.on("click",function(){
+                    $.ajax({url:`api/nextBatch/${batchID}/${batch.avisid}`,success(data){
+                            location.href = `#/batch/${data.batchid}/`
+                            location.reload()
+                        }})
+                })
+                $notesButtonDiv.append(prevBatchBtn);
+
+                $notesButtonDiv.append($notesButton);
+                $notesButtonDiv.append(nextBatchBtn);
                 $notice.append($notesButtonDiv);
                 $notice.append($showNotesDiv);
                 renderNewspaperForYear(newspaperYears, currentNewspaperYear, [url, currentNewspaperYear].join("/"));

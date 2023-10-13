@@ -58,40 +58,45 @@ public class NewspaperQADao {
         }
 
     }
+
     public List<String> getStatistics() throws SQLException {
         List<String> result = new ArrayList<>();
 
-        try(Connection conn = connectionPool.getConnection()){
-            try(PreparedStatement ps = conn.prepareStatement(
-                                                            """
-            WITH batchAndMonth AS
-                (SELECT count(*) AS numBatches,
-                        concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')) AS month
-                      FROM batch
-                      WHERE state = 'APPROVED'
-                        AND now() - interval '1 year' < lastmodified
-                      GROUP BY date_part('month', lastmodified),
-                               concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month'))),
-                pages AS(
-                    SELECT count(newspaperarchive.orig_relpath) AS numPages,
-                        concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')) AS pagesMonth 
-                    FROM batch, newspaperarchive
-                    WHERE batch.state = 'APPROVED' AND 
-                        now() - interval '1 year' < batch.lastmodified AND
-                        batch.batchid = newspaperarchive.batchid
-                    GROUP BY date_part('month',batch.lastmodified),
-                            concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month'))
-                )
-            SELECT batchAndMonth.month,batchAndMonth.numBatches,pages.numPages 
-            FROM batchAndMonth JOIN pages ON 
-                batchAndMonth.month = pages.pagesMonth 
-            ORDER BY batchAndMonth DESC ;
-                                                            """
-                                                            )){
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement(
+                    """
+                    WITH batchAndMonth AS
+                        (SELECT count(*) AS numBatches,
+                                concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')) AS month
+                              FROM batch
+                              WHERE state = 'APPROVED'
+                                AND now() - interval '1 year' < lastmodified
+                              GROUP BY date_part('month', lastmodified),
+                                       concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month'))),
+                        pages AS(
+                            SELECT count(newspaperarchive.orig_relpath) AS numPages,
+                                concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')) AS pagesMonth 
+                            FROM batch, newspaperarchive
+                            WHERE batch.state = 'APPROVED' AND 
+                                now() - interval '1 year' < batch.lastmodified AND
+                                batch.batchid = newspaperarchive.batchid
+                            GROUP BY date_part('month',batch.lastmodified),
+                                    concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month'))
+                        )
+                    SELECT batchAndMonth.month,batchAndMonth.numBatches,pages.numPages 
+                    FROM batchAndMonth JOIN pages ON 
+                        batchAndMonth.month = pages.pagesMonth 
+                    ORDER BY batchAndMonth DESC ;
+                                                                    """
+                                                             )) {
 
-                try(ResultSet res = ps.executeQuery()){
-                    while(res.next()){
-                        result.add(res.getString("month") +"|"+res.getString("numbatches")+"|"+res.getString("numpages"));
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
+                        result.add(res.getString("month") +
+                                   "|" +
+                                   res.getString("numbatches") +
+                                   "|" +
+                                   res.getString("numpages"));
                     }
                 }
 
@@ -106,15 +111,15 @@ public class NewspaperQADao {
 
     public String getJpegPath(String dir) throws SQLException {
         String result = "";
-        try(Connection conn = connectionPool.getConnection()){
-            try(PreparedStatement ps = conn.prepareStatement("""
-                                                            SELECT jpeg_relpath FROM newspaperarchive
-                                                            WHERE orig_relpath = ?
-                                                            """)) {
+        try (Connection conn = connectionPool.getConnection()) {
+            try (PreparedStatement ps = conn.prepareStatement("""
+                                                              SELECT jpeg_relpath FROM newspaperarchive
+                                                              WHERE orig_relpath = ?
+                                                              """)) {
                 int param = 1;
-                ps.setString(param++,dir);
-                try(ResultSet res = ps.executeQuery()) {
-                    while (res.next()){
+                ps.setString(param++, dir);
+                try (ResultSet res = ps.executeQuery()) {
+                    while (res.next()) {
                         result = res.getString("jpeg_relpath");
                         return result;
                     }
@@ -126,18 +131,18 @@ public class NewspaperQADao {
     }
 
     public String getAlto(String dir) throws SQLException {
-        try(Connection conn = connectionPool.getConnection()){
+        try (Connection conn = connectionPool.getConnection()) {
             StringBuilder result = new StringBuilder();
-            try(PreparedStatement ps = conn.prepareStatement("""
-                                                                SELECT alto_relpath FROM newspaperarchive
-                                                                WHERE orig_relpath = ?
-                                                                """)){
+            try (PreparedStatement ps = conn.prepareStatement("""
+                                                              SELECT alto_relpath FROM newspaperarchive
+                                                              WHERE orig_relpath = ?
+                                                              """)) {
                 int param = 1;
-                ps.setString(param++,dir);
+                ps.setString(param++, dir);
                 try (ResultSet res = ps.executeQuery()) {
                     while (res.next()) {
                         String altoPath = res.getString("alto_relpath");
-                        try(FileInputStream is = new FileInputStream(altoPath)){
+                        try (FileInputStream is = new FileInputStream(altoPath)) {
                             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
                             dbf.setNamespaceAware(false);
                             Document document = dbf.newDocumentBuilder().parse(is);
@@ -148,10 +153,10 @@ public class NewspaperQADao {
                             for (int index = 0; index < nl.getLength(); index++) {
                                 NodeList nodeList = nl.item(index).getChildNodes();
                                 String tempResult = "";
-                                for (int i = 1; i < nodeList.getLength();i++) {
+                                for (int i = 1; i < nodeList.getLength(); i++) {
                                     Node node = nodeList.item(i);
 
-                                    if(node.getNodeName().equals("String")){
+                                    if (node.getNodeName().equals("String")) {
                                         tempResult += node.getAttributes().getNamedItem("CONTENT").getNodeValue() + " ";
                                     }
                                 }
@@ -159,7 +164,8 @@ public class NewspaperQADao {
                                 result.append("\n");
                             }
 
-                        } catch (ParserConfigurationException | SAXException | XPathExpressionException | IOException e) {
+                        } catch (ParserConfigurationException | SAXException | XPathExpressionException |
+                                 IOException e) {
                             throw new RuntimeException(e);
                         }
                     }
@@ -272,7 +278,8 @@ public class NewspaperQADao {
 
         //Get all distinct newspaperIDs
         try (Connection conn = connectionPool.getConnection()) {
-            try (PreparedStatement ps = conn.prepareStatement("SELECT distinct(avisid) FROM batch ORDER BY avisid ASC")) {
+            try (PreparedStatement ps = conn.prepareStatement("SELECT distinct(avisid) FROM batch ORDER BY avisid " +
+                                                              "ASC")) {
                 try (ResultSet res = ps.executeQuery()) {
                     while (res.next()) {
                         String avisID = res.getString(1);
@@ -292,10 +299,10 @@ public class NewspaperQADao {
     public NewspaperID checkNewspaperInactive(String avisID) throws SQLException {
         try (Connection conn = connectionPool.getConnection()) {
             return new NewspaperID()
-                    .avisid(avisID)
-                    .isInactive(Set.of("APPROVED", "REJECTED")
-                                   .containsAll(DaoBatchHelper.getBatchStatesForAvisID(avisID, conn)))
-                    .deliveryDate(DaoBatchHelper.getLatestDeliveryDate(avisID, conn));
+                           .avisid(avisID)
+                           .isInactive(Set.of("APPROVED", "REJECTED")
+                                          .containsAll(DaoBatchHelper.getBatchStatesForAvisID(avisID, conn)))
+                           .deliveryDate(DaoBatchHelper.getLatestDeliveryDate(avisID, conn));
         }
     }
 
@@ -309,6 +316,22 @@ public class NewspaperQADao {
         }
     }
 
+    public Batch getNextBatch(String batchID, String newspaperID) {
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoBatchHelper.getLatestNextBatch(batchID, newspaperID, conn);
+        } catch (SQLException e) {
+            log.error("Failed to lookup batch ids", e);
+            throw new NotFoundServiceException("Err looking up batch id " + batchID, e);
+        }
+    }
+    public Batch getPreviousBatch(String batchID, String newspaperID) {
+        try (Connection conn = connectionPool.getConnection()) {
+            return DaoBatchHelper.getLatestPreviousBatch(batchID,newspaperID, conn);
+        } catch (SQLException e) {
+            log.error("Failed to lookup batch ids", e);
+            throw new NotFoundServiceException("Err looking up batch id " + batchID, e);
+        }
+    }
 
     public List<SlimBatch> getBatchIDs() throws DAOFailureException {
         log.debug("Looking up batch ids");
@@ -634,11 +657,11 @@ public class NewspaperQADao {
             List<NewspaperSection> sections = new ArrayList<>();
 
             NewspaperEdition edition = new NewspaperEdition()
-                    .batchid(batchID)
-                    .avisid(newspaperID)
-                    .date(date)
-                    .edition(editionPages.getKey())
-                    .sections(sections);
+                                               .batchid(batchID)
+                                               .avisid(newspaperID)
+                                               .date(date)
+                                               .edition(editionPages.getKey())
+                                               .sections(sections);
             editions.add(edition);
 
 
@@ -648,15 +671,15 @@ public class NewspaperQADao {
             for (Map.Entry<String, Set<NewspaperPage>> sectionPages : sectionsToPages.entrySet()) {
 
                 NewspaperSection section = new NewspaperSection()
-                        .batchid(batchID)
-                        .avisid(newspaperID)
-                        .date(date)
-                        .edition(editionPages.getKey())
-                        .section(sectionPages.getKey())
-                        .pages(sectionPages.getValue()
-                                           .stream()
-                                           .sorted(Comparator.comparingInt(p -> p.getPageNumber()))
-                                           .toList());
+                                                   .batchid(batchID)
+                                                   .avisid(newspaperID)
+                                                   .date(date)
+                                                   .edition(editionPages.getKey())
+                                                   .section(sectionPages.getKey())
+                                                   .pages(sectionPages.getValue()
+                                                                      .stream()
+                                                                      .sorted(Comparator.comparingInt(p -> p.getPageNumber()))
+                                                                      .toList());
 
 
                 Map<Integer, List<Note>> pageNotes = DaoNoteHelper.getPageLevelNotes(batchID,
@@ -756,7 +779,7 @@ public class NewspaperQADao {
         try (Connection conn = connectionPool.getConnection()) {
             return DaoNoteHelper.getAllNumNotesForDay(batchID,
                                                       newspaperID,
-                                                      LocalDate.parse(date,DateTimeFormatter.ISO_LOCAL_DATE),
+                                                      LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE),
                                                       conn);
         }
     }

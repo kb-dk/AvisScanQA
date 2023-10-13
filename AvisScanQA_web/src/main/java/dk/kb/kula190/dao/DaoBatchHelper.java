@@ -40,8 +40,9 @@ public class DaoBatchHelper {
     /**
      * Gets (distinct) states for all batches for the given avisID.
      * Used to figure out if all batches (of an avisID) is "finished" or some are still in progress
+     *
      * @param avisID the avis id to check for
-     * @param conn the connection
+     * @param conn   the connection
      * @return List of distinct states for the batches of an avis ID
      * @throws SQLException
      */
@@ -65,6 +66,7 @@ public class DaoBatchHelper {
             return results;
         }
     }
+
     static LocalDate getLatestDeliveryDate(String avisID, Connection conn) throws SQLException {
         String result = null;
         try (PreparedStatement ps = conn.prepareStatement(
@@ -102,6 +104,49 @@ public class DaoBatchHelper {
         return null;
     }
 
+    static Batch getLatestNextBatch(String batchID, String newspaperID, Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                SELECT * FROM batch b
+                WHERE batchid > ?
+                AND b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)
+                AND avisid = ?
+                ORDER BY batchid
+                LIMIT 1
+                """
+                                                         )) {
+            ps.setString(1, batchID);
+            ps.setString(2, newspaperID);
+            try (ResultSet res = ps.executeQuery()) {
+                if (res.next()) {
+                    return readBatch(conn, res);
+                }
+            }
+        }
+        return null;
+    }
+    static Batch getLatestPreviousBatch(String batchID, String newspaperID, Connection conn) throws SQLException {
+        try (PreparedStatement ps = conn.prepareStatement(
+                """
+                SELECT * FROM batch b
+                WHERE batchid < ?
+                AND b.lastmodified >= ALL(SELECT lastmodified FROM batch WHERE batchid=b.batchid)
+                AND avisid = ?
+                ORDER BY batchid
+                LIMIT 1
+                """
+                                                         )) {
+            ps.setString(1, batchID);
+            ps.setString(2, newspaperID);
+            try (ResultSet res = ps.executeQuery()) {
+                if (res.next()) {
+                    return readBatch(conn, res);
+                }
+            }
+        }
+        return null;
+    }
+
 
     static SlimBatch getLatestSlimBatch(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
@@ -126,8 +171,8 @@ public class DaoBatchHelper {
                                                           " FROM batch b1"
                                                           +
                                                           " WHERE lastmodified >= ALL(SELECT lastmodified FROM batch " +
-                                                          "b2 WHERE b1.batchid = b2.batchid)"+
-                                                         " ORDER BY batchid ASC")) {
+                                                          "b2 WHERE b1.batchid = b2.batchid)" +
+                                                          " ORDER BY batchid ASC")) {
             List<SlimBatch> list = new ArrayList<>();
             try (ResultSet res = ps.executeQuery()) {
 
