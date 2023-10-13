@@ -65,29 +65,30 @@ public class NewspaperQADao {
         try (Connection conn = connectionPool.getConnection()) {
             try (PreparedStatement ps = conn.prepareStatement(
                     """
-                    WITH batchAndMonth AS
-                        (SELECT count(*) AS numBatches,
-                                concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')) AS month
+                        WITH batchAndMonth AS
+                             (SELECT count(*) AS numBatches,
+                                     concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')) AS month,
+                                     lastmodified
                               FROM batch
                               WHERE state = 'APPROVED'
-                                AND now() - interval '1 year' < lastmodified
+                              AND now() - interval '1 year' < lastmodified
                               GROUP BY date_part('month', lastmodified),
-                                       concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month'))),
-                        pages AS(
-                            SELECT count(newspaperarchive.orig_relpath) AS numPages,
-                                concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')) AS pagesMonth 
-                            FROM batch, newspaperarchive
-                            WHERE batch.state = 'APPROVED' AND 
-                                now() - interval '1 year' < batch.lastmodified AND
-                                batch.batchid = newspaperarchive.batchid
-                            GROUP BY date_part('month',batch.lastmodified),
-                                    concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month'))
-                        )
-                    SELECT batchAndMonth.month,batchAndMonth.numBatches,pages.numPages 
-                    FROM batchAndMonth JOIN pages ON 
-                        batchAndMonth.month = pages.pagesMonth 
-                    ORDER BY batchAndMonth DESC ;
-                                                                    """
+                                       concat(EXTRACT(YEAR FROM lastmodified), ' ', TO_CHAR(lastmodified, 'Month')),
+                                       lastmodified),
+                            pages AS(
+                             SELECT count(newspaperarchive.orig_relpath) AS numPages,
+                                    concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')) AS pagesMonth
+                             FROM batch, newspaperarchive
+                             WHERE batch.state = 'APPROVED' AND
+                                         now() - interval '1 year' < batch.lastmodified AND
+                                     batch.batchid = newspaperarchive.batchid
+                             GROUP BY date_part('month',batch.lastmodified),
+                                      concat(EXTRACT(YEAR FROM batch.lastmodified), ' ', TO_CHAR(batch.lastmodified, 'Month')))
+                    SELECT batchAndMonth.month,batchAndMonth.numBatches,pages.numPages
+                    FROM batchAndMonth JOIN pages ON
+                         batchAndMonth.month = pages.pagesMonth
+                    ORDER BY batchAndMonth.lastmodified DESC;
+                    """
                                                              )) {
 
                 try (ResultSet res = ps.executeQuery()) {
@@ -105,7 +106,6 @@ public class NewspaperQADao {
             }
 
         }
-
         return result;
     }
 
