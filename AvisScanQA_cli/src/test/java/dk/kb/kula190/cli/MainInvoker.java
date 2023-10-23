@@ -17,7 +17,7 @@ public class MainInvoker {
 //            = new File(System.getenv("HOME") + "/Documents/ribesocialdemokrat_19100101_19100531_RT2");
     private static final File
             specificBatch
-            = new File(System.getenv("HOME") + "/Documents/dendanskeslesviger_18550101_18551231_RT3");
+            = new File(System.getenv("HOME") + "/Documents/dybboelposten_19070701_19071231_RT1");
 //    private static final File
 //            specificBatch
 //            = new File(System.getenv("HOME") + "/Documents/this is a + test folder/schleswigschegrenzpost_18650103_18700306_RT2");

@@ -161,17 +161,22 @@ function loadBatchForNewspaper(batchID) {
                 }
                 let prevBatchBtn = $("<button/>",{id:"prevBatch",class:"btn btn-secondary"}).text("Previous batch");
                 prevBatchBtn.on("click",function(){
-                    $.ajax({url:`api/previousBatch/${batchID}/${batch.avisid}`,success(data){
-                            console.log(data)
-                            location.href = `#/batch/${data.batchid}/`
-                            location.reload()
+                    $.ajax({url:`api/previousBatch/${batchID}/${batch.avisid}`,
+                        /**
+                         * @param {Batch} data */
+                        success(data){
+                            location.href = `#/batch/${data.batchid}/`;
+                            location.reload();
                         }})
                 })
                 let nextBatchBtn = $("<button/>",{id:"nextBatch",class:"btn btn-secondary"}).text("Next batch");
                 nextBatchBtn.on("click",function(){
-                    $.ajax({url:`api/nextBatch/${batchID}/${batch.avisid}`,success(data){
-                            location.href = `#/batch/${data.batchid}/`
-                            location.reload()
+                    $.ajax({url:`api/nextBatch/${batchID}/${batch.avisid}`,
+                        /**
+                         * @param {Batch} data */
+                        success(data){
+                            location.href = `#/batch/${data.batchid}/`;
+                            location.reload();
                         }})
                 })
                 $notesButtonDiv.append(prevBatchBtn);
@@ -322,7 +327,8 @@ function renderBatchTable(filter) {
         $table.bootstrapTable('filterBy', {});
     }
 }
-
+/**
+ * @param {Event} event */
 async function stateSubmitHandler(event) {
     event.preventDefault(); // <- cancel event
     const data = new FormData(event.target);

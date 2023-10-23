@@ -280,6 +280,12 @@ function renderDayDisplay(newspaperDay, editionIndex, sectionIndex, pageIndex) {
     });
 }
 
+/**
+ *
+ * @param {jQuery|HTMLElement} parentElement
+ * @param {NewspaperEdition[]}editions
+ * @param {number}editionIndex
+ */
 function createEditionNavigationButtons(parentElement,editions,editionIndex){
     for (let i = 0; i < editions.length; i++) {
         const edition = editions[i];

@@ -66,7 +66,7 @@ avischk-web-qa:
           styling:
             backgroundColor: "#cf1d1d"
             borderColor: "#cf1d1d"
-          calenderStyling:
+          calendarStyling:
             color: "white"
             backgroundColor: "#28a745"
             borderColor: "#28a745"
