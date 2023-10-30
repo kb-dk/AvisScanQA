@@ -386,6 +386,25 @@ paths:
                   type: string
 
 
+  /newspaperNotes/{newspaperID}:
+    get:
+      operationId: getAllNotesFromNewspaper
+      summary: ""
+      parameters:
+        - name: newspaperID
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Note"
 
   /notes/{batchID}:
     get:

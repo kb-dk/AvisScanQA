@@ -208,6 +208,16 @@ public class DefaultApiServiceImpl implements DefaultApi {
             throw handleException(e);
         }
     }
+    @Override
+    public List<Note> getAllNotesFromNewspaper(String newspaperID){
+        try{
+            return getDAO().getAllNotesFromNewspaper(newspaperID);
+        }catch (DAOFailureException e) {
+            log.error("Could not retrieve notes for '{}'",
+                      newspaperID, e);
+            throw handleException(e);
+        }
+    }
 
     @Override
     public List<Note> getNotes(String batchID) {

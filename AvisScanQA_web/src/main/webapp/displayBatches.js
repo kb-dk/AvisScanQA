@@ -379,6 +379,37 @@ function checkBatchIDExists(batchID) {
     })
 
 }
+
+/**
+ *
+ * @param {string} avisID
+ */
+function handleNewspaperNotesDownload(avisID) {
+    $.getJSON(`api/newspaperNotes/${avisID}`)
+        .done(/**
+         @param {Note[]} notes */
+        function (notes) {
+            const items = notes;
+            const replacer = (key, value) => value === null ? '' : value // specify how you want to handle null values here
+            if (items.length > 0) {
+                const header = Object.keys(items[0]);
+                let csv = [[header.join(",")]]
+                for (let i = 0; i < items.length; i++) {
+
+                    csv[++i] = [header.map(name => JSON.stringify(items[i][name],replacer)).join(",")].join("\r\n");
+                }
+                let link = document.createElement("a");
+                link.download = `${avisID}.csv`;
+                link.href = `data:text/csv,${csv}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                link.remove();
+            }
+            //Close the window, but wait 100 ms to ensure that the download have started
+            setTimeout("window.close()", 100);
+        });
+}
 /**
  * @param {string} batchId
  * */

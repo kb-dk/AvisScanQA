@@ -18,6 +18,14 @@ import java.util.stream.Stream;
 import static dk.kb.kula190.dao.DaoUtils.toOffsetDateTime;
 
 public class DaoBatchHelper {
+    /**
+     *
+     * @param avisID
+     * @param conn
+     * @return list of last modified batches with given newspaper id
+     * @throws SQLException
+     */
+
     static List<SlimBatch> getLatestBatches(String avisID, Connection conn) throws SQLException {
         List<SlimBatch> results = new ArrayList<>();
         try (PreparedStatement ps = conn.prepareStatement(
@@ -86,7 +94,13 @@ public class DaoBatchHelper {
         }
     }
 
-
+    /**
+     *
+     * @param batchID
+     * @param conn
+     * @return latest modified batch with given batchID
+     * @throws SQLException
+     */
     static Batch getLatestBatch(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "select * "
@@ -103,7 +117,14 @@ public class DaoBatchHelper {
         }
         return null;
     }
-
+    /**
+     *
+     * @param batchID
+     * @param newspaperID
+     * @param conn
+     * @return next batch similar to current batch within newspaper
+     * @throws SQLException
+     */
     static Batch getLatestNextBatch(String batchID, String newspaperID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 """
@@ -125,6 +146,15 @@ public class DaoBatchHelper {
         }
         return null;
     }
+
+    /**
+     *
+     * @param batchID
+     * @param newspaperID
+     * @param conn
+     * @return previous batch similar to current batch within newspaper
+     * @throws SQLException
+     */
     static Batch getLatestPreviousBatch(String batchID, String newspaperID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 """
@@ -185,6 +215,15 @@ public class DaoBatchHelper {
         }
     }
 
+    /**
+     *
+     * @param batchID
+     * @param state
+     * @param username
+     * @param conn
+     * @throws SQLException
+     * Adds new entry in database with a changed state.
+     */
     static void setBatchState(String batchID, String state, String username, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement(
                 "INSERT INTO batch(batchid, avisid, roundtrip, start_date, end_date, delivery_date, problems, state, " +

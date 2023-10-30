@@ -13,6 +13,23 @@ import java.util.Map;
 
 public class DaoNoteHelper {
 
+    static List<Note> getAllNotesFromNewspaper(String newspaperID, Connection conn)throws SQLException{
+        try(PreparedStatement ps = conn.prepareStatement(
+                                                        """
+                                                            SELECT * FROM notes WHERE avisid = ?
+                                                            """
+                                                        )){
+            ps.setString(1,newspaperID);
+            try(ResultSet res = ps.executeQuery()){
+                List<Note> notes = new ArrayList<>();
+                while (res.next()){
+                    notes.add(readNote(res));
+                }
+                return notes;
+            }
+        }
+    }
+
     static List<Note> getAllNotes(String batchID, Connection conn) throws SQLException {
         try (PreparedStatement ps = conn.prepareStatement("SELECT * from notes where batchid = ?")) {
             int param = 1;

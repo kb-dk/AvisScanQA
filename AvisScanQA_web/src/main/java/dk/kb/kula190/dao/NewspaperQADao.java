@@ -48,6 +48,14 @@ public class NewspaperQADao {
         this.connectionPool = connectionPool;
     }
 
+    public List<Note> getAllNotesFromNewspaper(String newspaperID) throws DAOFailureException{
+        try(Connection conn = connectionPool.getConnection()){
+            return DaoNoteHelper.getAllNotesFromNewspaper(newspaperID, conn);
+        }catch (SQLException e) {
+            log.error("Failed to retrieve notes from {}", newspaperID, e);
+            throw new DAOFailureException("Failed to retrieve notes from " + newspaperID, e);
+        }
+    }
 
     public List<Note> getNotes(@Nonnull String batchID) throws DAOFailureException {
         try (Connection conn = connectionPool.getConnection()) {

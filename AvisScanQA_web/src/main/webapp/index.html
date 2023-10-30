@@ -142,6 +142,9 @@
     $.routes.add('/batch/{batchid:string}/notes', function () {
         handleNotesDownload(this.batchid);
     })
+    $.routes.add('/newspaperNotes/{avis:string}', function () {
+        handleNewspaperNotesDownload(this.avis);
+    })
     $.routes.add("/statistics",function (){
        handleStatisticsDownload();
     });

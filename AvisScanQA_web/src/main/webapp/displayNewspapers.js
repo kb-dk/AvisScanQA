@@ -94,7 +94,7 @@ async function loadNewspaperIDs() {
                 title: 'Avis',
                 field: 'avis',
                 formatter: function (value) {
-                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,17)+'...' : value}</a>`;
+                    return `<a href= '#/newspaper/${value}/0/'>${value.length > 20 ? value.substring(0,37)+'...' : value}</a>`;
                 },
                 sortable: true
             }
@@ -122,6 +122,10 @@ function loadYearsForNewspaper(avisID, year) {
                 if (year === 0) {
                     year = parseInt(years.sort()[0]);
                 }
+                $notice.append($("<a>", {
+                    href: `#/newspaperNotes/${avisID}`,
+                    target: "_blank"
+                }).text(`Get Notes`));
                 const notesUrl = `api/${avisID}/notes`;
                 $.getJSON(notesUrl)
                     .done(
