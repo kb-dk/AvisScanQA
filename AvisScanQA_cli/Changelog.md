@@ -12,3 +12,4 @@ Version 1.0: Newspaper QA with CLI and web application
 1.11: Updated SQL schema. Removed unused library of Tiff integration. 
 1.12: Statistics updated to show correct date. Added completed pages to statistics. Color changes. Changed default note dropdowns content. Fixed bug with changing years in calendar.
 1.13: Updated error reporting for autoQA, added dropdown option for day notes. Bug fix for calendar year changes
+1.14: Next and previous batch buttons. Small GUI improvements. Fixed statistics sorting error. Functionality for getting all notes from a newspaper. QA updates jpeg path into database rather than giving error. QA and GUI can handle batch pages with only a year given. (Changed from always setting date to 1. January, to the first date in the batch)
