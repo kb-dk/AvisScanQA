@@ -10,13 +10,13 @@
 
     <groupId>dk.kb.kula190</groupId>
     <artifactId>AvisScanQA</artifactId>
-    <version>1.16-SNAPSHOT</version>
+    <version>1.16</version>
     <packaging>pom</packaging>
     <scm>
         <url>https://github.com/kb-dk/AvisScanQA</url>
         <connection>scm:git:https://github.com/kb-dk/AvisScanQA.git</connection>
         <developerConnection>scm:git:git@github.com:kb-dk/AvisScanQA.git</developerConnection>
-        <tag>AvisScanQA-1.2</tag>
+        <tag>AvisScanQA-1.16</tag>
     </scm>
 
     <properties>
